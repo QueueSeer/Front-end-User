@@ -5,6 +5,7 @@ import Register from "./pages/Login/Register";
 import Fillter from "./pages/Login/Fillter";
 import ForgotPassword from "./pages/Login/ForgotPassword";
 import ResetPassword from "./pages/Login/ResetPassword";
+import LandingPage from "./pages/landing/LandingPage";
 import "./index.css";
 
 export default function App() {
@@ -13,12 +14,13 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/fillter" element={<Fillter />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
+        <Route path="/landingPage" element={<LandingPage />} />
       </Routes>
     </Router>
   );
