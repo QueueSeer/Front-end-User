@@ -13,7 +13,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<ResetPassword />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/fillter" element={<Fillter />} />
