@@ -14,6 +14,22 @@ import PaymentChokCoin from'./images/landingpage/PaymentChokCoin.png';
 import StatusNotifications from'./images/landingpage/StatusNotifications.png';
 import SectionEnd from'./images/landingpage/SectionEnd.png';
 
+// ไอคอนใน homeicon
+import call from './icon/homeicon/call.png';
+import ChatLine from './icon/homeicon/ChatLine.png';
+import profileshot from './icon/homeicon/profileshot.png';
+import RatingStar from './icon/homeicon/RatingStar.png';
+import RatingStarColor from './icon/homeicon/RatingStarColor.png';
+import videocall from './icon/homeicon/videocall.png';
+
+// ภาพใน home
+import AuctionQueue from './images/home/AuctionQueue.png';
+import horoscope from './images/home/horoscope.png';
+import Howto from './images/home/Howto.png';
+import Luckycolor from './images/home/Luckycolor.png';
+import pic from './images/home/pic.png';
+import profile from './images/home/profile.png';
+
 
 const images = {
     // โลโก้และไอคอน login 
@@ -34,6 +50,22 @@ const images = {
     PaymentChokCoin,
     StatusNotifications,
     SectionEnd,
+
+       // ไอคอนใน homeicon
+       call,
+       ChatLine,
+       profileshot,
+       RatingStar,
+       RatingStarColor,
+       videocall,
+   
+       // ภาพใน home
+       AuctionQueue,
+       horoscope,
+       Howto,
+       Luckycolor,
+       pic,
+       profile,
 
 
 
