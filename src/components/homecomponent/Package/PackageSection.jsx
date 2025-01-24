@@ -28,7 +28,7 @@ const PackageSection = () => {
     };
 
     return (
-        <div className="p-12">
+        <div className="p-12 translate-y-[-60px]  ">
             <PackageHeader onPrev={prevSlide} onNext={nextSlide} currentIndex={currentIndex} totalPackages={packages.length} />
             <div className="overflow-hidden w-full">
                 <div className="flex transition-transform duration-300 gap-6" style={{ transform: `translateX(-${currentIndex * 100 / visiblePackages}%)` }}>

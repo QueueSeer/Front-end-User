@@ -17,10 +17,11 @@ const PopularSeers = () => {
     ];
 
     const [currentIndex, setCurrentIndex] = useState(0);
-    const visibleSeers = 5; // เพิ่มจำนวนหมอดูที่แสดงเป็น 5 คนแทน 3
+    const visibleSeersDesktop = 5; // Desktop แสดง 5 คน
+    const visibleSeersMobile = 3; // มือถือแสดง 3 คน
 
     const nextSlide = () => {
-        if (currentIndex < seers.length - visibleSeers) {
+        if (currentIndex < seers.length - visibleSeersDesktop) {
             setCurrentIndex(currentIndex + 1);
         }
     };
@@ -33,9 +34,23 @@ const PopularSeers = () => {
 
     return (
         <div className="p-12">
+            {/* Header พร้อมปุ่มเลื่อน */}
             <SeerHeader onPrev={prevSlide} onNext={nextSlide} currentIndex={currentIndex} totalSeers={seers.length} />
-            <div className="overflow-hidden w-full">
-                <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${currentIndex * 100 / visibleSeers}%)` }}>
+
+            {/* Desktop: Slide ได้, มือถือ & iPad: Scroll ขวาได้ */}
+            <div className="w-full">
+                {/*  Desktop: Slide ได้, ไม่มี Scroll */}
+                <div className="hidden md:block overflow-hidden">
+                    <div className="flex transition-transform duration-300"
+                        style={{ transform: `translateX(-${currentIndex * 100 / visibleSeersDesktop}%)` }}>
+                        {seers.map((seer, index) => (
+                            <SeerCard key={index} seer={seer} />
+                        ))}
+                    </div>
+                </div>
+
+                {/*  มือถือ & iPad: Scroll ขวาได้ */}
+                <div className="md:hidden flex overflow-x-auto whitespace-nowrap scrollbar-hide">
                     {seers.map((seer, index) => (
                         <SeerCard key={index} seer={seer} />
                     ))}

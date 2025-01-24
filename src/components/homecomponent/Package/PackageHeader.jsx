@@ -10,8 +10,11 @@ const PackageHeader = ({ onPrev, onNext, currentIndex, totalPackages }) => {
                 </h2>
                 <p className="text-gray-500 text-xl">เลือกแพ็กเกจที่คุณสนใจ</p>
             </div>
-            <div className="flex items-center gap-4">
-                <button className="border border-gray-400 px-4 py-1 rounded-full text-purple-700 text-xl font-medium">ทั้งหมด</button>
+            {/* ซ่อนปุ่ม Next/Prev และเลขเพจเฉพาะบนมือถือ */}
+            <div className="hidden sm:flex items-center gap-4">
+                <button className="border border-gray-400 px-4 py-1 rounded-full text-purple-700 text-xl font-medium">
+                    ทั้งหมด
+                </button>
                 <div className="flex items-center gap-2">
                     <button onClick={onPrev} disabled={currentIndex === 0} className="p-2 rounded-full shadow-md">
                         <img src={currentIndex === 0 ? Images.Arrowleft : Images.Arrowleftcolor} alt="prev" className="w-8 h-8" />

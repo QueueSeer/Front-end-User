@@ -38,6 +38,7 @@ import AuctionQueue from './images/home/AuctionQueue.png';
 import horoscope from './images/home/horoscope.png';
 import Howto from "./images/home/howto.png";
 import Luckycolor from './images/home/Luckycolor.png';
+import Luckycolor2 from './images/home/Luckycolor2.png';
 import pic from './images/home/pic.png';
 import profile from './images/home/profile.png';
 
@@ -90,6 +91,7 @@ const images = {
        Luckycolor,
        pic,
        profile,
+       Luckycolor2,
 
 
 

@@ -13,7 +13,7 @@ const PopularCategories = () => {
     ];
 
     return (
-        <div className="p-12">
+        <div className="p-12 translate-y-[-70px]">
             <PopularCategoriesHeader />
             <div className="grid grid-cols-3 gap-6 mt-4">
                 {categories.map((category, index) => (
