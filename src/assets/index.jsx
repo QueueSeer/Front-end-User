@@ -1,3 +1,4 @@
+
 import logo from'./images/logo.png';
 import marble from'./images/login/marble.png';
 import profile_seer from'./images/Navbar/profile_seer.png'
@@ -16,6 +17,33 @@ import SectionEnd from'./images/landingpage/SectionEnd.png';
 import Facebook from './icon/Footer/Facebook.png';
 import Instagram from './icon/Footer/Instagram.png';
 import Twitter from './icon/Footer/Twitter.png';
+
+// ไอคอนใน homeicon
+import call from './icon/homeicon/call.png';
+import ChatLine from './icon/homeicon/ChatLine.png';
+import profileshot from './icon/homeicon/profileshot.png';
+import RatingStar from './icon/homeicon/RatingStar.png';
+import RatingStarColor from './icon/homeicon/RatingStarColor.png';
+import videocall from './icon/homeicon/videocall.png';
+import Lovehoroscope from './icon/homeicon/Lovehoroscope.png';
+import astrology from './icon/homeicon/astrology.png';
+import Gypsycards from './icon/homeicon/Gypsycards.png';
+import Monthlyhoroscope from './icon/homeicon/Monthlyhoroscope.png';
+import Dailyhoroscope from './icon/homeicon/dailyhoroscope.png';
+import discount from './icon/homeicon/discount.png';
+import more from './icon/homeicon/more.png';
+import ArrowRight from './icon/homeicon/ArrowRight.png';
+import Arrowleft from './icon/homeicon/Arrowleft.png';
+import Arrowleftcolor from './icon/homeicon/Arrowleftcolor.png';
+import Searchicon from './icon/homeicon/Searchicon.png';
+// ภาพใน home
+import AuctionQueue from './images/home/AuctionQueue.png';
+import horoscope from './images/home/horoscope.png';
+import Howto from "./images/home/howto.png";
+import Luckycolor from './images/home/Luckycolor.png';
+import Luckycolor2 from './images/home/Luckycolor2.png';
+import pic from './images/home/pic.png';
+import profile from './images/home/profile.png';
 
 
 const images = {
@@ -42,6 +70,36 @@ const images = {
      Facebook,
     Instagram ,
     Twitter,
+
+       // ไอคอนใน homeicon
+       call,
+       ChatLine,
+       profileshot,
+       RatingStar,
+       RatingStarColor,
+       videocall,
+       Lovehoroscope,
+       astrology,
+       Gypsycards,
+       Monthlyhoroscope,
+       Dailyhoroscope,
+       discount,
+       more,
+       ArrowRight,
+       Arrowleft,
+       Arrowleftcolor,
+       Searchicon,
+
+
+   
+       // ภาพใน home
+       AuctionQueue,
+       horoscope,
+       Howto,
+       Luckycolor,
+       pic,
+       profile,
+       Luckycolor2,
 
 
 
