@@ -5,6 +5,7 @@ import Register from "./pages/Login/Register";
 import Fillter from "./pages/Login/Fillter";
 import ForgotPassword from "./pages/Login/ForgotPassword";
 import ResetPassword from "./pages/Login/ResetPassword";
+import LandingPage from "./pages/landing/LandingPage";
 import Homepage from "./pages/home/Homepage";
 import "./index.css";
 
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/fillter" element={<Fillter />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
+        <Route path="/landingPage" element={<LandingPage />} />
         <Route path="/homepage" element={<Homepage />} />
       </Routes>
     </Router>

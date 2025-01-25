@@ -44,7 +44,7 @@ export default function Fillter() {
       setStep(2);
       setSelectedTags([]);
     } else if (step === lastStep) {
-      navigate("/landing");
+      navigate("/landingpage");
     }
   };
 

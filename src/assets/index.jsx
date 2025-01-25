@@ -14,6 +14,9 @@ import personalInformation from'./images/landingpage/personalInformation.png';
 import PaymentChokCoin from'./images/landingpage/PaymentChokCoin.png';
 import StatusNotifications from'./images/landingpage/StatusNotifications.png';
 import SectionEnd from'./images/landingpage/SectionEnd.png';
+import Facebook from './icon/Footer/Facebook.png';
+import Instagram from './icon/Footer/Instagram.png';
+import Twitter from './icon/Footer/Twitter.png';
 
 // ไอคอนใน homeicon
 import call from './icon/homeicon/call.png';
@@ -62,6 +65,11 @@ const images = {
     PaymentChokCoin,
     StatusNotifications,
     SectionEnd,
+
+     // images หน้า footer
+     Facebook,
+    Instagram ,
+    Twitter,
 
        // ไอคอนใน homeicon
        call,
