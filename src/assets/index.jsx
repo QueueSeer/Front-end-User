@@ -44,6 +44,12 @@ import Luckycolor from './images/home/Luckycolor.png';
 import Luckycolor2 from './images/home/Luckycolor2.png';
 import pic from './images/home/pic.png';
 import profile from './images/home/profile.png';
+// ไอคอน home
+import time from './icon/ProfilrIcon/time.png';
+import X from './icon/ProfilrIcon/X.png';
+import Tiktok from './icon/ProfilrIcon/Tiktok.png';
+import Instagram2 from './icon/ProfilrIcon/Instagram2.png';
+import Facebook2 from './icon/ProfilrIcon/Facebook2.png';
 
 
 const images = {
@@ -100,6 +106,13 @@ const images = {
        pic,
        profile,
        Luckycolor2,
+
+ // ไอคอน Profile 
+       time,
+       X ,
+        Tiktok, 
+        Instagram2,
+        Facebook2,
 
 
 
