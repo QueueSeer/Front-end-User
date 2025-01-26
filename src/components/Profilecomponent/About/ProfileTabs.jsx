@@ -9,14 +9,14 @@ const ProfileTabs = () => {
   return (
     <div>
       {/* เมนูแท็บ */}
-      <div className="flex border-b border-gray-300">
+      <div className="flex border-b border-gray-300 mt-10">
         <button
           className={`py-2 px-4 text-lg font-semibold ${
             activeTab === "about" ? "text-black border-b-2 border-black" : "text-gray-400"
           }`}
           onClick={() => setActiveTab("about")}
         >
-          หน้าแรก
+          เกี่ยวกับเรา 
         </button>
         <button
           className={`py-2 px-4 text-lg font-semibold ${
@@ -37,7 +37,7 @@ const ProfileTabs = () => {
       </div>
 
       {/* แสดงคอนเทนต์ของแท็บที่เลือก */}
-      <div className="mt-6">
+      <div className="mt-6 w-full">
         {activeTab === "about" && <AboutSection />}
         {activeTab === "packages" && <PackagesSection />}
         {activeTab === "reviews" && <ReviewsSection />}
