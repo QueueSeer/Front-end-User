@@ -9,7 +9,7 @@ const ProfileTabs = () => {
   return (
     <div>
       {/* เมนูแท็บ */}
-      <div className="flex border-b border-gray-300 mt-10">
+      <div className="flex border-b border-gray-300 ">
         <button
           className={`py-2 px-4 text-lg font-semibold ${
             activeTab === "about" ? "text-black border-b-2 border-black" : "text-gray-400"
@@ -37,7 +37,7 @@ const ProfileTabs = () => {
       </div>
 
       {/* แสดงคอนเทนต์ของแท็บที่เลือก */}
-      <div className="mt-6 w-full">
+      <div className="mt-5 w-full">
         {activeTab === "about" && <AboutSection />}
         {activeTab === "packages" && <PackagesSection />}
         {activeTab === "reviews" && <ReviewsSection />}

@@ -7,12 +7,10 @@ const PackageLabel = ({ type }) => {
     discount: { text: "-45%", bgColor: "bg-red-600" },
   };
 
-  if (!labelStyles[type]) return null;
+  if (!type || !labelStyles[type]) return null;
 
   return (
-    <span
-      className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-full ${labelStyles[type].bgColor}`}
-    >
+    <span className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-full ${labelStyles[type].bgColor}`}>
       {labelStyles[type].text}
     </span>
   );

@@ -6,30 +6,32 @@ import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
 
 const QseerSchedulePage = ({ profileImageUrl, name, category, experience, followers, rating }) => {
   return (
-    <div className="p-12 flex flex-wrap lg:flex-nowrap gap-6 w-full">
-      <div className="flex-1 w-full">
-        <ProfileCard
-          profileImageUrl={profileImageUrl}
-          name={name}
-          category={category}
-          experience={experience}
-          followers={followers}
-          rating={rating}
-        />
-        <div className="mt-6 space-y-4">
-          <ActionButtons />
+    <div className="p-12 flex flex-col w-full gap-6">
+      {/* ส่วนบน: แบ่งซ้ายขวา */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* ซ้าย: ProfileCard */}
+        <div className="lg:w-1/2 w-full">
+          <ProfileCard
+            profileImageUrl={profileImageUrl}
+            name={name}
+            category={category}
+            experience={experience}
+            followers={followers}
+            rating={rating}
+          />
+             <ActionButtons />
         </div>
-
-       
-        <div className="w-full">
-          <ProfileTabs />
+        {/* ขวา: FullCalendarPage */}
+        <div className="lg:w-1/2 w-full">
+          <FullCalendarPage />
         </div>
       </div>
 
-      {/* ให้ FullCalendarPage ไม่บีบ ProfileTabs */}
+      {/* ส่วนล่าง: เต็มจอ */}
+      <div className="w-full space-y-4">
      
-        <FullCalendarPage />
-     
+        <ProfileTabs />
+      </div>
     </div>
   );
 };
