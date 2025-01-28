@@ -44,7 +44,21 @@ import Luckycolor from './images/home/Luckycolor.png';
 import Luckycolor2 from './images/home/Luckycolor2.png';
 import pic from './images/home/pic.png';
 import profile from './images/home/profile.png';
+// ไอคอน home
+import time from './icon/ProfilrIcon/time.png';
+import X from './icon/ProfilrIcon/X.png';
+import Tiktok from './icon/ProfilrIcon/Tiktok.png';
+import Instagram2 from './icon/ProfilrIcon/Instagram2.png';
+import Facebook2 from './icon/ProfilrIcon/Facebook2.png';
+import youtobe from './icon/ProfilrIcon/youtobe.png';
 
+// ไอคอน review
+import ArrowDown from './icon/Reviewicon/ArrowDown.png';
+import SortFromBottomToTop from './icon/Reviewicon/SortFromBottomToTop.png';
+import Star from './icon/Reviewicon/Star.png';
+import Starcolor from './icon/Reviewicon/Starcolor.png';
+import StarYellow from './icon/Reviewicon/StarYellow.png';
+import member1 from './icon/Reviewicon/member1.png';
 
 const images = {
     // โลโก้และไอคอน login 
@@ -100,6 +114,23 @@ const images = {
        pic,
        profile,
        Luckycolor2,
+
+ // ไอคอน Profile 
+       time,
+       X ,
+        Tiktok, 
+        Instagram2,
+        Facebook2,
+        youtobe,
+
+        // Reviewicon 
+
+       ArrowDown,
+       SortFromBottomToTop,
+       Star,
+        Starcolor,
+       StarYellow,
+       member1,
 
 
 
