@@ -58,6 +58,7 @@ import SortFromBottomToTop from './icon/Reviewicon/SortFromBottomToTop.png';
 import Star from './icon/Reviewicon/Star.png';
 import Starcolor from './icon/Reviewicon/Starcolor.png';
 import StarYellow from './icon/Reviewicon/StarYellow.png';
+import member1 from './icon/Reviewicon/member1.png';
 
 const images = {
     // โลโก้และไอคอน login 
@@ -129,6 +130,7 @@ const images = {
        Star,
         Starcolor,
        StarYellow,
+       member1,
 
 
 

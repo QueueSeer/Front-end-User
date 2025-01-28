@@ -1,5 +1,5 @@
 import React from "react";
-import Images from "../../assets"; // Replace with the correct path to your images
+import Images from "../../../../assets";
 
 const Pagination = ({ currentPage, totalPages, onPrevious, onNext }) => {
   return (

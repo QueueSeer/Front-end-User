@@ -4,15 +4,15 @@ import Images from "../../../assets";
 const PackagesHeader = ({ onPrev, onNext, currentIndex, totalPages }) => {
   return (
     <div className="flex justify-between items-center mb-4">
-      <div className="flex flex-col">
+      <div className="flex flex-col mb-5">
         <h2 className="text-2xl font-bold flex items-center">
-          <span className="w-2 h-6 bg-purple-500 rounded-full mr-2"></span>
+          <span className="w-2 h-6 bg-[#8677A7] rounded-full mr-2"></span>
           แพ็กเกจทั้งหมด
         </h2>
       </div>
 
       {/* 🔹 ปุ่มเลื่อน (เพิ่ม cursor-pointer ให้ชัดว่ากดได้) */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 mb-1">
         <div className="flex items-center gap-2">
           <button
             onClick={onPrev}

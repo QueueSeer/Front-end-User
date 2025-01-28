@@ -45,7 +45,7 @@ const PackagesSection = () => {
       />
 
       {/* 🔹 แสดงแพ็กเกจ (2 แถว, 5 คอลัมน์) */}
-      <div className="grid grid-cols-5 gap-5 mt-5">
+      <div className="grid grid-cols-5 gap-5  ">
         {trendingPackages
           .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
           .map((pkg, index) => (
