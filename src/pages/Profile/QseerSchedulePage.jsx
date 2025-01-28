@@ -1,10 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import FullCalendarPage from "../../components/Profilecomponent/FullCalendarPage";
 import ProfileCard from "../../components/Profilecomponent/ProfileCard";
 import ActionButtons from "../../components/Profilecomponent/ActionButtons";
 import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
 
-const QseerSchedulePage = ({ profileImageUrl, name, category, experience, followers, rating }) => {
+const QseerSchedulePage = () => {
+  const location = useLocation();
+
+  // ✅ เพิ่ม useEffect เพื่อเลื่อนหน้ากลับด้านบนเมื่อเปลี่ยนหน้า
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const seer = location.state?.seer || {
+    profileImageUrl: "", 
+    name: "ไม่พบข้อมูลหมอดู",
+    category: "ไม่ระบุ",
+    experience: "ไม่ระบุ",
+    followers: 0,
+    rating: 0
+  };
+
   return (
     <div className="p-12 flex flex-col w-full gap-6">
       {/* ส่วนบน: แบ่งซ้ายขวา */}
@@ -12,15 +29,16 @@ const QseerSchedulePage = ({ profileImageUrl, name, category, experience, follow
         {/* ซ้าย: ProfileCard */}
         <div className="lg:w-1/2 w-full">
           <ProfileCard
-            profileImageUrl={profileImageUrl}
-            name={name}
-            category={category}
-            experience={experience}
-            followers={followers}
-            rating={rating}
+            profileImageUrl={seer.profileImageUrl}
+            name={seer.name}
+            category={seer.category}
+            experience={seer.experience}
+            followers={seer.followers}
+            rating={seer.rating}
           />
-             <ActionButtons />
+          <ActionButtons />
         </div>
+
         {/* ขวา: FullCalendarPage */}
         <div className="lg:w-1/2 w-full">
           <FullCalendarPage />
@@ -29,7 +47,6 @@ const QseerSchedulePage = ({ profileImageUrl, name, category, experience, follow
 
       {/* ส่วนล่าง: เต็มจอ */}
       <div className="w-full space-y-4">
-     
         <ProfileTabs />
       </div>
     </div>

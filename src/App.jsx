@@ -8,6 +8,10 @@ import ResetPassword from "./pages/Login/ResetPassword";
 import LandingPage from "./pages/landing/LandingPage";
 import Homepage from "./pages/home/Homepage";
 import QseerSchedulePage from "./pages/Profile/QseerSchedulePage";
+import BookingSeer from "./pages/bookingseer/BookingSeer";
+
+
+
 import "./index.css";
 
 export default function App() {
@@ -16,7 +20,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<QseerSchedulePage />} />
+        <Route path="/" element={<Homepage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/fillter" element={<Fillter />} />
@@ -24,7 +28,8 @@ export default function App() {
         <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
         <Route path="/landingPage" element={<LandingPage />} />
         <Route path="/homepage" element={<Homepage />} />
-        <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />
+        <Route path="/qseerSchedulePage" element={<QseerSchedulePage/>} />
+        <Route path="/bookingSeer" element={<BookingSeer />} />
       </Routes>
     </Router>
   );

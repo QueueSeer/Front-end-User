@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";  // ✅ นำเข้า useNavigate
 import Images from "../../../../assets";
 import SeerRating from "../../../homecomponent/SeerPopular/SeerRating";
 
@@ -17,10 +18,17 @@ const PackageLabel = ({ type }) => {
 };
 
 const PackageCard = ({ packageInfo }) => {
+  const navigate = useNavigate();  // ✅ ใช้ useNavigate
+
   const iconMap = {
     call: Images.call,
     chat: Images.ChatLine,
     video: Images.videocall,
+  };
+
+  // ✅ ฟังก์ชันนำทางไปยังหน้า BookingSeer
+  const handleBooking = () => {
+    navigate("/bookingseer", { state: { packageInfo } });
   };
 
   return (
@@ -76,7 +84,10 @@ const PackageCard = ({ packageInfo }) => {
             <img src={iconMap[packageInfo.icon]} alt="duration" className="w-8 h-8 mr-2" />
             {packageInfo.duration} นาที
           </div>
-          <button className="bg-[#8677A7] text-white px-4 py-2 rounded-md text-sm">จองเลย</button>
+          {/* ✅ ปุ่มจองเชื่อมไป BookingSeer */}
+          <button onClick={handleBooking} className="bg-[#8677A7] text-white px-4 py-2 rounded-md text-sm">
+            จองเลย
+          </button>
         </div>
       </div>
     </div>
