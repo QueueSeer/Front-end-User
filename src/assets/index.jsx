@@ -60,6 +60,24 @@ import Starcolor from './icon/Reviewicon/Starcolor.png';
 import StarYellow from './icon/Reviewicon/StarYellow.png';
 import member1 from './icon/Reviewicon/member1.png';
 
+//  ไอคอน Booking
+import CoinMoney from './icon/booking/CoinMoney.png';
+import DocumentText from './icon/booking/DocumentText.png';
+import Fillinformation from './icon/booking/Fillinformation.png';
+import FillinformationActive from './icon/booking/FillinformationActive.png';
+import finish from './icon/booking/finish.png';
+import finishActive from './icon/booking/finishActive.png';
+import MoreDetails from './icon/booking/MoreDetails.png';
+import PromptpayMoney from "./icon/booking/PromtpayMoney.png";
+import Reservation from './icon/booking/Reservation.png';
+import User from './icon/booking/User.png';
+import Visa from './icon/booking/Visa.png';
+import VisaActive from './icon/booking/VisaActive.png';
+
+//  รูปภาพ Booking
+import picbill from './images/booking/picbill.png';
+import tarotImages from './images/booking/tarotImages.png';
+
 const images = {
     // โลโก้และไอคอน login 
     logo,
@@ -131,6 +149,24 @@ const images = {
         Starcolor,
        StarYellow,
        member1,
+
+        // Bookingicon 
+       CoinMoney,
+       DocumentText,
+       Fillinformation,
+       FillinformationActive,
+       finish,
+       finishActive,
+       MoreDetails,
+       PromptpayMoney,
+       Reservation,
+       User,
+       Visa,
+       VisaActive,
+
+       // Booking images 
+       picbill,
+       tarotImages,
 
 
 
