@@ -73,6 +73,7 @@ import Reservation from './icon/booking/Reservation.png';
 import User from './icon/booking/User.png';
 import Visa from './icon/booking/Visa.png';
 import VisaActive from './icon/booking/VisaActive.png';
+import back from './icon/booking/back.png';
 
 //  รูปภาพ Booking
 import picbill from './images/booking/picbill.png';
@@ -99,7 +100,7 @@ const images = {
     SectionEnd,
 
      // images หน้า footer
-     Facebook,
+     Facebook, 
     Instagram ,
     Twitter,
 
@@ -149,20 +150,25 @@ const images = {
         Starcolor,
        StarYellow,
        member1,
+       
 
         // Bookingicon 
        CoinMoney,
        DocumentText,
-       Fillinformation,
-       FillinformationActive,
-       finish,
-       finishActive,
-       MoreDetails,
-       PromptpayMoney,
-       Reservation,
        User,
+       PromptpayMoney,
+
+       Fillinformation,
+       finish,
+       MoreDetails,
+       
+       Reservation,
+       
        Visa,
+       FillinformationActive,
        VisaActive,
+       finishActive,
+       back ,
 
        // Booking images 
        picbill,

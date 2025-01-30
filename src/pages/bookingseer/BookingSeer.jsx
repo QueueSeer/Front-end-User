@@ -1,20 +1,41 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Fillterbar from "../../components/fillterbar";
+import BookingSteps from "../../components/bookingcomponent/BookingSteps";
+import HeaderSection from "../../components/bookingcomponent/HeaderSection";
+import FullCalendarPage from "../../components/bookingcomponent/FullCalendarPage";
+import BackButton from "../../components/bookingcomponent/BackButton";
+import NextButton from "../../components/bookingcomponent/NextButton";
 
 const BookingSeer = () => {
   const location = useLocation();
-  const packageInfo = location.state?.packageInfo; // ✅ รับค่า packageInfo จาก state
+  const navigate = useNavigate();
+  const packageInfo = location.state?.packageInfo;
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [numQuestions, setNumQuestions] = useState(4); // 🔹 Mock ค่าเป็น 4
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // ✅ เลื่อนกลับไปด้านบนทุกครั้งที่โหลด
+  }, []);
 
   if (!packageInfo) {
     return <p>ไม่พบแพ็กเกจที่เลือก</p>;
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{packageInfo.title}</h1>
-      <p className="text-gray-600">หมอดู: {packageInfo.seer}</p>
-      <p className="text-purple-900 font-bold">{packageInfo.price} Coins</p>
-      <p className="text-gray-500">ระยะเวลา: {packageInfo.duration} นาที</p>
+    <div>
+      <Fillterbar />
+      <div className="p-6">
+        <BackButton />
+        <BookingSteps />
+        <HeaderSection packageInfo={packageInfo} setNumQuestions={setNumQuestions} />
+
+        <div className="w-full">
+          <FullCalendarPage setSelectedDate={setSelectedDate} />
+        </div>
+
+       
+      </div>
     </div>
   );
 };
