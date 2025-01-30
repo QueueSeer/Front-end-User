@@ -51,6 +51,7 @@ export default function App() {
             path="/bookingSeer3"
             element={
               <>
+                <BackButton />
                 <BookingSteps />
                 <BookingSeer3 />
               </>
