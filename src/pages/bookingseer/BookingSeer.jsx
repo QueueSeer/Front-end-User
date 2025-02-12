@@ -12,10 +12,10 @@ const BookingSeer = () => {
   const navigate = useNavigate();
   const packageInfo = location.state?.packageInfo;
   const [selectedDate, setSelectedDate] = useState(null);
-  const [numQuestions, setNumQuestions] = useState(4); // 🔹 Mock ค่าเป็น 4
+  const [numQuestions, setNumQuestions] = useState(4); // **จำนวนคำถามที่มาจาก HeaderSection**
 
   useEffect(() => {
-    window.scrollTo(0, 0); // ✅ เลื่อนกลับไปด้านบนทุกครั้งที่โหลด
+    window.scrollTo(0, 0);
   }, []);
 
   if (!packageInfo) {
@@ -34,7 +34,9 @@ const BookingSeer = () => {
           <FullCalendarPage setSelectedDate={setSelectedDate} />
         </div>
 
-       
+        <div className="fixed bottom-4 right-4">
+          <NextButton onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, numQuestions } })} />
+        </div>
       </div>
     </div>
   );

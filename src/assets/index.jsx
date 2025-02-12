@@ -74,10 +74,17 @@ import User from './icon/booking/User.png';
 import Visa from './icon/booking/Visa.png';
 import VisaActive from './icon/booking/VisaActive.png';
 import back from './icon/booking/back.png';
+import Copy from './icon/booking/Copy.png';
+import importimages from './icon/booking/importimages.png';
+import tickcircle from './icon/booking/tickcircle.png';
 
 //  รูปภาพ Booking
 import picbill from './images/booking/picbill.png';
 import tarotImages from './images/booking/tarotImages.png';
+import qr from './images/booking/qr.png';
+import code from './images/booking/code.png';
+import Comfirm from './images/booking/Comfirm.png';
+import copytofolder from './images/booking/copytofolder.png';
 
 const images = {
     // โลโก้และไอคอน login 
@@ -169,11 +176,18 @@ const images = {
        VisaActive,
        finishActive,
        back ,
+       Copy,
+       importimages,
+       tickcircle,
 
        // Booking images 
        picbill,
        tarotImages,
-
+       qr,
+       code,
+       Comfirm,
+       copytofolder, 
+     
 
 
     
