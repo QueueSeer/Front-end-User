@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NextButton from "../../components/bookingcomponent/NextButton";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
@@ -17,6 +16,10 @@ const BookingSeer2 = () => {
   const [questions, setQuestions] = useState(Array(numQuestions).fill(""));
   const [paymentMethod, setPaymentMethod] = useState(null);
 
+  useEffect(() => {
+    window.scrollTo(0, 0); // เลื่อนหน้าขึ้นไปด้านบนสุดเมื่อโหลดคอมโพเนนต์
+  }, []);
+
   const handleQuestionChange = (index, value) => {
     const newQuestions = [...questions];
     newQuestions[index] = value;
@@ -27,8 +30,6 @@ const BookingSeer2 = () => {
 
   return (
     <div className="p-6 flex flex-col items-center">
-      
-    
       <div className="w-full max-w-4xl">
         <UserInfoForm />
         <div className="mt-6">
@@ -38,19 +39,14 @@ const BookingSeer2 = () => {
       </div>
 
       <div className="w-full max-w-4xl mt-8 flex gap-6">
-        
-      
         <div className="flex-1">
           <PaymentOptions paymentMethod={paymentMethod} onSelect={setPaymentMethod} />
         </div>
-
-        <div className="flex-1  ">
+        <div className="flex-1">
           <PaymentSummary packageInfo={packageInfo} selectedDate={selectedDate} />
         </div>
-
       </div>
 
-      
       <div className="fixed bottom-4 right-4">
         <NextButton 
           onClick={() => navigate("/bookingSeer3", { state: { packageInfo, selectedDate, questions } })} 

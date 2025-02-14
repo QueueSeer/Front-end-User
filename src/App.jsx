@@ -14,6 +14,12 @@ import BookingSeer from "./pages/bookingseer/BookingSeer";
 import BookingSeer2 from "./pages/bookingseer/BookingSeer2";
 import BookingSeer3 from "./pages/bookingseer/BookingSeer3";
 import BookingSeer4 from "./pages/bookingseer/BookingSeer4";
+import Horoscope from "./pages/horoscope/Horoscope";
+import Auction from "./pages/auction/Auction";
+import DetailAuction from "./pages/auction/DetailAuction";
+import BidAuction from "./pages/auction/BidAuction";
+
+
 
 import "./index.css";
 
@@ -32,8 +38,14 @@ export default function App() {
           <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
           <Route path="/landingPage" element={<LandingPage />} />
           <Route path="/homepage" element={<Homepage />} />
-          <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />ฃ
+          <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />
           <Route path="/BookingSeer" element={<BookingSeer />} />
+          <Route path="/horoscope" element={<Horoscope />} />
+          <Route path="/auction" element={<Auction />} />
+          <Route path="/detailAuction/:id" element={<DetailAuction />} />
+          <Route path="/bidAuction" element={<BidAuction />} />
+
+
 
          
        

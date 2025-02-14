@@ -87,14 +87,14 @@ const FullCalendarPage = () => {
           {/* Days Header */}
           <div className="grid grid-cols-7 text-center">
             {["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."].map((day, index) => (
-              <div key={index} className="text-[#8677A7] text-sm font-medium flex items-center justify-center h-10">
+              <div key={index} className="text-[#8677A7] text-sm font-medium flex items-center justify-center h-10 pr-3">
                 {day}
               </div>
             ))}
           </div>
 
           {/* Days Grid */}
-          <div className="grid grid-cols-7 text-center">
+          <div className="grid grid-cols-7 text-center pl-4">
             {Array.from({ length: currentDate.startOf("month").day() }).map((_, index) => (
               <div key={`empty-${index}`} className="w-12 h-12"></div>
             ))}

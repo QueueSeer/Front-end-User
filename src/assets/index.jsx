@@ -86,6 +86,31 @@ import code from './images/booking/code.png';
 import Comfirm from './images/booking/Comfirm.png';
 import copytofolder from './images/booking/copytofolder.png';
 
+//  ไอคอน auction
+import profileSmall from './icon/AuctionIcon/profileSmall.png';
+import ClockCircle from './icon/AuctionIcon/ClockCircle.png';
+import share from './icon/AuctionIcon/share.png';
+import Sledgehammer from './icon/AuctionIcon/Sledgehammer.png';
+import backtoback from './icon/AuctionIcon/backtoback.png';
+import trophy from './icon/AuctionIcon/trophy.png';
+import CrownOne from './icon/AuctionIcon/CrownOne.png';
+import CrownTwo from './icon/AuctionIcon/CrownTwo.png';
+import up from './icon/AuctionIcon/up.png';
+import down from './icon/AuctionIcon/down.png';
+import ArrowUp from './icon/AuctionIcon/ArrowUp.png';
+
+
+
+
+//  ภาพ auction
+import auctionImages from './images/auctionpage/auctionImages.png';
+import tarotbig from './images/auctionpage/tarotbig.png';
+import StepTrail from './images/auctionpage/StepTrail.png';
+import profileWoman from './images/auctionpage/profileWoman.png';
+import profilemam from './images/auctionpage/profilemam.png';
+
+
+
 const images = {
     // โลโก้และไอคอน login 
     logo,
@@ -187,6 +212,33 @@ const images = {
        code,
        Comfirm,
        copytofolder, 
+
+        // icon action 
+       profileSmall,
+       ClockCircle,
+       share,
+       Sledgehammer,
+       backtoback,
+       trophy,
+       CrownOne,
+       CrownTwo,
+       up,
+       down,
+       ArrowUp,
+
+
+
+         // images action 
+         auctionImages,
+         tarotbig,
+         StepTrail,
+         profileWoman,
+         profilemam,
+
+       
+
+         
+
      
 
 
