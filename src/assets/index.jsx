@@ -60,6 +60,57 @@ import Starcolor from './icon/Reviewicon/Starcolor.png';
 import StarYellow from './icon/Reviewicon/StarYellow.png';
 import member1 from './icon/Reviewicon/member1.png';
 
+//  ไอคอน Booking
+import CoinMoney from './icon/booking/CoinMoney.png';
+import DocumentText from './icon/booking/DocumentText.png';
+import Fillinformation from './icon/booking/Fillinformation.png';
+import FillinformationActive from './icon/booking/FillinformationActive.png';
+import finish from './icon/booking/finish.png';
+import finishActive from './icon/booking/finishActive.png';
+import MoreDetails from './icon/booking/MoreDetails.png';
+import PromptpayMoney from "./icon/booking/PromtpayMoney.png";
+import Reservation from './icon/booking/Reservation.png';
+import User from './icon/booking/User.png';
+import Visa from './icon/booking/Visa.png';
+import VisaActive from './icon/booking/VisaActive.png';
+import back from './icon/booking/back.png';
+import Copy from './icon/booking/Copy.png';
+import importimages from './icon/booking/importimages.png';
+import tickcircle from './icon/booking/tickcircle.png';
+
+//  รูปภาพ Booking
+import picbill from './images/booking/picbill.png';
+import tarotImages from './images/booking/tarotImages.png';
+import qr from './images/booking/qr.png';
+import code from './images/booking/code.png';
+import Comfirm from './images/booking/Comfirm.png';
+import copytofolder from './images/booking/copytofolder.png';
+
+//  ไอคอน auction
+import profileSmall from './icon/AuctionIcon/profileSmall.png';
+import ClockCircle from './icon/AuctionIcon/ClockCircle.png';
+import share from './icon/AuctionIcon/share.png';
+import Sledgehammer from './icon/AuctionIcon/Sledgehammer.png';
+import backtoback from './icon/AuctionIcon/backtoback.png';
+import trophy from './icon/AuctionIcon/trophy.png';
+import CrownOne from './icon/AuctionIcon/CrownOne.png';
+import CrownTwo from './icon/AuctionIcon/CrownTwo.png';
+import up from './icon/AuctionIcon/up.png';
+import down from './icon/AuctionIcon/down.png';
+import ArrowUp from './icon/AuctionIcon/ArrowUp.png';
+
+
+
+
+//  ภาพ auction
+import auctionImages from './images/auctionpage/auctionImages.png';
+import tarotbig from './images/auctionpage/tarotbig.png';
+import StepTrail from './images/auctionpage/StepTrail.png';
+import profileWoman from './images/auctionpage/profileWoman.png';
+import profilemam from './images/auctionpage/profilemam.png';
+
+
+
 const images = {
     // โลโก้และไอคอน login 
     logo,
@@ -81,7 +132,7 @@ const images = {
     SectionEnd,
 
      // images หน้า footer
-     Facebook,
+     Facebook, 
     Instagram ,
     Twitter,
 
@@ -131,7 +182,64 @@ const images = {
         Starcolor,
        StarYellow,
        member1,
+       
 
+        // Bookingicon 
+       CoinMoney,
+       DocumentText,
+       User,
+       PromptpayMoney,
+
+       Fillinformation,
+       finish,
+       MoreDetails,
+       
+       Reservation,
+       
+       Visa,
+       FillinformationActive,
+       VisaActive,
+       finishActive,
+       back ,
+       Copy,
+       importimages,
+       tickcircle,
+
+       // Booking images 
+       picbill,
+       tarotImages,
+       qr,
+       code,
+       Comfirm,
+       copytofolder, 
+
+        // icon action 
+       profileSmall,
+       ClockCircle,
+       share,
+       Sledgehammer,
+       backtoback,
+       trophy,
+       CrownOne,
+       CrownTwo,
+       up,
+       down,
+       ArrowUp,
+
+
+
+         // images action 
+         auctionImages,
+         tarotbig,
+         StepTrail,
+         profileWoman,
+         profilemam,
+
+       
+
+         
+
+     
 
 
     

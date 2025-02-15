@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import BookingSteps from "./components/bookingcomponent/BookingSteps";
+import BackButton from "./components/bookingcomponent/BackButton";  // ✅ Import BookingSteps
 import Login from "./pages/Login/Login";
 import Register from "./pages/Login/Register";
 import Fillter from "./pages/Login/Fillter";
@@ -9,28 +11,75 @@ import LandingPage from "./pages/landing/LandingPage";
 import Homepage from "./pages/home/Homepage";
 import QseerSchedulePage from "./pages/Profile/QseerSchedulePage";
 import BookingSeer from "./pages/bookingseer/BookingSeer";
+import BookingSeer2 from "./pages/bookingseer/BookingSeer2";
+import BookingSeer3 from "./pages/bookingseer/BookingSeer3";
+import BookingSeer4 from "./pages/bookingseer/BookingSeer4";
+import Horoscope from "./pages/horoscope/Horoscope";
+import Auction from "./pages/auction/Auction";
+import DetailAuction from "./pages/auction/DetailAuction";
+import BidAuction from "./pages/auction/BidAuction";
 
 
 
 import "./index.css";
 
 export default function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false); // เพิ่มตัวแปร isDarkMode
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/fillter" element={<Fillter />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
-        <Route path="/landingPage" element={<LandingPage />} />
-        <Route path="/homepage" element={<Homepage />} />
-        <Route path="/qseerSchedulePage" element={<QseerSchedulePage/>} />
-        <Route path="/bookingSeer" element={<BookingSeer />} />
-      </Routes>
+      
+        <Routes>
+          <Route path="/" element={<Fillter />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/fillter" element={<Fillter />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
+          <Route path="/landingPage" element={<LandingPage />} />
+          <Route path="/homepage" element={<Homepage />} />
+          <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />
+          <Route path="/BookingSeer" element={<BookingSeer />} />
+          <Route path="/horoscope" element={<Horoscope />} />
+          <Route path="/auction" element={<Auction />} />
+          <Route path="/detailAuction/:id" element={<DetailAuction />} />
+          <Route path="/bidAuction" element={<BidAuction />} />
+
+
+
+         
+       
+          <Route
+            path="/bookingSeer2"
+            element={
+              <>
+                <BackButton />
+                <BookingSteps />
+                <BookingSeer2 />
+              </>
+            }
+          />
+          <Route
+            path="/bookingSeer3"
+            element={
+              <>
+                <BackButton />
+                <BookingSteps />
+                <BookingSeer3 />
+              </>
+            }
+          />
+          <Route
+            path="/bookingSeer4"
+            element={
+              <>
+                <BookingSteps />
+                <BookingSeer4 />
+              </>
+            }
+          />
+        </Routes>
+     
     </Router>
   );
 }
