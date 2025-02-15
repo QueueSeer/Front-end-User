@@ -98,7 +98,7 @@ import CrownTwo from './icon/AuctionIcon/CrownTwo.png';
 import up from './icon/AuctionIcon/up.png';
 import down from './icon/AuctionIcon/down.png';
 import ArrowUp from './icon/AuctionIcon/ArrowUp.png';
-
+import nextmoney from './icon/AuctionIcon/nextmoney.png';
 
 
 
@@ -108,6 +108,20 @@ import tarotbig from './images/auctionpage/tarotbig.png';
 import StepTrail from './images/auctionpage/StepTrail.png';
 import profileWoman from './images/auctionpage/profileWoman.png';
 import profilemam from './images/auctionpage/profilemam.png';
+import image64 from './images/auctionpage/image64.png';
+
+//  ไอคอน Topupicon
+import cat from './icon/Topupicon/cat.png';
+import clover from './icon/Topupicon/clover.png';
+import lotus from './icon/Topupicon/lotus.png';
+import QrScan from './icon/Topupicon/QrScan.png';
+import Redbag from './icon/Topupicon/Redbag.png';
+import RedEnvelope from './icon/Topupicon/RedEnvelope.png';
+import slot from './icon/Topupicon/slot.png';
+
+//  ภาพ Topupicon
+import logomarbeltext from './images/topup/logomarbeltext.png';
+import Packetphoto from './images/topup/Packetphoto.png';
 
 
 
@@ -225,6 +239,7 @@ const images = {
        up,
        down,
        ArrowUp,
+       nextmoney,
 
 
 
@@ -234,6 +249,20 @@ const images = {
          StepTrail,
          profileWoman,
          profilemam,
+         image64,
+
+   // icon topup 
+         cat,
+        clover,
+        lotus,
+        QrScan,
+        Redbag,
+        RedEnvelope,
+        slot,
+
+  // images topup 
+        logomarbeltext,
+        Packetphoto,
 
        
 

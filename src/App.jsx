@@ -18,6 +18,8 @@ import Horoscope from "./pages/horoscope/Horoscope";
 import Auction from "./pages/auction/Auction";
 import DetailAuction from "./pages/auction/DetailAuction";
 import BidAuction from "./pages/auction/BidAuction";
+import TopUpCoins from "./pages/Topup/TopUpCoins";
+import SummaryPage from "./pages/Topup/SummaryPage";
 
 
 
@@ -44,6 +46,8 @@ export default function App() {
           <Route path="/auction" element={<Auction />} />
           <Route path="/detailAuction/:id" element={<DetailAuction />} />
           <Route path="/bidAuction" element={<BidAuction />} />
+          <Route path="/top-up-coins" element={<TopUpCoins />} />
+          <Route path="/summary" element={<SummaryPage />} />
 
 
 
