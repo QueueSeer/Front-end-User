@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 const SummaryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedCoins, selectedPrice, selectedPayment, currentCoins } = location.state || {};
+  const { selectedCoins, selectedPrice, selectedPayment, currentCoins, from } = location.state || {}; // ✅ รับค่า from
 
   const [isLoading, setIsLoading] = useState(false);
   const [updatedCoins, setUpdatedCoins] = useState(currentCoins); // เก็บค่าล่าสุดของ Coins
@@ -15,7 +15,12 @@ const SummaryPage = () => {
     setTimeout(() => {
       setIsLoading(false);
       setUpdatedCoins(prev => prev + selectedCoins); // อัปเดตจำนวน Coin ใน LuckCard
-      navigate("/top-up-coins", { state: { updatedCoins: updatedCoins + selectedCoins } }); // ส่งค่ากลับไปอัปเดต
+
+      if (from === "BidAuctionFooter") {
+        navigate("/bidAuction", { state: { updatedCoins: updatedCoins + selectedCoins } }); // ✅ กลับไปที่ BidAuction
+      } else {
+        navigate("/top-up-coins", { state: { updatedCoins: updatedCoins + selectedCoins } }); // กลับไปที่หน้าเติมเงินปกติ
+      }
     }, 2000); // โหลด 2 วินาที
   };
 

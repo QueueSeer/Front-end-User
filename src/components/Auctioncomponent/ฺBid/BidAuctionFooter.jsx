@@ -7,6 +7,12 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [bidAmount, setBidAmount] = useState(50);
+  
+  // ✅ เพิ่ม state สำหรับ Coins ใน LuckCard
+  const [userCoins, setUserCoins] = useState(200);
+  
+  // ✅ เพิ่ม state สำหรับ Coins ของผู้ประมูล (เริ่มต้นที่ 0)
+  const [bidderCoins, setBidderCoins] = useState(0);
 
   const handleIncrease = () => {
     setBidAmount((prev) => Math.min(prev + 50, 200));
@@ -17,15 +23,28 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
   };
 
   const handleBid = () => {
-    const updatedBidders = bidders.map((bidder) =>
-      bidder.username === selectedBidder.username
-        ? { ...bidder, coins: bidder.coins + bidAmount }
-        : bidder
-    );
+    if (userCoins >= bidAmount) {
+      // ✅ ลด Coins ของผู้ใช้
+      setUserCoins((prev) => prev - bidAmount);
 
-    updatedBidders.sort((a, b) => b.coins - a.coins);
-    setBidders(updatedBidders);
-    setIsExpanded(false);
+      // ✅ อัปเดต Coins ของผู้ประมูล
+      const updatedBidderCoins = bidderCoins + bidAmount;
+      setBidderCoins(updatedBidderCoins);
+
+      // ✅ อัปเดตลิสต์ของผู้ประมูลและจัดอันดับใหม่
+      const updatedBidders = bidders.map((bidder) =>
+        bidder.username === selectedBidder.username
+          ? { ...bidder, coins: updatedBidderCoins }
+          : bidder
+      );
+
+      updatedBidders.sort((a, b) => b.coins - a.coins);
+      setBidders(updatedBidders);
+
+      setIsExpanded(false);
+    } else {
+      alert("Coins ไม่พอสำหรับลงเงิน กรุณาเติมโชค Coin!");
+    }
   };
 
   return (
@@ -57,27 +76,20 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FFF9E2] to-[#FFF5D1] flex items-center justify-center shadow-md">
             <img src={Images.trophy} alt="Coins" className="w-6 h-6" />
           </div>
-          <p className="text-lg font-semibold">{selectedBidder.coins} Coins</p>
+          <p className="text-lg font-semibold">{bidderCoins} Coins</p> {/* ✅ อัปเดต Coins ของผู้ประมูล */}
         </div>
       </div>
 
       {isExpanded && (
         <div className="bg-gray-200 px-6 py-5 rounded-b-lg shadow-lg">
-          <div className="grid grid-cols-2 gap-5">
-            {/* ✅ ใช้ LuckCard แทนกล่องโชคของคุณ และให้ขนาดเท่ากับของเดิม */}
-            <div className="relative flex justify-end">
-            <LuckCard coins={200} showTopUp={true} className="ml-auto" />
+          {/* ✅ ใช้ grid grid-cols-2 เพื่อให้ LuckCard และ Coins อยู่ในบรรทัดเดียวกัน */}
+          <div className="grid grid-cols-2 gap-5 items-center">
+            {/* ✅ LuckCard - ปรับขนาดให้ไม่เลื่อนผิดที่ */}
+            <div className="w-full">
+              <LuckCard coins={userCoins} showTopUp={true} />
+            </div>
 
-  <button
-  className="text-sm underline mt-3 flex justify-start items-center text-[#5A189A]"
-  onClick={() => navigate("/top-up-coins", { state: { from: "BidAuctionFooter" } })} // ✅ ส่งค่าไปบอกว่ามาจาก BidAuctionFooter
->
- 
-</button>
-
-</div>
-
-
+            {/* ✅ ส่วนเลือก Coins */}
             <div className="bg-white p-5 rounded-lg shadow-md flex flex-col justify-between">
               <div className="flex justify-between text-gray-700 text-sm">
                 <p>50 Coins น้อยที่สุด</p>
@@ -85,7 +97,10 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
               </div>
 
               <div className="flex items-center gap-3 mt-4">
-                <button className="bg-[#5A189A] text-white w-9 h-9 flex items-center justify-center rounded-full" onClick={handleDecrease}>
+                <button
+                  className="bg-[#5A189A] text-white w-9 h-9 flex items-center justify-center rounded-full"
+                  onClick={handleDecrease}
+                >
                   −
                 </button>
                 <input
@@ -97,7 +112,10 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
                   onChange={(e) => setBidAmount(Number(e.target.value))}
                   className="w-full"
                 />
-                <button className="bg-[#5A189A] text-white w-9 h-9 flex items-center justify-center rounded-full" onClick={handleIncrease}>
+                <button
+                  className="bg-[#5A189A] text-white w-9 h-9 flex items-center justify-center rounded-full"
+                  onClick={handleIncrease}
+                >
                   +
                 </button>
               </div>
@@ -107,10 +125,14 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
           </div>
 
           <div className="flex justify-between items-center mt-6 px-4">
-            <button onClick={() => navigate("/")} className="text-[#5A189A] text-sm flex items-center">
+          <button
+              onClick={() => navigate("/homepage", { state: { joinedAuction: true } })}
+              className="text-[#5A189A] text-sm flex items-center"
+            >
               <img src={Images.back} alt="Back" className="w-5 h-5 mr-1" />
               หน้าหลัก
             </button>
+
             <button className="bg-[#77599A] text-white py-2 px-8 rounded-full font-medium shadow-md" onClick={handleBid}>
               ลงเงิน
             </button>

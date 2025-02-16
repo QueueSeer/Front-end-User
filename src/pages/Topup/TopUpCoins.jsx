@@ -8,8 +8,8 @@ import Images from "../../assets";
 const TopUpCoins = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  
+  const from = location.state?.from || null; // ✅ รับค่าจาก BidAuctionFooter ถ้ามี
+
   // ตั้งค่า Coins เริ่มต้น
   const [currentCoins, setCurrentCoins] = useState(198);
   const [selectedCoins, setSelectedCoins] = useState(null);
@@ -31,7 +31,7 @@ const TopUpCoins = () => {
   const handleProceed = () => {
     if (selectedCoins && selectedPayment) {
       navigate("/summary", {
-        state: { selectedCoins, selectedPrice, selectedPayment, currentCoins },
+        state: { selectedCoins, selectedPrice, selectedPayment, currentCoins, from }, // ✅ ส่ง `from` ไป SummaryPage
       });
     }
   };
