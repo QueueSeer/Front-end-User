@@ -1,18 +1,47 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Images from "../../assets"; // Import รูปจาก assets
 
 const HeaderSection = ({ packageInfo, setNumQuestions }) => {
+  const [packageData, setPackageData] = useState(packageInfo || null);
+  const [loading, setLoading] = useState(!packageInfo);
+  const [error, setError] = useState(null);
+
+  // 🟢 โหลดข้อมูลแพ็กเกจจาก API ถ้า `packageInfo` ไม่มี
   useEffect(() => {
-    const numQuestionsMock = packageInfo?.numQuestions || 4; // 🔹 Mock ค่า 4 ถ้าไม่มีข้อมูล
-    setNumQuestions(numQuestionsMock);
+    if (!packageInfo) {
+      fetch("http://localhost:5000/api/package/1") // เปลี่ยนเป็น API จริงเมื่อพร้อม
+        .then((response) => {
+          if (!response.ok) throw new Error("โหลดแพ็กเกจล้มเหลว");
+          return response.json();
+        })
+        .then((data) => {
+          setPackageData(data);
+          setNumQuestions(data.numQuestions || 4);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error fetching package:", err);
+          // 🟢 ใช้ Mock Data ถ้า API ล้มเหลว
+          setPackageData({
+            title: "แพ็กเกจดูดวงพื้นฐาน",
+            price: 100,
+            numQuestions: 4,
+          });
+          setNumQuestions(4);
+          setLoading(false);
+        });
+    }
   }, [packageInfo, setNumQuestions]);
+
+  if (loading) return <p className="text-center text-gray-500">กำลังโหลดข้อมูลแพ็กเกจ...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="p-12">
       {/* ชื่อแพ็กเกจ & ราคา */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{packageInfo?.title || "แพ็กเกจดูดวง"} </h1>
-        <p className="text-purple-900 font-bold text-xl">{packageInfo?.price || 100} Coins</p>
+        <h1 className="text-2xl font-bold">{packageData?.title || "แพ็กเกจดูดวง"} </h1>
+        <p className="text-purple-900 font-bold text-xl">{packageData?.price || 100} Coins</p>
       </div>
 
       {/* ภาพ + รายละเอียด */}
@@ -25,7 +54,7 @@ const HeaderSection = ({ packageInfo, setNumQuestions }) => {
         {/* รายละเอียด */}
         <div className="w-2/3">
           <p className="text-gray-700">
-            ในแพ็กเกจนี้คุณสามารถถามได้ <strong>{packageInfo?.numQuestions || 4} คำถาม</strong> 
+            ในแพ็กเกจนี้คุณสามารถถามได้ <strong>{packageData?.numQuestions || 4} คำถาม</strong> 
              :โดยผู้เชี่ยวชาญด้านโหราศาสตร์จะให้คำแนะนำเกี่ยวกับความรักและความสัมพันธ์
             และเจาะลึกเกี่ยวกับเรื่องความรักโดยแบ่งการทำนายออกเป็น 12 เดือน ซึ่งคุณจะได้รู้ถึง:
           </p>

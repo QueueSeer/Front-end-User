@@ -4,9 +4,9 @@ import Images from "../../../assets"; // ✅ นำเข้า assets
 const LoserPopup = ({ rank, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
-      <div className="bg-purple-700 rounded-2xl p-6 w-[450px] shadow-lg text-center relative">
+      <div className="bg-white rounded-2xl p-6 w-[450px] shadow-lg text-center relative">
         {/* หัวข้อ */}
-        <h2 className="text-xl font-bold text-white">ลำดับผลการประมูล</h2>
+        <h2 className="text-xl font-bold text-purple-800">ลำดับผลการประมูล</h2>
 
         {/* ไอคอนมงกุฎ + รูปโปรไฟล์ */}
         <div className="relative mt-4">
@@ -30,7 +30,7 @@ const LoserPopup = ({ rank, onClose }) => {
 
         {/* ปุ่มปิด */}
         <button
-          className="mt-6 bg-white text-purple-700 font-medium px-8 py-1 rounded-full"
+          className="mt-6 bg-purple-800 text-white font-medium px-8 py-1 rounded-full"
           onClick={onClose}
         >
           ปิดหน้าต่าง

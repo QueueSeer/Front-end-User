@@ -12,13 +12,13 @@ const BookingSeer4 = () => {
 
   return (
     <div className="flex flex-col items-center p-6">
-      {/* ✅ การจองเสร็จสิ้น */}
+      {/*  การจองเสร็จสิ้น */}
       <ConfirmationCard />
 
-      {/* ✅ วิธีการใช้ Code */}
+      {/*  วิธีการใช้ Code */}
       <HowToUseCode />
 
-      {/* ✅ ปุ่มการกระทำ */}
+      {/* ปุ่มการกระทำ */}
       <div className="w-full flex justify-end gap-4 mt-auto pr-6">
         <button
           className="px-6 py-3 rounded-lg border-2 border-[#65558F] font-semibold text-[#65558F] text-base bg-white hover:bg-[#F4F1FA] transition"

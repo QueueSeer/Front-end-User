@@ -8,14 +8,13 @@ import FeatureSection from "../../components/homecomponent/FeatureSection";
 import PopularSeers from "../../components/homecomponent/SeerPopular/PopularSeers";
 import PackageSection from "../../components/homecomponent/Package/PackageSection";
 import PopularCategories from "../../components/homecomponent/PopularCategories/PopularCategories";
-import OngoingAuctions from "../../components/homecomponent/OngoingAuctions"; // ✅ นำเข้า Component ใหม่
-import Images from "../../assets"; // ✅ นำเข้า Images
+import OngoingAuctions from "../../components/homecomponent/OngoingAuctions"; 
+import Images from "../../assets"; 
 
 const Homepage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ โหลดข้อมูลประมูลจาก localStorage (ถ้ามี)
   const [ongoingAuctions, setOngoingAuctions] = useState(() => {
     return JSON.parse(localStorage.getItem("ongoingAuctions")) || [];
   });
@@ -24,12 +23,11 @@ const Homepage = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // ✅ เพิ่ม Card การประมูลเฉพาะเมื่อ `joinedAuction` เป็น `true`
   useEffect(() => {
     if (location.state?.joinedAuction) {
       const exampleAuctions = [
         {
-          id: "auction-1",
+          id: `auction-${Date.now()}-1`,
           title: "กำลังเข้าร่วมประมูล",
           description: "ดูดวงความรัก สุขภาพ การงาน ภาพรวมประจำปี",
           timeLeft: "00:00:05:00",
@@ -38,37 +36,38 @@ const Homepage = () => {
           isWinner: null,
         },
         {
-          id: "auction-2",
+          id: `auction-${Date.now()}-2`,
           title: "สิ้นสุดการประมูล",
           description: "ดูดวงความรัก สุขภาพ การงาน ภาพรวมประจำปี",
           timeLeft: "00:00:00:00",
           seerName: "หมอดู เพียงฟ้า",
           seerImage: Images.profileSmall,
-          isWinner: false, // ✅ แพ้ประมูล
+          isWinner: false, // แพ้ประมูล
         },
         {
-          id: "auction-3",
+          id: `auction-${Date.now()}-3`,
           title: "สิ้นสุดการประมูล",
           description: "ดูดวงความรัก สุขภาพ การงาน ภาพรวมประจำปี",
           timeLeft: "00:00:00:00",
           seerName: "หมอดู เพียงฟ้า",
           seerImage: Images.profileSmall,
-          isWinner: true, // ✅ ชนะประมูล
+          isWinner: true, // ชนะประมูล
         }
       ];
 
-      // ✅ เช็คว่าไม่เพิ่มการ์ดซ้ำ
-      const exists = ongoingAuctions.some((auction) => auction.id === "auction-1");
-      if (!exists) {
-        const updatedAuctions = [...ongoingAuctions, ...exampleAuctions];
-        setOngoingAuctions(updatedAuctions);
-        localStorage.setItem("ongoingAuctions", JSON.stringify(updatedAuctions));
-      }
+      // ✅ ล้างค่าการประมูลเก่าใน localStorage ก่อนเพิ่มใหม่
+      localStorage.removeItem("ongoingAuctions");
 
-      // ✅ รีเซ็ต `joinedAuction` เพื่อไม่ให้เพิ่มซ้ำเมื่อรีเฟรช
+      // ✅ ใช้ callback function ใน `setOngoingAuctions` เพื่ออัปเดตให้ทันที
+      setOngoingAuctions((prevAuctions) => {
+        const updatedAuctions = [...prevAuctions, ...exampleAuctions];
+        localStorage.setItem("ongoingAuctions", JSON.stringify(updatedAuctions));
+        return updatedAuctions;
+      });
+
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state?.joinedAuction, navigate, ongoingAuctions]);
+  }, [location.state?.joinedAuction, navigate]);
 
   return (
     <>
@@ -78,7 +77,6 @@ const Homepage = () => {
         <div className="p-8">
           <SearchBar />
           <IconSection />
-          {/* ✅ แสดง `OngoingAuctions` เฉพาะเมื่อมีข้อมูล */}
           {ongoingAuctions.length > 0 && <OngoingAuctions auctions={ongoingAuctions} />}
           <FeatureSection />
           <PopularSeers />
