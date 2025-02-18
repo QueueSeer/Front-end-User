@@ -3,8 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import NextButton from "../../components/bookingcomponent/NextButton";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
 import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
-import PaymentOptions from "../../components/bookingcomponent/step2/PaymentOptions";
-import PaymentSummary from "../../components/bookingcomponent/step2/PaymentSummary";
+import Payment from "../../components/bookingcomponent/step2/Payment"; 
 
 const BookingSeer2 = () => {
   const navigate = useNavigate();
@@ -15,6 +14,7 @@ const BookingSeer2 = () => {
 
   const [questions, setQuestions] = useState(Array(numQuestions).fill(""));
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [useCoins, setUseCoins] = useState(false); // ✅ เพิ่ม State ของโชคคอยน์
 
   useEffect(() => {
     window.scrollTo(0, 0); // เลื่อนหน้าขึ้นไปด้านบนสุดเมื่อโหลดคอมโพเนนต์
@@ -38,18 +38,21 @@ const BookingSeer2 = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mt-8 flex gap-6">
-        <div className="flex-1">
-          <PaymentOptions paymentMethod={paymentMethod} onSelect={setPaymentMethod} />
-        </div>
-        <div className="flex-1">
-          <PaymentSummary packageInfo={packageInfo} selectedDate={selectedDate} />
-        </div>
+      {/* ✅ ใช้คอมโพเนนต์ Payment */}
+      <div className="w-full max-w-4xl mt-8">
+        <Payment 
+          packageInfo={packageInfo} 
+          selectedDate={selectedDate} 
+          paymentMethod={paymentMethod} 
+          setPaymentMethod={setPaymentMethod} 
+          useCoins={useCoins} 
+          setUseCoins={setUseCoins} 
+        />
       </div>
 
       <div className="fixed bottom-4 right-4">
         <NextButton 
-          onClick={() => navigate("/bookingSeer3", { state: { packageInfo, selectedDate, questions } })} 
+          onClick={() => navigate("/bookingSeer3", { state: { packageInfo, selectedDate, questions, paymentMethod, useCoins } })} 
           disabled={!isFormValid} 
         />
       </div>

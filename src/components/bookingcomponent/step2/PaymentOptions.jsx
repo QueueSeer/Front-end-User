@@ -37,7 +37,7 @@ const PaymentOptions = ({ paymentMethod, onSelect }) => {
           <div className="flex items-center space-x-2">
             <img src={Images.CoinMoney} alt="Coins" className="w-20 pl-3" />
             <span className={paymentMethod === "coins" ? "text-white" : "text-[#65558F] font-semibold"}>
-             
+              Coins
             </span>
           </div>
         </button>
