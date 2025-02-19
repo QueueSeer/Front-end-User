@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const BookingSeer3 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const receivedPrice = location.state?.finalPrice ?? null; // ✅ ป้องกัน undefined
+  const receivedPrice = location.state?.finalPrice ?? null; // ป้องกัน undefined
 
   const [finalPrice, setFinalPrice] = useState(receivedPrice);
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
@@ -24,7 +24,7 @@ const BookingSeer3 = () => {
   useEffect(() => {
     if (!API_TOKEN) {
       console.warn(" ไม่มี Token กรุณา Login ก่อน");
-      navigate("/login"); // ✅ ส่งไปหน้า Login ถ้าไม่มี Token
+      navigate("/login"); //  ส่งไปหน้า Login ถ้าไม่มี Token
     }
   }, [API_TOKEN, navigate]);
 
@@ -50,19 +50,19 @@ const BookingSeer3 = () => {
     
         if (response.status === 401) {
           console.error(" Token หมดอายุหรือไม่ถูกต้อง");
-          navigate("/login"); // ✅ Redirect ไป Login ถ้า Token หมดอายุ
+          navigate("/login"); // Redirect ไป Login ถ้า Token หมดอายุ
           return;
         }
     
         if (!response.ok) throw new Error(" ไม่สามารถโหลด QR Code ได้");
     
         const qrUrl = await response.text();
-        console.log("✅ QR Code URL (Raw):", qrUrl);
+        console.log(" QR Code URL (Raw):", qrUrl);
     
         const decodedUrl = decodeURIComponent(qrUrl.trim()); // ป้องกัน Encoding Error
         setQrCodeUrl(`${decodedUrl}.png`); //  ใช้ URL ของ QR
     
-        console.log("✅ QR Code URL (Final):", `${decodedUrl}.png`);
+        console.log("QR Code URL (Final):", `${decodedUrl}.png`);
       } catch (error) {
         console.error(" Error fetching QR Code:", error);
         setErrorQr(true);
@@ -135,7 +135,7 @@ const BookingSeer3 = () => {
         </div>
       </div>
 
-      {/* 🔘 ปุ่มการกระทำ */}
+      {/*  ปุ่มการกระทำ */}
       <div className="flex gap-6 mt-8">
         {/* ปุ่ม บันทึก QR */}
         <button
