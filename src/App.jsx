@@ -20,6 +20,7 @@ import DetailAuction from "./pages/auction/DetailAuction";
 import BidAuction from "./pages/auction/BidAuction";
 import TopUpCoins from "./pages/Topup/TopUpCoins";
 import SummaryPage from "./pages/Topup/SummaryPage";
+import AuctionDetails from "./pages/auction/AuctionDetails";
 
 
 
@@ -32,7 +33,7 @@ export default function App() {
     <Router>
       
         <Routes>
-          <Route path="/" element={<Fillter />} />
+          <Route path="/" element={<Homepage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/bidAuction" element={<BidAuction />} />
           <Route path="/top-up-coins" element={<TopUpCoins />} />
           <Route path="/summary" element={<SummaryPage />} />
+          <Route path="/auction-details" element={<AuctionDetails />} />
 
 
 

@@ -8,6 +8,7 @@ const Payment = ({ packageInfo, selectedDate }) => {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [useCoins, setUseCoins] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ เพิ่ม state กันกดซ้ำ
 
   const date = selectedDate ? dayjs(selectedDate) : null;
   const totalPrice = packageInfo?.price || 0;
@@ -15,13 +16,39 @@ const Payment = ({ packageInfo, selectedDate }) => {
   const maxCoinUsage = 200; // หักได้สูงสุด 200 คอยน์
   const discount = useCoins && paymentMethod === "promptpay" ? Math.min(maxCoinUsage, totalPrice) : 0;
   const finalPrice = totalPrice - discount;
-  
-  
 
-  const handlePayment = () => {
-    navigate("/bookingSeer3", {
-      state: { packageInfo, selectedDate, paymentMethod, useCoins, finalPrice },
+  // ✅ Mock API สำหรับสร้าง bookingId
+  const createBooking = async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const bookingId = `BK-${Math.floor(Math.random() * 1000000)}`;
+        resolve({ bookingId });
+      }, 1000);
     });
+  };
+
+  const handlePayment = async () => {
+    if (!paymentMethod) return;
+
+    setLoading(true);
+    const { bookingId } = await createBooking();
+
+    const paymentData = {
+      bookingId,
+      packageInfo,
+      selectedDate,
+      paymentMethod,
+      useCoins,
+      finalPrice: totalPrice - discount, // ✅ ส่งค่า finalPrice ให้ชัวร์
+    };
+
+    if (paymentMethod === "promptpay") {
+      console.log("Navigating to BookingSeer3 with data:", paymentData); // ✅ Debug
+      navigate("/bookingSeer3", { state: paymentData });
+    } else if (paymentMethod === "coins") {
+      navigate("/bookingSeer4", { state: paymentData });
+    }
+    setLoading(false);
   };
 
   return (
@@ -154,12 +181,18 @@ const Payment = ({ packageInfo, selectedDate }) => {
           </div>
         </div>
 
+        {/* ✅ ปุ่มชำระเงิน */}
         <div className="mt-4 flex justify-center">
-          <button className="w-full bg-[#65558F] text-white p-3 rounded-md font-semibold text-lg hover:bg-[#564477]" onClick={handlePayment} disabled={!paymentMethod}>
-            ชำระเงิน
+          <button
+            className="w-full bg-[#65558F] text-white p-3 rounded-md font-semibold text-lg hover:bg-[#564477]"
+            onClick={handlePayment}
+            disabled={!paymentMethod || loading}
+          >
+            {loading ? "กำลังดำเนินการ..." : "ชำระเงิน"}
           </button>
         </div>
       </div>
+    
     </div>
   );
 };
