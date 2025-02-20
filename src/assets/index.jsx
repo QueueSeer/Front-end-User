@@ -124,6 +124,31 @@ import logomarbeltext from './images/topup/logomarbeltext.png';
 import Packetphoto from './images/topup/Packetphoto.png';
 
 
+import bellIcon from './icon/Sidebar/bellIcon.png';
+import calendarIcon from './icon/Sidebar/calendarIcon.png';
+import BoltIcon from './icon/Sidebar/BoltIcon.png'
+import BoxIcon from './icon/Sidebar/BoxIcon.png'
+import SledgehammerIcon from './icon/Sidebar/SledgehammerIcon.png'
+import Clock_CircleIcon from './icon/Sidebar/Clock_CircleIcon.png'
+import OutlineIcon from './icon/Sidebar/OutlineIcon.png'
+import Star_Icon from './icon/Sidebar/Star_Icon.png'
+import Users_GroupIcon from './icon/Sidebar/Users_GroupIcon.png'
+import LogoutIcon from './icon/Sidebar/LogoutIcon.png'
+import bellClickIcon from './icon/Sidebar/bellClickIcon.png'
+import UserIcon from './icon/Sidebar/UserIcon.png'
+
+
+import StarsIcon from './icon/Profile/StarsIcon.png'
+import LinkIcon from './icon/Profile/LinkMinimalisticIcon.png'
+import WalletIcon from './icon/Profile/WalletIcon.png'
+import LineIcon from './icon/Profile/lineIcon.png'
+import FacebookIcon from './icon/Profile/FacebookIcon.png'
+import YoutubeIcon from './icon/Profile/YoutubeIcon.png'
+import InstagramIcon from './icon/Profile/InstagramIcon.png'
+import XIcon from './icon/Profile/XIcon.png'
+import TiktokIcon from './icon/Profile/TiktokIcon.png'
+import PlusIcon from './icon/Profile/PlusIcon.png'
+import ThaiqrIcon from './icon/Profile/ThaiqrIcon.png'
 
 const images = {
     // โลโก้และไอคอน login 
@@ -263,6 +288,39 @@ const images = {
   // images topup 
         logomarbeltext,
         Packetphoto,
+
+          // icon sidebar
+        bellIcon,
+    calendarIcon,
+    BoltIcon,
+    BoxIcon,
+    SledgehammerIcon,
+    Clock_CircleIcon,
+    OutlineIcon,
+    Star_Icon,
+    Users_GroupIcon,
+    LogoutIcon,
+    bellClickIcon,
+    UserIcon,
+
+      // icon profile 
+  
+   
+   
+    
+    StarsIcon,
+    LinkIcon,
+    WalletIcon,
+    LineIcon,
+    FacebookIcon,
+    YoutubeIcon,
+    InstagramIcon,
+    XIcon,
+    TiktokIcon,
+    PlusIcon,
+    ThaiqrIcon,
+
+
 
        
 
