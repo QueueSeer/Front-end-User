@@ -17,6 +17,7 @@ import SectionEnd from'./images/landingpage/SectionEnd.png';
 import Facebook from './icon/Footer/Facebook.png';
 import Instagram from './icon/Footer/Instagram.png';
 import Twitter from './icon/Footer/Twitter.png';
+import logout from "./images/logout/Logout.png";
 
 // ไอคอนใน homeicon
 import call from './icon/homeicon/call.png';
@@ -123,6 +124,28 @@ import slot from './icon/Topupicon/slot.png';
 import logomarbeltext from './images/topup/logomarbeltext.png';
 import Packetphoto from './images/topup/Packetphoto.png';
 
+// Navnar and Sidebar
+import UserIcon from './icon/Navbar/UserIcon.png';
+import calendarIcon from './icon/Navbar/calendarIcon.png';
+import OutlineIcon from './icon/Navbar/OutlineIcon.png';
+import Users_GroupIcon from './icon/Navbar/Users_GroupIcon.png';
+import LogoutIcon from './icon/Navbar/LogoutIcon.png';
+import BoltIcon from './icon/Navbar/BoltIcon.png';
+import bellIcon from './icon/Navbar/bellIcon.png';
+import bellClickIcon from './icon/Navbar/bellClickIcon.png';
+
+// ✅ ไอคอนที่เกี่ยวข้องกับโปรไฟล์
+import StarsIcon from './icon/Profile/StarsIcon.png';
+import LinkIcon from './icon/Profile/LinkMinimalisticIcon.png';
+import WalletIcon from './icon/Profile/WalletIcon.png';
+import LineIcon from './icon/Profile/lineIcon.png';
+import FacebookIcon from './icon/Profile/FacebookIcon.png';
+import YoutubeIcon from './icon/Profile/YoutubeIcon.png';
+import InstagramIcon from './icon/Profile/InstagramIcon.png';
+import XIcon from './icon/Profile/XIcon.png';
+import TiktokIcon from './icon/Profile/TiktokIcon.png';
+import PlusIcon from './icon/Profile/PlusIcon.png';
+import ThaiqrIcon from './icon/Profile/ThaiqrIcon.png';
 
 
 const images = {
@@ -134,6 +157,30 @@ const images = {
     keyIcon,
     letterIcon,
     profile_seer,
+    logout,
+
+    // Navnar and Sidebar
+    UserIcon,
+    calendarIcon,
+    OutlineIcon,
+    Users_GroupIcon,
+    LogoutIcon,
+    BoltIcon,
+    bellIcon,
+    bellClickIcon,
+
+    // ✅ ไอคอนที่เกี่ยวข้องกับโปรไฟล์
+    StarsIcon,
+    LinkIcon,
+    WalletIcon,
+    LineIcon,
+    FacebookIcon,
+    YoutubeIcon,
+    InstagramIcon,
+    XIcon,
+    TiktokIcon,
+    PlusIcon,
+    ThaiqrIcon,
 
     // images หน้า landing page 
     Section1 , 

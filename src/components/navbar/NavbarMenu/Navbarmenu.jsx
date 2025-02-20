@@ -15,6 +15,9 @@ const NavbarLinks = () => {
         <li>
           <a href="#auction">ประมูล</a>
         </li>
+        <li>
+          <a href="#auction">บทความ</a>
+        </li>
       </ul>
     </div>
   );

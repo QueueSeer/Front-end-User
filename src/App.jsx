@@ -9,7 +9,7 @@ import ForgotPassword from "./pages/Login/ForgotPassword";
 import ResetPassword from "./pages/Login/ResetPassword";
 import LandingPage from "./pages/landing/LandingPage";
 import Homepage from "./pages/home/Homepage";
-import QseerSchedulePage from "./pages/Profile/QseerSchedulePage";
+import QseerSchedulePage from "./pages/ProfileSeer/QseerSchedulePage";
 import BookingSeer from "./pages/bookingseer/BookingSeer";
 import BookingSeer2 from "./pages/bookingseer/BookingSeer2";
 import BookingSeer3 from "./pages/bookingseer/BookingSeer3";
@@ -20,6 +20,7 @@ import DetailAuction from "./pages/auction/DetailAuction";
 import BidAuction from "./pages/auction/BidAuction";
 import TopUpCoins from "./pages/Topup/TopUpCoins";
 import SummaryPage from "./pages/Topup/SummaryPage";
+import ProfileMe from "./pages/Profile/Profile";
 
 
 
@@ -48,7 +49,7 @@ export default function App() {
           <Route path="/bidAuction" element={<BidAuction />} />
           <Route path="/top-up-coins" element={<TopUpCoins />} />
           <Route path="/summary" element={<SummaryPage />} />
-
+          <Route path="/profileme" element={<ProfileMe />} />
 
 
          
