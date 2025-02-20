@@ -23,6 +23,9 @@ import SummaryPage from "./pages/Topup/SummaryPage";
 import AuctionDetails from "./pages/auction/AuctionDetails";
 import Profile from "./pages/EditProfile/Profile";
 import FollowerPage from "./pages/followerpage/FollowerPage";
+import QueueHistory from "./pages/EditProfile/QueueHistory";
+import Queuedetails from "./pages/EditProfile/Queuedetails";
+import PaymentHistoryPage from "./pages/EditProfile/PaymentHistoryPage";
 
 
 
@@ -55,6 +58,10 @@ export default function App() {
           <Route path="/auction-details" element={<AuctionDetails />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/follower" element={<FollowerPage />} />
+          <Route path="/queuehistory" element={<QueueHistory />} />
+          <Route path="/queuedetails" element={<Queuedetails />} />
+          <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
+
 
 
 

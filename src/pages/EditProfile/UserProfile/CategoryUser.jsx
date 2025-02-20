@@ -18,7 +18,7 @@ const CategoryUser = () => {
   return (
     <div>
       <h2 className="text-xl text-gray-800 font-semibold mb-4">
-        เรื่องที่เชี่ยวชาญของฉัน
+        เรื่องที่สนใจของฉัน 
       </h2>
 
       {/* ปุ่มสำหรับเปิด Popup */}

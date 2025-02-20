@@ -150,6 +150,16 @@ import TiktokIcon from './icon/Profile/TiktokIcon.png'
 import PlusIcon from './icon/Profile/PlusIcon.png'
 import ThaiqrIcon from './icon/Profile/ThaiqrIcon.png'
 
+import tarotqueue from './images/QueueCard/tarotqueue.png';
+
+import CalendarMinimalistic from './icon/QueuCard/CalendarMinimalistic.png'
+import timer from './icon/QueuCard/timer.png'
+import UserProfile from './icon/QueuCard/UserProfile.png'
+import next2 from './icon/QueuCard/next2.png'
+
+
+
+
 const images = {
     // โลโก้และไอคอน login 
     logo,
@@ -319,6 +329,14 @@ const images = {
     TiktokIcon,
     PlusIcon,
     ThaiqrIcon,
+    tarotqueue,
+
+       // QueueCard
+
+    CalendarMinimalistic,
+    timer,
+    UserProfile,
+    next2,
 
 
 

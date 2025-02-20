@@ -29,9 +29,7 @@ const ContentUser = () => {
             <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-[16px] font-regular">
               แก้ไขโปรไฟล์
             </button>
-            <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-[16px] font-regular">
-              แชร์โปรไฟล์
-            </button>
+         
           </div>
         </div>
       </div>

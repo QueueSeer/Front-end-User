@@ -82,7 +82,7 @@ const Sidebar = () => {
               onClick={() => setIsLogoutModalOpen(true)} // เปิด Popup
               className="flex items-center justify-start w-full p-3 rounded-md cursor-pointer font-medium text-gray-700 hover:bg-[#B6AFCA] hover:text-black"
             >
-              <img src={Images.Logout} alt="Logout Icon" className="w-5 h-5" />
+              <img src={Images.LogoutIcon} alt="Logout Icon" className="w-5 h-5" />
               <span className="ml-3">ออกจากระบบ</span>
             </button>
           </div>

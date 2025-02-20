@@ -15,13 +15,10 @@ const Profile = () => {
       <ContentUser />
       <div className="flex flex-col gap-[30px] px-[30px] pb-[18px]">
         {/* Button to show the popup */}
-        <AboutUser />
-
+      
         <CategoryUser />
 
-        <SocialLinksManager />
-
-        <AccountPrompay />
+       
 
       
       </div>
