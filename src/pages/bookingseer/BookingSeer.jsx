@@ -10,17 +10,39 @@ import NextButton from "../../components/bookingcomponent/NextButton";
 const BookingSeer = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const packageInfo = location.state?.packageInfo;
+  const [packageInfo, setPackageInfo] = useState(location.state?.packageInfo || null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [numQuestions, setNumQuestions] = useState(4); // **จำนวนคำถามที่มาจาก HeaderSection**
+  const [numQuestions, setNumQuestions] = useState(4);
+  const [loading, setLoading] = useState(!packageInfo);
+  const [error, setError] = useState(null);
+
+  // 🟢 โหลด `packageInfo` จาก API ถ้าไม่มีค่าเข้ามา
+  useEffect(() => {
+    if (!packageInfo) {
+      fetch("http://localhost:5000/api/package/1") // เปลี่ยนเป็น API จริงเมื่อพร้อม
+        .then((response) => {
+          if (!response.ok) throw new Error("โหลดแพ็กเกจล้มเหลว");
+          return response.json();
+        })
+        .then((data) => {
+          setPackageInfo(data);
+          setNumQuestions(data.numQuestions || 4);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error fetching package:", err);
+          setError("ไม่สามารถโหลดแพ็กเกจได้");
+          setLoading(false);
+        });
+    }
+  }, [packageInfo]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (!packageInfo) {
-    return <p>ไม่พบแพ็กเกจที่เลือก</p>;
-  }
+  if (loading) return <p className="text-center text-gray-500">กำลังโหลดแพ็กเกจ...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div>

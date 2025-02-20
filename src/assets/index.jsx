@@ -98,7 +98,7 @@ import CrownTwo from './icon/AuctionIcon/CrownTwo.png';
 import up from './icon/AuctionIcon/up.png';
 import down from './icon/AuctionIcon/down.png';
 import ArrowUp from './icon/AuctionIcon/ArrowUp.png';
-
+import nextmoney from './icon/AuctionIcon/nextmoney.png';
 
 
 
@@ -108,8 +108,47 @@ import tarotbig from './images/auctionpage/tarotbig.png';
 import StepTrail from './images/auctionpage/StepTrail.png';
 import profileWoman from './images/auctionpage/profileWoman.png';
 import profilemam from './images/auctionpage/profilemam.png';
+import image64 from './images/auctionpage/image64.png';
+
+//  ไอคอน Topupicon
+import cat from './icon/Topupicon/cat.png';
+import clover from './icon/Topupicon/clover.png';
+import lotus from './icon/Topupicon/lotus.png';
+import QrScan from './icon/Topupicon/QrScan.png';
+import Redbag from './icon/Topupicon/Redbag.png';
+import RedEnvelope from './icon/Topupicon/RedEnvelope.png';
+import slot from './icon/Topupicon/slot.png';
+
+//  ภาพ Topupicon
+import logomarbeltext from './images/topup/logomarbeltext.png';
+import Packetphoto from './images/topup/Packetphoto.png';
 
 
+import bellIcon from './icon/Sidebar/bellIcon.png';
+import calendarIcon from './icon/Sidebar/calendarIcon.png';
+import BoltIcon from './icon/Sidebar/BoltIcon.png'
+import BoxIcon from './icon/Sidebar/BoxIcon.png'
+import SledgehammerIcon from './icon/Sidebar/SledgehammerIcon.png'
+import Clock_CircleIcon from './icon/Sidebar/Clock_CircleIcon.png'
+import OutlineIcon from './icon/Sidebar/OutlineIcon.png'
+import Star_Icon from './icon/Sidebar/Star_Icon.png'
+import Users_GroupIcon from './icon/Sidebar/Users_GroupIcon.png'
+import LogoutIcon from './icon/Sidebar/LogoutIcon.png'
+import bellClickIcon from './icon/Sidebar/bellClickIcon.png'
+import UserIcon from './icon/Sidebar/UserIcon.png'
+
+
+import StarsIcon from './icon/Profile/StarsIcon.png'
+import LinkIcon from './icon/Profile/LinkMinimalisticIcon.png'
+import WalletIcon from './icon/Profile/WalletIcon.png'
+import LineIcon from './icon/Profile/lineIcon.png'
+import FacebookIcon from './icon/Profile/FacebookIcon.png'
+import YoutubeIcon from './icon/Profile/YoutubeIcon.png'
+import InstagramIcon from './icon/Profile/InstagramIcon.png'
+import XIcon from './icon/Profile/XIcon.png'
+import TiktokIcon from './icon/Profile/TiktokIcon.png'
+import PlusIcon from './icon/Profile/PlusIcon.png'
+import ThaiqrIcon from './icon/Profile/ThaiqrIcon.png'
 
 const images = {
     // โลโก้และไอคอน login 
@@ -225,6 +264,7 @@ const images = {
        up,
        down,
        ArrowUp,
+       nextmoney,
 
 
 
@@ -234,6 +274,53 @@ const images = {
          StepTrail,
          profileWoman,
          profilemam,
+         image64,
+
+   // icon topup 
+         cat,
+        clover,
+        lotus,
+        QrScan,
+        Redbag,
+        RedEnvelope,
+        slot,
+
+  // images topup 
+        logomarbeltext,
+        Packetphoto,
+
+          // icon sidebar
+        bellIcon,
+    calendarIcon,
+    BoltIcon,
+    BoxIcon,
+    SledgehammerIcon,
+    Clock_CircleIcon,
+    OutlineIcon,
+    Star_Icon,
+    Users_GroupIcon,
+    LogoutIcon,
+    bellClickIcon,
+    UserIcon,
+
+      // icon profile 
+  
+   
+   
+    
+    StarsIcon,
+    LinkIcon,
+    WalletIcon,
+    LineIcon,
+    FacebookIcon,
+    YoutubeIcon,
+    InstagramIcon,
+    XIcon,
+    TiktokIcon,
+    PlusIcon,
+    ThaiqrIcon,
+
+
 
        
 

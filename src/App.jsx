@@ -18,6 +18,12 @@ import Horoscope from "./pages/horoscope/Horoscope";
 import Auction from "./pages/auction/Auction";
 import DetailAuction from "./pages/auction/DetailAuction";
 import BidAuction from "./pages/auction/BidAuction";
+import TopUpCoins from "./pages/Topup/TopUpCoins";
+import SummaryPage from "./pages/Topup/SummaryPage";
+import AuctionDetails from "./pages/auction/AuctionDetails";
+import Profile from "./pages/EditProfile/Profile";
+import FollowerPage from "./pages/followerpage/FollowerPage";
+
 
 
 
@@ -30,7 +36,7 @@ export default function App() {
     <Router>
       
         <Routes>
-          <Route path="/" element={<Fillter />} />
+          <Route path="/" element={<Profile/>} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
@@ -44,6 +50,11 @@ export default function App() {
           <Route path="/auction" element={<Auction />} />
           <Route path="/detailAuction/:id" element={<DetailAuction />} />
           <Route path="/bidAuction" element={<BidAuction />} />
+          <Route path="/top-up-coins" element={<TopUpCoins />} />
+          <Route path="/summary" element={<SummaryPage />} />
+          <Route path="/auction-details" element={<AuctionDetails />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/follower" element={<FollowerPage />} />
 
 
 
