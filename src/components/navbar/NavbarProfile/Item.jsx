@@ -6,22 +6,17 @@ const menuItems = [
   {
     icon: Images.calendarIcon,
     label: "จองคิว",
-    to: "/profile", // กำหนดเส้นทางที่จะไปเมื่อคลิก
-  },
-  {
-    icon: Images.BoltIcon,
-    label: "ดูดวงทันที",
-    to: "/fortune", // กำหนดเส้นทางที่จะไปเมื่อคลิก
+    to: "/queuehistory", // กำหนดเส้นทางที่จะไปเมื่อคลิก
   },
   {
     icon: Images.OutlineIcon,
-    label: "รายรับของฉัน",
-    to: "/revenue", // กำหนดเส้นทางที่จะไปเมื่อคลิก
+    label: "การชำระเงิน",
+    to: "/paymentHistoryPage", // กำหนดเส้นทางที่จะไปเมื่อคลิก
   },
   {
     icon: Images.Users_GroupIcon,
     label: "ผู้ติดตาม",
-    to: "/followers", // กำหนดเส้นทางที่จะไปเมื่อคลิก
+    to: "/follower", // กำหนดเส้นทางที่จะไปเมื่อคลิก
   },
 ];
 
