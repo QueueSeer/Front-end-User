@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import PaymentTable from "../../components/PaymentHistory/PaymentTable";
 import Images from "../../assets"; // ✅ ตรวจสอบให้แน่ใจว่า import Images
+import Navbar from "../../components/navbar";
 
 const PaymentHistoryPage = () => {
   // ตัวอย่างข้อมูลการชำระเงิน
@@ -42,7 +43,9 @@ const PaymentHistoryPage = () => {
 
   return (
     <div className="min-h-screen dark:bg-gray-900 flex flex-col">
+      <Navbar/>
       {/* Layout */}
+      
       <div className="flex px-12 pt-12 gap-14">
         {/* Sidebar */}
         <div className="hidden lg:block w-72">

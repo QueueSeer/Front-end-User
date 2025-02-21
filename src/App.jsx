@@ -21,11 +21,10 @@ import BidAuction from "./pages/auction/BidAuction";
 import TopUpCoins from "./pages/Topup/TopUpCoins";
 import SummaryPage from "./pages/Topup/SummaryPage";
 import AuctionDetails from "./pages/auction/AuctionDetails";
-import Profile from "./pages/EditProfile/Profile";
 import FollowerPage from "./pages/followerpage/FollowerPage";
-import QueueHistory from "./pages/EditProfile/QueueHistory";
-import Queuedetails from "./pages/EditProfile/Queuedetails";
-import PaymentHistoryPage from "./pages/EditProfile/PaymentHistoryPage";
+import QueueHistory from "./pages/Menu/Queue/QueueHistory";
+import Queuedetails from "./pages/Menu/Queue/Queuedetails";
+import PaymentHistoryPage from "./pages/Menu/PaymentHistoryPage";
 import ProfileMe from "./pages/Profile/Profile";
 
 
@@ -40,7 +39,7 @@ export default function App() {
     <Router>
       
         <Routes>
-          <Route path="/" element={<Profile/>} />
+          <Route path="/" element={<ProfileMe/>} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
@@ -57,7 +56,6 @@ export default function App() {
           <Route path="/top-up-coins" element={<TopUpCoins />} />
           <Route path="/summary" element={<SummaryPage />} />
           <Route path="/auction-details" element={<AuctionDetails />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/follower" element={<FollowerPage />} />
           <Route path="/queuehistory" element={<QueueHistory />} />
           <Route path="/queuedetails" element={<Queuedetails />} />

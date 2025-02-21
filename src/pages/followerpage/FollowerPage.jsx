@@ -31,7 +31,7 @@ const FollowerPage = () => {
   return (
     <div className="min-h-screen dark:bg-gray-900 flex flex-col">
       {/* Navbar */}
-     
+     <Navbar/>
 
       {/* Layout */}
       <div className="flex px-12 pt-12 gap-14">

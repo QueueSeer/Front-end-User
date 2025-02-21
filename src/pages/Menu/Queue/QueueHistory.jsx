@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import Sidebar from "../../components/Sidebar";
-import QueueCard from "../../components/QueueCard/QueueCard"; 
-import Images from "../../assets";
-
+import Sidebar from "../../../components/Sidebar";
+import QueueCard from "../../../components/QueueCard/QueueCard";
+import Images from "../../../assets";
+import Navbar from "../../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Layout from "./Layout";
 const QueueHistoryPage = () => {
   // State สำหรับ Tab ที่เลือก
   const [activeTab, setActiveTab] = useState("รอเข้ารับบริการ");
 
   // ข้อมูลจองคิว
   const allQueueData = {
-    "รอเข้ารับบริการ": [
+    รอเข้ารับบริการ: [
       {
         image: "/images/tarot.jpg",
         title: "แพคเกจดูดวงรายเดือน",
@@ -27,7 +28,7 @@ const QueueHistoryPage = () => {
         time: "13.00 น.",
       },
     ],
-    "เข้ารับบริการสำเร็จ": [
+    เข้ารับบริการสำเร็จ: [
       {
         image: "/images/tarot.jpg",
         title: "ดูดวงโชคชะตาปีนี้",
@@ -37,7 +38,7 @@ const QueueHistoryPage = () => {
         time: "10.00 น.",
       },
     ],
-    "บริการที่ยกเลิก": [
+    บริการที่ยกเลิก: [
       {
         image: "/images/tarot.jpg",
         title: "ดูดวงสุขภาพ",
@@ -50,28 +51,12 @@ const QueueHistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 flex flex-col">
-      {/* Layout */}
-      <div className="flex px-12 pt-12 gap-14">
-        {/* Sidebar */}
-        <div className="hidden lg:block w-72">
-          <Sidebar active="จองคิว" />
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-lg p-6">
-          {/* Header */}
-          <div className="flex items-center space-x-2 mb-4">
-            <img src={Images.calendarIcon} alt="calendarIcon" className="w-7 h-7" />
-            <h1 className="text-xl font-bold" style={{ color: '#65558F' }}>จองคิว</h1>
+    <Layout>
         
-           
-            
-          </div>
-          <hr className="border-gray-300 mb-4" />
-          {/* Tab Selection */}
-          <div className="flex justify-center gap-4 mb-6">
-            {["รอเข้ารับบริการ", "เข้ารับบริการสำเร็จ", "บริการที่ยกเลิก"].map((tab) => (
+        {/* Tab Selection */}
+        <div className="flex justify-center gap-4 my-6">
+          {["รอเข้ารับบริการ", "เข้ารับบริการสำเร็จ", "บริการที่ยกเลิก"].map(
+            (tab) => (
               <button
                 key={tab}
                 className={`px-4 py-2 rounded-full text-sm font-semibold ${
@@ -83,16 +68,15 @@ const QueueHistoryPage = () => {
               >
                 {tab}
               </button>
-            ))}
-          </div>
-
-          {/* Queue List */}
-          {allQueueData[activeTab].map((item, index) => (
-            <QueueCard key={index} {...item} status={activeTab} />
-          ))}
+            )
+          )}
         </div>
-      </div>
-    </div>
+
+        {/* Queue List */}
+        {allQueueData[activeTab].map((item, index) => (
+          <QueueCard key={index} {...item} status={activeTab} />
+        ))}
+    </Layout>
   );
 };
 

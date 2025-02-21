@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react";
-import SidebarItem from "./item/SidebarItem"; // Component สำหรับแสดงแต่ละเมนู
+import React, { useState, useMemo } from "react";
+import SidebarItem from "./item/SidebarItem";
 import MenuItems from "./item/MenuItems";
-import { useLocation } from "react-router-dom"; // ใช้ตรวจสอบ URL ปัจจุบัน
+import { useLocation, useNavigate } from "react-router-dom";
+import LogoutModal from "../Popup/LogoutModal";
 import Images from "../../assets";
-import { useNavigate } from "react-router-dom";
 
-
-const Sidebar = () => {
+const Sidebar = ({ activeOverride = null }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // สำหรับเปิด/ปิด Sidebar ใน Mobile
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false); // สำหรับจัดการ Popup Logout
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  useEffect(() => {
+  // คำนวณเมนูที่ active อยู่
+  const activeIndex = useMemo(() => {
+    if (activeOverride !== null) {
+      return activeOverride;
+    }
     const currentIndex = MenuItems.findIndex((item) =>
       Array.isArray(item.href)
         ? item.href.includes(location.pathname)
