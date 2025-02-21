@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import BankFormpopup from "./Prompay/BankFormpopup";
 import CloseButton from "../../Button/CloseButton";
+import BackButton from "../Button/BackButton";
 import AddButton from "./Social/AddButton";
 import Images from "../../../assets"; // ตรวจสอบให้แน่ใจว่าไฟล์นี้มี PlusIcon
 
@@ -105,7 +106,8 @@ const PopupBank = ({ isOpen, onClose }) => {
               <CloseButton label="ย้อนกลับ" onClose={onClose} />
             ) : (
               <CloseButton label="เสร็จสิ้น" onClose={onClose} />
-            )}
+            )
+            }
           </div>
         )}
       </div>
