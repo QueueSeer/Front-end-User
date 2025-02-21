@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import BackButton from "../../Button/BackButton";
+import BackButton from "../../../Button/CloseButton";
 
 const BankFormpopup = ({ isOpen, onClose, onSave, name, num, title }) => {
   const [formName, setFormName] = useState(name || "");

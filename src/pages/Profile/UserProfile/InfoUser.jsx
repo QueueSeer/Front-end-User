@@ -4,10 +4,10 @@ import React from 'react';
 const InfoUser = () => {
   return (
     <div className="flex-1 text-base">
-      <h2 className="text-xl text-gray-800 font-semibold mb-4">
+      <h2 className="text-[24px] text-gray-800 font-semibold mb-6">
         ข้อมูลส่วนตัว
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-3 text-[18px]">
         <div className="flex">
           <div className="w-32 font-medium text-black">ชื่อหมอดู</div>
           <div>เพียงฟ้า พาชัย</div>

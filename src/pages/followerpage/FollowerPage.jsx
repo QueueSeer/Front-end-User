@@ -31,7 +31,7 @@ const FollowerPage = () => {
   return (
     <div className="min-h-screen dark:bg-gray-900 flex flex-col">
       {/* Navbar */}
-     
+     <Navbar/>
 
       {/* Layout */}
       <div className="flex px-12 pt-12 gap-14">
@@ -44,7 +44,7 @@ const FollowerPage = () => {
         <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-lg p-6">
           {/* Header */}
           <div className="flex items-center space-x-2 mb-4">
-            <img src={Images.membericon} alt="Follower Icon" className="w-7 h-7" />
+            <img src={Images.Users_GroupIcon} alt="Follower Icon" className="w-7 h-7" />
             <h1 className="text-xl font-bold" style={{ color: '#65558F' }}>ผู้ติดตาม</h1>
           </div>
           <hr className="border-gray-300 mb-4" />

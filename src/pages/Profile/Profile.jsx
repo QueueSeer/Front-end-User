@@ -8,7 +8,7 @@ import UserProfile from "./UserProfile"; // เรียกใช้ path ที
 export default function Profile() {
   return (
     <div>
-     
+      <Navbar /> {/* เรียกใช้ Navbar */}
       <div className="flex px-12 pt-12 gap-14">
         {/* Sidebar */}
         <div className="hidden lg:block w-72">

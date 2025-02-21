@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import BankFormpopup from "./Prompay/BankFormpopup";
+import CloseButton from "../../Button/CloseButton";
 import BackButton from "../Button/BackButton";
 import AddButton from "./Social/AddButton";
 import Images from "../../../assets"; // ตรวจสอบให้แน่ใจว่าไฟล์นี้มี PlusIcon
@@ -102,10 +103,11 @@ const PopupBank = ({ isOpen, onClose }) => {
         {!showFormPopup && (
           <div className="flex justify-end mt-6">
             {prompay.length === 0 ? (
-              <BackButton label="ย้อนกลับ" onClose={onClose} />
+              <CloseButton label="ย้อนกลับ" onClose={onClose} />
             ) : (
-              <BackButton label="เสร็จสิ้น" onClose={onClose} />
-            )}
+              <CloseButton label="เสร็จสิ้น" onClose={onClose} />
+            )
+            }
           </div>
         )}
       </div>

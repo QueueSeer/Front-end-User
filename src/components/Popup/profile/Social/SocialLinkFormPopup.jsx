@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import BackButton from "../../Button/BackButton";
+import BackButton from "../../../Button/CloseButton";
 
 const SocialLinkFormPopup = ({ isOpen, onClose, onSave, name, url, title }) => {
   const [formName, setFormName] = useState(name || "");

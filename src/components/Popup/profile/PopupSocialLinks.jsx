@@ -3,7 +3,7 @@ import Images from "../../../assets";
 import SocialLinkItem from "./Social/SocialLinkItem";
 import AddSocialLinkButton from "./Social/AddButton";
 import SocialLinkFormPopup from "./Social/SocialLinkFormPopup";
-import BackButton from "../Button/BackButton";
+import CloseButton from "../../Button/CloseButton";
 
 const PopupSocialLinks = ({ isOpen, onClose }) => {
   const [socialLinks, setSocialLinks] = useState([
@@ -149,7 +149,7 @@ const PopupSocialLinks = ({ isOpen, onClose }) => {
 
         {!showFormPopup && (
           <div className="flex justify-end mt-6">
-            <BackButton onClose={onClose} />
+            <CloseButton onClose={onClose} />
           </div>
         )}
       </div>
