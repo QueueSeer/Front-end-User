@@ -316,6 +316,7 @@ const images = {
   timer,
   UserProfile,
   next2,
+  tarotqueue,
 };
 
 export default images;
