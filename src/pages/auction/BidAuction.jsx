@@ -5,30 +5,31 @@ import BidAuctionList from "../../components/Auctioncomponent/ฺBid/BidAuctionL
 import BidAuctionFooter from "../../components/Auctioncomponent/ฺBid/BidAuctionFooter";
 import WinnerPopup from "../../components/Auctioncomponent/ฺBid/WinnerPopup"; // ✅ Import Popup ชนะ
 import LoserPopup from "../../components/Auctioncomponent/ฺBid/LoserPopup"; // ✅ Import Popup แพ้
+import Navbar from "../../components/navbar"; // ✅ ใช้ path ที่ถูกต้อง
 
 const BidAuction = () => {
   const location = useLocation();
   const updatedCoins = location.state?.updatedCoins || 0; // ✅ รับค่าที่อัปเดตจาก SummaryPage
 
-  const auctioneer = "หมอดู เพียงฟ้า พาพิชัย";
+  const auctioneer = "หมอดู เพียงฟ้า พาขวัญ";
 
   const timeLeft = [
     { label: "วัน", value: "0" },
     { label: "ชั่วโมง", value: "0" },
-    { label: "นาที", value: "1" },
-    { label: "วินาที", value: "29" }
+    { label: "นาที", value: "0" },
+    { label: "วินาที", value: "0" }
   ];
 
   //  สร้าง state สำหรับจัดเก็บอันดับใหม่
   const [bidders, setBidders] = useState([
-    { username: "ร*********", hiddenUser: "JaiJup*****", coins: 9300 },
-    { username: "ร*********", hiddenUser: "Rajir*****", coins: 8900 },
-    { username: "บ*********", hiddenUser: "punra*****", coins: 7010 },
-    { username: "ร*********", hiddenUser: "punra*****", coins: 7000 },
-    { username: "แ*********", hiddenUser: "Manmkiti64", coins: 6990 }, // ✅ คำนวณอันดับใหม่ให้ Manmkiti64
-    { username: "ค*********", hiddenUser: "Rajir*****", coins: 6940 },
-    { username: "ภ*********", hiddenUser: "roj*****", coins: 6930 },
-    { username: "ฐ*********", hiddenUser: "ฐู*********", coins: 6910 }
+ // ✅ คำนวณอันดับใหม่ให้ Manmkiti64
+    { username: "ร*********", hiddenUser: "JaiJup*****", coins: 100 },
+    { username: "ร*********", hiddenUser: "Rajir*****", coins: 90 },
+    { username: "แ*********", hiddenUser: "Manmkiti64", coins: 85 },
+    { username: "บ*********", hiddenUser: "punra*****", coins: 80 },
+    { username: "ร*********", hiddenUser: "punra*****", coins: 70 },
+   
+   
   ]);
 
   //  อัปเดตอันดับของ selectedBidder เมื่อ updatedCoins เปลี่ยน
@@ -63,7 +64,15 @@ const BidAuction = () => {
   }, [location.state]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
+    <>
+      {/* ✅ Navbar ตรึงด้านบน */}
+      <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        <Navbar />
+    </div>
+
+    {/* ✅ ใช้ `pt-[100px]` เพื่อดันเนื้อหาลงมา */}
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 pt-[100px] relative">
+
       {/*  Popup อยู่บนสุด */}
       {showWinnerPopup && (
         <div className="fixed inset-0 z-50 flex justify-center items-center">
@@ -80,6 +89,7 @@ const BidAuction = () => {
       <BidAuctionList bidders={bidders} />
       <BidAuctionFooter selectedBidder={selectedBidder} bidders={bidders} setBidders={setBidders} />
     </div>
+    </>
   );
 };
 

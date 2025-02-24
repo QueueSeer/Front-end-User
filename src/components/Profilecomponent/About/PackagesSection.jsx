@@ -3,7 +3,7 @@ import PackagesHeader from "./PackagesHeader";
 import TrendingPackageCard from "./AboutComponent/TrendingPackageCard";
 
 const trendingPackages = [
-  { title: "Package 1", seer: "หมอดูเพียงฟ้า", rating: 4.0, reviews: 935, price: 45, duration: 15, icon: "call", tags: ["ความรัก", "การเงิน"] },
+  { title: "Package 1", seer: "หมอดูเพียงฟ้า", rating: 4.0, reviews: 935, price: 49, duration: 15, icon: "call", tags: ["ความรัก", "การเงิน"] },
   { title: "Package 2", seer: "หมอดูภาลัย", rating: 4.5, reviews: 810, price: 60, duration: 20, icon: "chat", tags: ["การงาน", "สุขภาพ"] },
   { title: "Package 3", seer: "หมอดูณัฐ", rating: 4.8, reviews: 1200, price: 99, duration: 25, icon: "video", tags: ["การงาน", "สุขภาพ"] },
   { title: "Package 4", seer: "หมอดูดิน", rating: 4.2, reviews: 540, price: 30, duration: 10, icon: "call", tags: ["ภาพรวม", "การเงิน"] },

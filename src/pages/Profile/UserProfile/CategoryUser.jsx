@@ -1,53 +1,53 @@
 import React, { useState } from "react";
 import Images from "../../../assets";
-import PopupCategory from "../../../components/Popup/profile/PopupCategory"; // Import Popup สำหรับเลือกหมวดหมู่
+import PopupCategory from "../../../components/Popup/profile/PopupCategory";
+import PopupInterest from "../../../components/Popup/profile/PopupInterest";
 
 const CategoryUser = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // สถานะเปิด/ปิด Popup
-  const [selectedCategory, setSelectedCategory] = useState(""); // เก็บหมวดหมู่ที่เลือก
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [isInterestPopupOpen, setIsInterestPopupOpen] = useState(false);
+  const [selectedInterest, setSelectedInterest] = useState("");
 
-  // ฟังก์ชันสำหรับแสดง/ซ่อน Popup
   const togglePopup = () => setIsPopupOpen(!isPopupOpen);
+  const toggleInterestPopup = () => setIsInterestPopupOpen(!isInterestPopupOpen);
 
-  // ฟังก์ชันสำหรับบันทึกหมวดหมู่ที่เลือก
-  const handleSave = (category) => {
-    setSelectedCategory(category); // อัปเดตหมวดหมู่ที่เลือก
-    setIsPopupOpen(false); // ปิด Popup หลังจากบันทึก
+  const handleSaveCategory = (category) => {
+    setSelectedCategory(category);
+    setIsPopupOpen(false);
+  };
+
+  const handleSaveInterest = (interest) => {
+    setSelectedInterest(interest);
+    setIsInterestPopupOpen(false);
   };
 
   return (
-    <div>
-      <h2 className="text-xl text-gray-800 font-semibold mb-4">
-        เรื่องที่เชี่ยวชาญของฉัน
-      </h2>
+    <div className="w-full">
+      <h2 className="text-xl text-gray-800 font-semibold mb-4">เรื่องที่สนใจของฉัน</h2>
 
-      {/* ปุ่มสำหรับเปิด Popup */}
-      <button
-        onClick={togglePopup}
-        className="border-2 px-[30px] py-[20px] rounded-[5px] w-[420px]"
-      >
-        <div className="flex flex-row gap-[20px] items-center">
-          <img
-            src={Images.StarsIcon}
-            alt="Starts Icon"
-            className="mr-3 w-8 h-8 items-center"
-          />
-          <div className="flex flex-col gap-[5px] items-start">
+      <div className="flex gap-5">
+        {/* หมวดหมู่ดูดวง */}
+        <button onClick={togglePopup} className="border-2 px-6 py-4 rounded-md w-full flex items-center gap-4">
+          <img src={Images.StarsIcon} alt="Icon" className="w-8 h-8" />
+          <div>
             <div className="font-semibold text-black">หมวดหมู่ดูดวง</div>
-            <div className="font-regular text-black/80 text-[18px]">
-            {selectedCategory || "ยังไม่มีหมวดหมู่ที่เลือก"}
-            </div>
+            <div className="text-gray-600">{selectedCategory || "ยังไม่มีหมวดหมู่ที่เลือก"}</div>
           </div>
-        </div>
-      </button>
+        </button>
 
-      {/* Popup สำหรับเลือกหมวดหมู่ */}
-      <PopupCategory
-        isOpen={isPopupOpen} // สถานะเปิด/ปิด Popup
-        onClose={togglePopup} // ฟังก์ชันปิด Popup
-        selectedCategory={selectedCategory} // หมวดหมู่ที่เลือกในปัจจุบัน
-        onSave={handleSave} // ฟังก์ชันสำหรับบันทึกหมวดหมู่
-      />
+        {/* เรื่องที่สนใจ */}
+        <button onClick={toggleInterestPopup} className="border-2 px-6 py-4 rounded-md w-full flex items-center gap-4">
+          <img src={Images.HeartIcon} alt="Icon" className="w-8 h-8" />
+          <div>
+            <div className="font-semibold text-black">เรื่องที่สนใจ</div>
+            <div className="text-gray-600">{selectedInterest || "ยังไม่มีเรื่องที่สนใจ"}</div>
+          </div>
+        </button>
+      </div>
+
+      <PopupCategory isOpen={isPopupOpen} onClose={togglePopup} onSave={handleSaveCategory} />
+      <PopupInterest isOpen={isInterestPopupOpen} onClose={toggleInterestPopup} onSave={handleSaveInterest} />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import AuctionHeader from "../../components/Auctioncomponent/Detail/AuctionHeade
 import AuctionInfoBox from "../../components/Auctioncomponent/Detail/AuctionInfoBox";
 import AuctionDetailSection from "../../components/Auctioncomponent/Detail/AuctionDetailSection";
 import ProfileCard from "../../components/Profilecomponent/ProfileCard";
+import Navbar from "../../components/navbar"; // ✅ ใช้ path ที่ถูกต้อง
 
 const DetailAuction = () => {
   const { id } = useParams();
@@ -16,8 +17,13 @@ const DetailAuction = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
-      <div className="w-full max-w-4xl">
+    <>
+    {/* ✅ Navbar ตรึงด้านบน */}
+    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+      <Navbar />
+    </div>
+    <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center ">
+      <div className="w-full max-w-4xl mt-20">
         {/* ส่วนหัว */}
         <AuctionHeader auction={auction} onBack={() => navigate(-1)} />
 
@@ -34,6 +40,7 @@ const DetailAuction = () => {
       
       </div>
     </div>
+    </>
   );
 };
 

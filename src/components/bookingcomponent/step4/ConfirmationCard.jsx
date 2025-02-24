@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Images from "../../../assets";
 
+
 const ConfirmationCard = () => {
   const [isCopied, setIsCopied] = useState(false); // ✅ state สำหรับแจ้งเตือนการคัดลอก
   const [isPopupOpen, setIsPopupOpen] = useState(false); // ✅ state สำหรับ Popup บันทึกภาพ
@@ -47,13 +48,13 @@ const ConfirmationCard = () => {
           <p>เพียงฟ้า พาขวัญ</p>
 
           <p className="font-medium">แพ็กเกจ</p>
-          <p>ดูดวงความรัก</p>
+          <p>Package 1  </p> 
 
           <p className="font-medium">ชื่อผู้จอง</p>
           <p>น.ส. สุรางคนางค์ เกตุยั่งยืนวงศ์</p>
 
           <p className="font-medium">วันเวลาที่จอง</p>
-          <p>08/07/67 13:30 น.</p>
+          <p>25/02/68 10:45 น.</p>
 
           <p className="font-medium">ช่องทางการติดต่อหมอดู</p>
           <p className="text-[#65558F] underline cursor-pointer">thrthtrhtrytjy</p>
@@ -67,7 +68,7 @@ const ConfirmationCard = () => {
 
       {/* ✅ ยอดรวม */}
       <p className="text-lg font-bold">
-        ยอดรวม: <span className="text-black">00.00 บาท</span>
+        ยอดรวม: <span className="text-black">49.00 บาท</span>
       </p>
 
       {/* ✅ ปุ่มบันทึกภาพ */}

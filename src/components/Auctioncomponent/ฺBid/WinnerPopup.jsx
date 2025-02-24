@@ -28,12 +28,12 @@ const WinnerPopup = ({ onClose }) => {
         <div className="bg-pink-500 text-white px-3 py-1 rounded-lg  w-[180px] mx-auto mt-5  ">
           <p className="text-xs font-bold">แมมผู้ชอบดูดวง</p>
           <p className="text-md font-semibold">Manmkiti64</p>
-          <p className="text-xs">10,000 Coins</p>
+          <p className="text-xs">150 Coins</p>
         </div>
 
         {/* รายละเอียดการประมูล */}
         <p className="text-lg font-semibold text-gray-800 mt-4">ดูดวงความรัก สุขภาพ การงาน ภาพรวมประจำปี</p>
-        <p className="text-sm text-gray-600">หมอดู เพียงฟ้า พาพิชัย</p>
+        <p className="text-sm text-gray-600">หมอดู เพียงฟ้า พาขวัญ</p>
 
         {/* ลิงก์รายละเอียดเพิ่มเติม */}
         <button

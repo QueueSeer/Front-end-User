@@ -13,18 +13,18 @@ const Queuedetails = () => {
 
   const auctionData = {
     confirmationCode: "4QCFR",
-    paymentDate: "09 กันยายน 2567, 13.45 น.",
-    price: "10,000 คอยน์",
-    appointmentDate: "10 กันยายน 2567",
-    appointmentTime: "13.30 น.",
+    paymentDate: "24 กุมภาพันธ์ 2568, 13.45 น.",
+    price: "49 คอยน์",
+    appointmentDate: "25 กุมภาพันธ์ 2568",
+    appointmentTime: "10.45 น.",
     status: "รอเข้ารับบริการ",
-    seerName: "หมอดู เพียงฟ้า พงษ์พิช",
+    seerName: "หมอดู เพียงฟ้า พาขวัญ",
     contact: "thrthrthjrtjrjyjv",
     user: {
-      name: "จารุวรรณ เกตุอ่อนงาม",
+      name: "สุรางคนางค์ เกตุยั่งยืนวงศ์",
       gender: "เพศหญิง",
       birthDate: "8 เมษายน 2546",
-      birthTime: "03.45 น.",
+      birthTime: "08.45 น.",
       email: "255298@gmail.com",
       connectionType: "อีเมล",
     },
@@ -121,7 +121,7 @@ const Queuedetails = () => {
               </div>
 
               <div className="text-center mt-8">
-                <p className="text-xl font-bold">เเพคเกจดูดวงรายเดือน</p>
+                <p className="text-xl font-bold">Package 1 </p>
                 <p className="opacity-80 text-sm mt-1">
                   {auctionData.seerName}
                 </p>

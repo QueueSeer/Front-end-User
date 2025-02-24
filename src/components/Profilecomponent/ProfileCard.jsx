@@ -30,7 +30,7 @@ const ProfileCard = ({ profileImageUrl, name, category, experience, followers, r
         {/* Lower Section */}
         <div className="flex justify-between text-gray-700 font-medium text-center">
           <div className="flex flex-col">
-            <span className="text-black text-lg font-semibold">{experience}+</span>
+            <span className="text-black text-lg font-semibold">{experience}</span>
             <span className="text-[#8677A7] text-sm font-medium">ประสบการณ์</span>
           </div>
           <div className="flex flex-col">
@@ -51,8 +51,8 @@ ProfileCard.defaultProps = {
   name: "หมอดูเพียงฟ้า พาขวัญ",
   category: "ศาสตร์ไพ่ยิปซี",
   experience: "10+",
-  followers: "1,025",
-  rating: "4.5",
+  followers: "0",
+  rating: "0",
 };
 
 export default ProfileCard;

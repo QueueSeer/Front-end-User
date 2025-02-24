@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Images from "../../assets";
 import { useLocation, useNavigate } from "react-router-dom";
+import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
 
 const SummaryPage = () => {
   const navigate = useNavigate();
@@ -14,17 +15,28 @@ const SummaryPage = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      setUpdatedCoins(prev => prev + selectedCoins); // อัปเดตจำนวน Coin ใน LuckCard
-
-      if (from === "BidAuctionFooter") {
-        navigate("/bidAuction", { state: { updatedCoins: updatedCoins + selectedCoins } }); // ✅ กลับไปที่ BidAuction
-      } else {
-        navigate("/top-up-coins", { state: { updatedCoins: updatedCoins + selectedCoins } }); // กลับไปที่หน้าเติมเงินปกติ
-      }
-    }, 2000); // โหลด 2 วินาที
+      const newUpdatedCoins = updatedCoins + selectedCoins; // อัปเดตค่าคอยน์
+  
+      navigate("/qr-summary", {
+        state: {
+          updatedCoins: newUpdatedCoins, 
+          selectedCoins,
+          selectedPrice,
+          selectedPayment,
+          currentCoins,
+          from
+        }
+      });
+    }, 2000);
   };
+  
 
   return (
+    <>
+    {/* Navbar ตรึงด้านบน */}
+    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+      <Navbar />
+    </div>
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
       {/* Loading Overlay */}
       {isLoading && (
@@ -58,7 +70,7 @@ const SummaryPage = () => {
           onClick={() => navigate(-1)}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-full px-4 py-3 mt-5"
         >
-          <img src={Images.ArrowLeft} alt="Arrow Left Icon" className="w-5 h-5" />
+          <img src={Images.backtoback} alt="Arrow Left Icon" className="w-2 h-3" />
           <span className="text-sm">ย้อนกลับ</span>
         </button>
       </div>
@@ -98,7 +110,7 @@ const SummaryPage = () => {
 
           <div className="flex justify-between items-center mt-2">
             <span className="text-gray-600 font-medium">ชื่อผู้ใช้</span>
-            <span className="font-bold text-gray-800">แมมผู้ชอบดูดวง</span>
+            <span className="font-bold text-gray-800">Surangkanang</span>
           </div>
         </div>
 
@@ -116,6 +128,7 @@ const SummaryPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -2,6 +2,8 @@ import React from "react";
 import Images from "../../../assets"; // ✅ ใช้รูปจาก assets
 
 const BidAuctionList = ({ bidders }) => {
+  const myUsername = "แ*********"; // ✅ แทนค่าด้วยชื่อของตัวเอง
+
   return (
     <div className="mt-6 w-full max-w-2xl mx-auto pb-24">
       {bidders.map((bid, index) => (
@@ -30,7 +32,7 @@ const BidAuctionList = ({ bidders }) => {
 
             {/* รูปโปรไฟล์ */}
             <img
-              src={Images.profileWoman}
+              src={bid.username === myUsername ? Images.profilemam : Images.profileWoman}
               alt="Profile"
               className="w-10 h-10 rounded-full border-2 border-white"
             />

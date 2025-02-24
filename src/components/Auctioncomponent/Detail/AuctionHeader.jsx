@@ -11,7 +11,7 @@ const AuctionHeader = ({ auction }) => {
     <div className="relative w-full bg-[#8677A7] text-white p-6 rounded-lg">
       {/* ปุ่มย้อนกลับ */}
       <button onClick={() => navigate(-1)} className="absolute top-4 left-4 flex items-center text-gray-600 text-sm px-3 py-1 bg-gray-200 rounded-full">
-        <img src={Images.backtoback} alt="Back" className="w-3 h-3 mr-2" />
+        <img src={Images.backtoback} alt="Back" className="w-2 h-3 mr-2" />
         <span>ย้อนกลับ</span>
       </button>
 

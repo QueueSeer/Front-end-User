@@ -8,6 +8,7 @@ const UserInfoForm = ({ onValidationChange }) => {
     birthTime: "",
     email: "",
     status: "",
+    notifyByEmail: false, // ✅ เพิ่ม state การแจ้งเตือน
   });
 
   const [errors, setErrors] = useState({});
@@ -37,13 +38,16 @@ const UserInfoForm = ({ onValidationChange }) => {
     if (!data.status) newErrors.status = "กรุณาเลือกสถานะ";
 
     setErrors(newErrors);
-    onValidationChange(Object.keys(newErrors).length === 0); // แจ้งให้ `BookingSeer2` รู้ว่าสถานะฟอร์มถูกต้องหรือไม่
+    onValidationChange(Object.keys(newErrors).length === 0);
   };
 
   // ฟังก์ชันอัปเดตค่าในฟอร์ม
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    const updatedFormData = { ...formData, [name]: value };
+    const { name, value, type, checked } = e.target;
+    const updatedFormData = {
+      ...formData,
+      [name]: type === "checkbox" ? checked : value, // ✅ อัปเดตค่า Checkbox
+    };
     setFormData(updatedFormData);
     validateForm(updatedFormData);
   };
@@ -140,6 +144,22 @@ const UserInfoForm = ({ onValidationChange }) => {
           <option value="in_relationship">มีคู่</option>
         </select>
         {errors.status && <p className="text-red-500 text-sm">{errors.status}</p>}
+      </div>
+
+      {/* ✅ ส่วนการแจ้งเตือนผ่านอีเมล */}
+      <div className="col-span-2">
+        <label className="text-gray-700 font-semibold">การแจ้งเตือน</label>
+        <div className="flex items-center mt-2">
+          <input
+            type="checkbox"
+            name="notifyByEmail"
+            checked={formData.notifyByEmail}
+            onChange={handleChange}
+            className="w-5 h-5 mr-2"
+          />
+          <label className="text-gray-700">Email</label>
+        </div>
+        <p className="text-gray-500 text-sm">สำหรับผู้ที่ต้องการรับการแจ้งเตือนผ่านทางอีเมล</p>
       </div>
     </div>
   );

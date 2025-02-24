@@ -4,6 +4,7 @@ import NextButton from "../../components/bookingcomponent/NextButton";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
 import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
 import Payment from "../../components/bookingcomponent/step2/Payment"; 
+import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
 
 const BookingSeer2 = () => {
   const navigate = useNavigate();
@@ -29,6 +30,11 @@ const BookingSeer2 = () => {
   const isFormValid = questions.every(q => q.trim() !== "") && paymentMethod;
 
   return (
+    <>
+    {/* Navbar ตรึงด้านบน */}
+    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+      <Navbar />
+    </div>
     <div className="p-6 flex flex-col items-center">
       <div className="w-full max-w-4xl">
         <UserInfoForm />
@@ -50,13 +56,9 @@ const BookingSeer2 = () => {
         />
       </div>
 
-      <div className="fixed bottom-4 right-4">
-        <NextButton 
-          onClick={() => navigate("/bookingSeer3", { state: { packageInfo, selectedDate, questions, paymentMethod, useCoins } })} 
-          disabled={!isFormValid} 
-        />
-      </div>
+    
     </div>
+    </>
   );
 };
 

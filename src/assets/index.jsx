@@ -144,12 +144,23 @@ import TiktokIcon from "./icon/Profile/TiktokIcon.png";
 import PlusIcon from "./icon/Profile/PlusIcon.png";
 import ThaiqrIcon from "./icon/Profile/ThaiqrIcon.png";
 
+import ClockIcon from "./icon/Profile/ClockIcon.png";
+import PackageIcon from "./icon/Profile/PackageIcon.png";
+import CheckIcon from "./icon/Profile/CheckIcon.png";
+import HeartIcon from "./icon/Profile/HeartIcon.png";
+import PencilIcon from "./icon/Profile/PencilIcon.png";
+
+
 import tarotqueue from "./images/QueueCard/tarotqueue.png";
+import TaroActive from "./images/QueueCard/TaroActive.png";
 
 import CalendarMinimalistic from "./icon/QueuCard/CalendarMinimalistic.png";
 import timer from "./icon/QueuCard/timer.png";
 import UserProfile from "./icon/QueuCard/UserProfile.png";
 import next2 from "./icon/QueuCard/next2.png";
+import StarOutline from "./icon/QueuCard/StarOutline.png";
+import StarFilled from "./icon/QueuCard/StarFilled.png";
+
 
 const images = {
   // โลโก้และไอคอน login
@@ -317,6 +328,16 @@ const images = {
   UserProfile,
   next2,
   tarotqueue,
+  StarOutline,
+StarFilled,
+TaroActive,
+
+
+  ClockIcon,
+PackageIcon,
+CheckIcon,
+HeartIcon,
+PencilIcon,
 };
 
 export default images;

@@ -13,27 +13,20 @@ const QueueHistoryPage = () => {
     รอเข้ารับบริการ: [
       {
         image: "/images/tarot.jpg",
-        title: "แพคเกจดูดวงรายเดือน",
+        title: "Package 1",
         categories: "ดวงความรัก การเงิน สุขภาพ",
         fortuneTeller: "หมอดูเพียงฟ้า",
-        date: "จันทร์ 09 ก.ย. 2567",
+        date: "อังคาร 25 ก.พ. 2568",
         time: "13.00 น.",
       },
-      {
-        image: "/images/tarot.jpg",
-        title: "ดูดวงทันที",
-        categories: "ดวงความรัก การเงิน สุขภาพ",
-        fortuneTeller: "หมอดูเพียงฟ้า",
-        date: "อังคาร 10 ก.ย. 2567",
-        time: "13.00 น.",
-      },
+   
     ],
     เข้ารับบริการสำเร็จ: [
       {
         image: "/images/tarot.jpg",
-        title: "ดูดวงโชคชะตาปีนี้",
+        title: "ดูดวงรายเดือน",
         categories: "ดวงชะตา การงาน การเงิน",
-        fortuneTeller: "หมอดูลินดา",
+        fortuneTeller: "หมอดูเพียงฟ้า พาขวัญ",
         date: "ศุกร์ 05 ก.ย. 2567",
         time: "10.00 น.",
       },

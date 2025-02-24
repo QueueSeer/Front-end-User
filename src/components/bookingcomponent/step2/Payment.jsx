@@ -13,7 +13,7 @@ const Payment = ({ packageInfo, selectedDate }) => {
   const date = selectedDate ? dayjs(selectedDate) : null;
   const totalPrice = packageInfo?.price || 0;
   const userCoins = 300; // จำนวนโชคคอยน์ที่มี
-  const maxCoinUsage = 200; // หักได้สูงสุด 200 คอยน์
+  const maxCoinUsage = 247; // หักได้สูงสุด 200 คอยน์
   const discount = useCoins && paymentMethod === "promptpay" ? Math.min(maxCoinUsage, totalPrice) : 0;
   const finalPrice = totalPrice - discount;
 
@@ -115,9 +115,9 @@ const Payment = ({ packageInfo, selectedDate }) => {
         <div className="mt-3 text-gray-700 text-sm">
           <div className="grid grid-cols-2 gap-2">
             <p className="font-medium">วันที่นัดหมาย</p>
-            <p className="text-right">{date ? date.format("D MMMM YYYY") : "9 กันยายน 2567"}</p>
+            <p className="text-right">{date ? date.format("D MMMM YYYY") : "25 กุมภาพันธ์ 2568"}</p>
             <p className="font-medium">เวลาที่นัดหมาย</p>
-            <p className="text-right">13:35 น.</p>
+            <p className="text-right">10:45 น.</p>
           </div>
         </div>
 

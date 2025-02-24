@@ -1,22 +1,24 @@
-// navbarlinks.jsx
-
-import React from 'react';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const NavbarLinks = () => {
   return (
     <div className="hidden lg:flex flex-none">
       <ul className="flex space-x-5 gap-1 text-gray-800">
         <li>
-          <a href="#home">หน้าหลัก</a>
+          <Link to="/homepage">หน้าหลัก</Link>
         </li>
         <li>
-          <a href="#packages">แพ็กเกจ</a>
+          <Link to="/packages">แพ็กเกจ</Link>
         </li>
         <li>
-          <a href="#auction">ประมูล</a>
+          <Link to="/top-up-coins">เติมโชค</Link>
         </li>
         <li>
-          <a href="#auction">บทความ</a>
+          <Link to="/auction">ประมูล</Link>
+        </li>
+        <li>
+          <Link to="/articles">บทความ</Link>
         </li>
       </ul>
     </div>

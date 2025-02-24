@@ -25,7 +25,7 @@ const LoserPopup = ({ rank, onClose }) => {
         <div className="bg-pink-500 text-white px-3 py-1 rounded-lg mt-3 w-[200px] mx-auto">
           <p className="text-xs font-bold">Su*******</p>
           <p className="text-md font-semibold">Km*****</p>
-          <p className="text-sm font-bold">10,000 Coins</p>
+          <p className="text-sm font-bold">85 Coins</p>
         </div>
 
         {/* ปุ่มปิด */}

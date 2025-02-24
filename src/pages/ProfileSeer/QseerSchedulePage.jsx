@@ -4,6 +4,8 @@ import FullCalendarPage from "../../components/Profilecomponent/FullCalendarPage
 import ProfileCard from "../../components/Profilecomponent/ProfileCard";
 import ActionButtons from "../../components/Profilecomponent/ActionButtons";
 import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
+import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+
 
 const QseerSchedulePage = () => {
   const location = useLocation();
@@ -23,7 +25,12 @@ const QseerSchedulePage = () => {
   };
 
   return (
-    <div className="p-12 flex flex-col w-full gap-6">
+    <>
+      {/* Navbar ตรึงด้านบน */}
+      <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        <Navbar />
+      </div>
+    <div className="p-12 flex flex-col w-full gap-6 mt-20">
       {/* ส่วนบน: แบ่งซ้ายขวา */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* ซ้าย: ProfileCard */}
@@ -50,6 +57,7 @@ const QseerSchedulePage = () => {
         <ProfileTabs />
       </div>
     </div>
+    </>
   );
 };
 

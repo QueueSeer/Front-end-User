@@ -9,10 +9,10 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
   const [bidAmount, setBidAmount] = useState(50);
   
   // ✅ เพิ่ม state สำหรับ Coins ใน LuckCard
-  const [userCoins, setUserCoins] = useState(200);
+  const [userCoins, setUserCoins] = useState(85);
   
   // ✅ เพิ่ม state สำหรับ Coins ของผู้ประมูล (เริ่มต้นที่ 0)
-  const [bidderCoins, setBidderCoins] = useState(0);
+  const [bidderCoins, setBidderCoins] = useState(85);
 
   const handleIncrease = () => {
     setBidAmount((prev) => Math.min(prev + 50, 200));
@@ -61,7 +61,7 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
           <div className="relative w-8 h-8 flex items-center justify-center">
             <img src={Images.CrownTwo} alt="Rank" className="w-full h-full" />
             <span className="absolute text-sm font-bold text-white">
-              {selectedBidder?.rank ?? "5"}
+              {selectedBidder?.rank ?? "3"}
             </span>
           </div>
 

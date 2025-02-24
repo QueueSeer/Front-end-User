@@ -9,7 +9,7 @@ const ActionButtons = () => {
         <div>
           <h3 className="text-lg font-semibold text-black">ดูดวงทันที</h3>
           <p className="text-gray-500 flex items-center mt-1">
-            <img src={Images.time} alt="time icon" className="w-4 h-4 mr-2" /> เปิด: 9 กันยายน 2567, 09:30 น.
+            <img src={Images.time} alt="time icon" className="w-4 h-4 mr-2" /> เปิด: 25 กุมภาพันธ์ 2568, 09:30 น.
           </p>
         </div>
         <button className="w-32 px-4 py-2 rounded-lg text-white bg-[#8677A7]">
@@ -21,7 +21,7 @@ const ActionButtons = () => {
         <div>
           <h3 className="text-lg font-semibold text-black">ประมูล</h3>
           <p className="text-gray-500 flex items-center mt-1">
-            <img src={Images.time} alt="time icon" className="w-4 h-4 mr-2" /> เปิด: 9 กันยายน 2567, 09:30 น.
+            <img src={Images.time} alt="time icon" className="w-4 h-4 mr-2" /> เปิด: 25 กุมภาพันธ์ 2568, 13:30 น.
           </p>
         </div>
         <button className="w-32 px-4 py-2 rounded-lg text-white bg-[#8677A7]">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Images from "../../assets"; // ✅ ใช้ Images จาก assets
+import Navbar from "../../components/navbar"; // ✅ ใช้ path ที่ถูกต้อง
 
 const AuctionDetails = () => {
   const location = useLocation();
@@ -8,19 +9,19 @@ const AuctionDetails = () => {
   const [isCopied, setIsCopied] = useState(false);
 
   const auctionData = {
-    confirmationCode: "4QCFR",
-    paymentDate: "09 กันยายน 2567, 13.45 น.",
-    price: "10,000 คอยน์",
-    appointmentDate: "10 กันยายน 2567",
+    confirmationCode: "3QCFR",
+    paymentDate: "24 กุมภาพันธ์ 2567, 13.45 น.",
+    price: "150 คอยน์",
+    appointmentDate: "25 กุมภาพันธ์ 2568",
     appointmentTime: "13.30 น.",
     status: "รอเข้ารับบริการ",
-    seerName: "หมอดู เพียงฟ้า พงษ์พิช",
+    seerName: "หมอดู เพียงฟ้า พาขวัญ",
     contact: "thrthrthjrtjrjyjv",
     user: {
-      name: "จารุวรรณ เกตุอ่อนงาม",
+      name: "สุรางคนางค์ เกตุยั่งยืนวงศ์",
       gender: "เพศหญิง",
       birthDate: "8 เมษายน 2546",
-      birthTime: "03.45 น.",
+      birthTime: "08.45 น.",
       email: "255298@gmail.com",
       connectionType: "อีเมล",
     },
@@ -53,6 +54,12 @@ const AuctionDetails = () => {
   };
 
   return (
+    <>
+    {/* ✅ Navbar ตรึงด้านบน */}
+    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+      <Navbar />
+    </div>
+
     <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center">
       {/* ปุ่มย้อนกลับ */}
       <button
@@ -79,7 +86,7 @@ const AuctionDetails = () => {
         {/* ข้อมูลการชำระเงิน */}
         <div className="mt-6 border border-green-400 rounded-md p-4 text-center text-gray-700">
           <p>
-            ชำระผ่าน <b>โอนคอยน์</b> วันที่ <b>{auctionData.paymentDate}</b> จำนวนราคา{" "}
+            ชำระผ่าน <b>โชคคอยน์</b> วันที่ <b>{auctionData.paymentDate}</b> จำนวนราคา{" "}
             <b>{auctionData.price}</b>
           </p>
         </div>
@@ -173,6 +180,7 @@ const AuctionDetails = () => {
 
       </div>
     </div>
+    </>
   );
 };
 

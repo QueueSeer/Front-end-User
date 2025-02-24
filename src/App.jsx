@@ -20,6 +20,7 @@ import DetailAuction from "./pages/auction/DetailAuction";
 import BidAuction from "./pages/auction/BidAuction";
 import TopUpCoins from "./pages/Topup/TopUpCoins";
 import SummaryPage from "./pages/Topup/SummaryPage";
+import QrSummary from "./pages/Topup/QrSummary";
 import AuctionDetails from "./pages/auction/AuctionDetails";
 import FollowerPage from "./pages/followerpage/FollowerPage";
 import QueueHistory from "./pages/Menu/Queue/QueueHistory";
@@ -61,8 +62,10 @@ export default function App() {
           <Route path="/queuedetails" element={<Queuedetails />} />
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
+          <Route path="/qr-summary" element={<QrSummary/>} />
 
 
+       
 
 
          
@@ -87,15 +90,16 @@ export default function App() {
               </>
             }
           />
-          <Route
-            path="/bookingSeer4"
-            element={
-              <>
-                <BookingSteps />
-                <BookingSeer4 />
-              </>
-            }
-          />
+        <Route
+          path="/bookingSeer4"
+          element={
+            <div className="mt-[130px]">
+              <BookingSteps />
+              <BookingSeer4 />
+            </div>
+          }
+        />
+
         </Routes>
      
     </Router>

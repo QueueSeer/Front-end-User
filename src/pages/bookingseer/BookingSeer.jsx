@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Fillterbar from "../../components/fillterbar";
+import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
 import BookingSteps from "../../components/bookingcomponent/BookingSteps";
 import HeaderSection from "../../components/bookingcomponent/HeaderSection";
 import FullCalendarPage from "../../components/bookingcomponent/FullCalendarPage";
@@ -45,9 +45,12 @@ const BookingSeer = () => {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div>
-      <Fillterbar />
-      <div className="p-6">
+    <>
+    {/* Navbar ตรึงด้านบน */}
+    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+      <Navbar />
+    </div>
+      <div className="p-6 mt-8">
         <BackButton />
         <BookingSteps />
         <HeaderSection packageInfo={packageInfo} setNumQuestions={setNumQuestions} />
@@ -60,7 +63,7 @@ const BookingSeer = () => {
           <NextButton onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, numQuestions } })} />
         </div>
       </div>
-    </div>
+      </>
   );
 };
 

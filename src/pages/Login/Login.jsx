@@ -69,13 +69,13 @@ export default function Login() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
   
-    let hasError = false; // ใช้ตรวจสอบว่ามีข้อผิดพลาดหรือไม่
+    let hasError = false;
   
     // ตรวจสอบอีเมล
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // รูปแบบอีเมลที่ถูกต้อง
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
       setEmailError("กรุณากรอกอีเมล");
-      hasError = true; // ตั้งค่าว่ามีข้อผิดพลาด
+      hasError = true;
     } else if (!emailRegex.test(email)) {
       setEmailError("กรุณากรอกอีเมลให้ถูกต้อง");
       hasError = true;
@@ -87,12 +87,10 @@ export default function Login() {
       hasError = true;
     }
   
-    // ถ้ามีข้อผิดพลาด ไม่ดำเนินการต่อ
     if (hasError) {
       return;
     }
   
-    // ถ้าข้อมูลถูกต้อง
     try {
       const response = await axios.post(
         "https://backend.qseer.app/api/access/login",
@@ -102,13 +100,31 @@ export default function Login() {
   
       if (response.status === 200) {
         console.log("Login Successful:", response.data);
-        localStorage.setItem("token", response.data.token); // เก็บ token
-        navigate("/fillter"); // ไปที่หน้า fillter
+        localStorage.setItem("token", response.data.token);
+        navigate("/fillter"); 
       }
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
+      
+      if (error.response) {
+        const errorMessage = error.response.data?.message || "";
+        
+        if (error.response.status === 401 || error.response.status === 404) {
+          if (errorMessage.includes("Incorrect password")) {
+            setPasswordError(" รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+          } else {
+            setEmailError(" ไม่พบบัญชีผู้ใช้นี้ในระบบ");
+          }
+        } else {
+          setEmailError(" เกิดข้อผิดพลาด กรุณาลองอีกครั้ง");
+        }
+      } else {
+        setEmailError(" ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+      }
     }
   };
+  
+  
   
   
   

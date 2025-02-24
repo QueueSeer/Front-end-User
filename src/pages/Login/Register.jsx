@@ -28,13 +28,11 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setPasswordError("");
-    setConfirmPasswordError("");
     setFormError({});
     setIsLoading(true);
-
+  
     let errors = {};
-
+  
     if (!username) errors.username = "กรุณากรอกชื่อผู้ใช้";
     if (!displayName) errors.displayName = "กรุณากรอกชื่อที่จะแสดง";
     if (!firstName) errors.firstName = "กรุณากรอกชื่อ";
@@ -42,23 +40,19 @@ export default function Register() {
     if (!email) errors.email = "กรุณากรอกอีเมล";
     if (!phoneNumber) errors.phoneNumber = "กรุณากรอกหมายเลขโทรศัพท์";
     else if (!/^\d+$/.test(phoneNumber)) errors.phoneNumber = "หมายเลขโทรศัพท์ต้องเป็นตัวเลขเท่านั้น";
-
+  
     if (!password) errors.password = "กรุณากรอกรหัสผ่าน";
-    else if (!validatePassword(password)) {
-      errors.password = "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษรและประกอบด้วยตัวพิมพ์ใหญ่ ตัวพิมพ์เล็ก ตัวเลข และอักขระพิเศษ";
-    }
-
     if (!confirmPassword) errors.confirmPassword = "กรุณายืนยันรหัสผ่าน";
     else if (password !== confirmPassword) {
       errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
     }
-
+  
     if (Object.keys(errors).length > 0) {
       setFormError(errors);
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const response = await fetch("https://backend.qseer.app/api/user/register", {
         method: "POST",
@@ -80,21 +74,35 @@ export default function Register() {
           },
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         setIsLoading(false);
         navigate("/login");
+      } else if (response.status === 409) {
+        // กรณีอีเมลถูกใช้แล้ว
+        if (data.field === "email" && data.type === "UniqueViolation") {
+          setFormError({ email: " อีเมลนี้ถูกใช้งานแล้ว กรุณาใช้อีเมลอื่น" });
+        } else {
+          setFormError({ server: " เกิดข้อผิดพลาด กรุณาลองอีกครั้ง" });
+        }
+        setIsLoading(false);
       } else {
-        setFormError(data.errors || { server: "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง" });
+        setFormError({ server: " เกิดข้อผิดพลาด กรุณาลองอีกครั้ง" });
         setIsLoading(false);
       }
     } catch (error) {
-      setFormError({ server: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้" });
+      setFormError({ server: " ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้" });
       setIsLoading(false);
     }
   };
+  
+  
+  
+  
+  
+  
 
   const handleGoogleLogin = async (credentialResponse) => {
     const jwtToken = credentialResponse.credential;

@@ -7,7 +7,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#8677A7", // ตั้งค่า primary color
+        primary: "#8677A7",
         secondary: "#65558F",
         secondary2: "#420F75",
         background: "#b2aac7",
@@ -16,9 +16,15 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Noto Sans Thai', 'sans-serif'],
-      }, 
+      },
       screens: {
-        'xxl': '1800px', // สร้างคีย์ xxl สำหรับ 1800px
+        'xxl': '1800px',
+      },
+      width: {
+        screen: "100vw", // ทำให้ w-screen ใช้ได้จริง
+      },
+      height: {
+        screen: "100vh", // ทำให้ h-screen ใช้ได้จริง
       },
     },
   },
