@@ -121,7 +121,7 @@ const Queuedetails = () => {
               </div>
 
               <div className="text-center mt-8">
-                <p className="text-xl font-bold">Package 1 </p>
+                <p className="text-xl font-bold">ความรักในปีนี้เป็นอย่างไร </p>
                 <p className="opacity-80 text-sm mt-1">
                   {auctionData.seerName}
                 </p>

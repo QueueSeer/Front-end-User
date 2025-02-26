@@ -67,7 +67,7 @@ const QrSummary = () => {
           {/* 💰 แสดงยอดชำระ */}
           <div className="flex justify-between text-lg font-semibold">
             <span>ยอดชำระเงิน</span>
-            <span>49.00 บาท</span>
+            <span>100.00 บาท</span>
           </div>
 
           {/* ⏳ ระยะเวลาชำระเงิน */}
@@ -82,7 +82,7 @@ const QrSummary = () => {
           {/* 🔳 QR Code สำหรับชำระเงิน */}
           <div className="flex flex-col items-center mt-4">
             <img src={Images.qr} alt="QR Code" className="w-60 mt-2" />
-            <p className="text-lg font-semibold mt-2 text-[#65558F]">49.00 บาท</p>
+            <p className="text-lg font-semibold mt-2 text-[#65558F]">100.00 บาท</p>
             <p className="text-gray-600 text-sm">บัญชี: นางสาวสุรางคนางค์ เกตุยั่งยืนวงศ์</p>
           </div>
         </div>

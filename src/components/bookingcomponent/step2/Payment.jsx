@@ -64,7 +64,7 @@ const Payment = ({ packageInfo, selectedDate }) => {
               hover:bg-[#65558F] hover:text-white`}
             onClick={() => setPaymentMethod("promptpay")}
           >
-            <span className="font-medium">QR Code Promptpay</span>
+            <span className="font-medium">QR Code PromptPay</span>
             <img src={Images.PromptpayMoney} alt="PromptPay" className="w-20" />
           </button>
 
@@ -126,7 +126,7 @@ const Payment = ({ packageInfo, selectedDate }) => {
           <div className="mt-3 text-gray-700 text-sm">
             <div className="grid grid-cols-2">
               <p className="font-medium">ช่องทางการชำระเงิน</p>
-              <p className="text-right">{paymentMethod === "coins" ? "โชคคอยน์" : "QR Code Promptpay"}</p>
+              <p className="text-right">{paymentMethod === "coins" ? "โชคคอยน์" : "QR Code PromptPay"}</p>
             </div>
           </div>
         )}

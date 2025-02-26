@@ -36,7 +36,7 @@ const BookingSeer4 = () => {
           </button>
           <button
             className="px-6 py-3 rounded-lg font-semibold text-white bg-[#65558F] hover:bg-[#564477] text-base transition"
-            onClick={() => navigate("/booking")}
+            onClick={() => navigate("/queuehistory")}
           >
             จองคิว
           </button>

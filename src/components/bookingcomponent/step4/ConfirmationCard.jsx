@@ -48,7 +48,7 @@ const ConfirmationCard = () => {
           <p>เพียงฟ้า พาขวัญ</p>
 
           <p className="font-medium">แพ็กเกจ</p>
-          <p>Package 1  </p> 
+          <p>ความรักปีนี้เป็นอย่างไร  </p> 
 
           <p className="font-medium">ชื่อผู้จอง</p>
           <p>น.ส. สุรางคนางค์ เกตุยั่งยืนวงศ์</p>

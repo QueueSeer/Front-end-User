@@ -13,7 +13,7 @@ const QueueHistoryPage = () => {
     รอเข้ารับบริการ: [
       {
         image: "/images/tarot.jpg",
-        title: "Package 1",
+        title: "ความรักในปีนี้เป็นอย่างไร",
         categories: "ดวงความรัก การเงิน สุขภาพ",
         fortuneTeller: "หมอดูเพียงฟ้า",
         date: "อังคาร 25 ก.พ. 2568",

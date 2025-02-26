@@ -23,6 +23,7 @@ const BidAuction = () => {
   //  สร้าง state สำหรับจัดเก็บอันดับใหม่
   const [bidders, setBidders] = useState([
  // ✅ คำนวณอันดับใหม่ให้ Manmkiti64
+ 
     { username: "ร*********", hiddenUser: "JaiJup*****", coins: 100 },
     { username: "ร*********", hiddenUser: "Rajir*****", coins: 90 },
     { username: "แ*********", hiddenUser: "Manmkiti64", coins: 85 },

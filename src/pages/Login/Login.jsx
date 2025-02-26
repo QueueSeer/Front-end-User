@@ -49,7 +49,7 @@ export default function Login() {
       if (response.status === 200) {
         console.log("Login Successful:", response.data);
         localStorage.setItem("token", response.data.token); // 
-        navigate("/fillter"); // ย้ายไปยังหน้าฟิลเตอร์
+        navigate("/homepage"); // ย้ายไปยังหน้าฟิลเตอร์
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
@@ -109,20 +109,19 @@ export default function Login() {
       if (error.response) {
         const errorMessage = error.response.data?.message || "";
         
-        if (error.response.status === 401 || error.response.status === 404) {
-          if (errorMessage.includes("Incorrect password")) {
-            setPasswordError(" รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
-          } else {
-            setEmailError(" ไม่พบบัญชีผู้ใช้นี้ในระบบ");
-          }
+        if (error.response.status === 401) {
+          setEmailError("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง");
+        } else if (error.response.status === 404) {
+          setEmailError("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง");
         } else {
-          setEmailError(" เกิดข้อผิดพลาด กรุณาลองอีกครั้ง");
+          setEmailError("เกิดข้อผิดพลาด กรุณาลองอีกครั้ง");
         }
       } else {
-        setEmailError(" ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+        setEmailError("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
       }
     }
-  };
+};
+
   
   
   

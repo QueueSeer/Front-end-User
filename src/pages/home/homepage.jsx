@@ -10,6 +10,7 @@ import PackageSection from "../../components/homecomponent/Package/PackageSectio
 import PopularCategories from "../../components/homecomponent/PopularCategories/PopularCategories";
 import OngoingAuctions from "../../components/homecomponent/OngoingAuctions"; 
 import Images from "../../assets"; 
+import Navbar from "../../components/navbar";
 
 const Homepage = () => {
   const location = useLocation();
@@ -70,9 +71,13 @@ const Homepage = () => {
   }, [location.state?.joinedAuction, navigate]);
 
   return (
-    <>
-      <Fillterbar />
-      <div className="w-full">
+     <>
+          {/* Navbar ตรึงด้านบน */}
+          <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+            <Navbar />
+          </div>
+     
+      <div className="w-full mt-5">
         <HeroSection />
         <div className="p-8">
           <SearchBar />
