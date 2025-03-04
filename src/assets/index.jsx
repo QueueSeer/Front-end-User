@@ -16,7 +16,7 @@ import SectionEnd from "./images/landingpage/SectionEnd.png";
 import Facebook from "./icon/Footer/Facebook.png";
 import Instagram from "./icon/Footer/Instagram.png";
 import Twitter from "./icon/Footer/Twitter.png";
-import logout from "./images/logout/Logout.png";
+import logout from "./images/logout/logout.png";
 
 // ไอคอนใน homeicon
 import call from "./icon/homeicon/call.png";
@@ -39,7 +39,7 @@ import Searchicon from "./icon/homeicon/Searchicon.png";
 // ภาพใน home
 import AuctionQueue from "./images/home/AuctionQueue.png";
 import horoscope from "./images/home/horoscope.png";
-import Howto from "./images/home/howto.png";
+import Howto from "./images/home/Howto.png";
 import Luckycolor from "./images/home/Luckycolor.png";
 import Luckycolor2 from "./images/home/Luckycolor2.png";
 import pic from "./images/home/pic.png";
