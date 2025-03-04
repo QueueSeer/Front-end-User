@@ -29,7 +29,7 @@ import Lovehoroscope from "./icon/homeicon/Lovehoroscope.png";
 import astrology from "./icon/homeicon/astrology.png";
 import Gypsycards from "./icon/homeicon/Gypsycards.png";
 import Monthlyhoroscope from "./icon/homeicon/Monthlyhoroscope.png";
-import Dailyhoroscope from "./icon/homeicon/dailyhoroscope.png";
+import Dailyhoroscope from "./icon/homeicon/Dailyhoroscope.png";
 import discount from "./icon/homeicon/discount.png";
 import more from "./icon/homeicon/more.png";
 import ArrowRight from "./icon/homeicon/ArrowRight.png";
