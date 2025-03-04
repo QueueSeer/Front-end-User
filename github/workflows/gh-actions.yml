@@ -1,0 +1,24 @@
+name: Qseer application
+
+on:
+  push:
+    branches: [ "Dev" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+  build:
+    runs-on: self-hosted
+    environment: Production
+    steps:
+    - name: Fetch latest commit
+      uses: actions/checkout@v4
+    - name: Build app
+      run: docker compose up --force-recreate --build --detach
+    - name: Check if app is running
+      id: checkAlive
+      run: sleep 5 && docker compose ps --services --status=exited | grep -v '\b\b'
+    - name: Show failed logs
+      if: failure() && steps.checkAlive.outcome == 'failure'
+      run: docker compose logs
