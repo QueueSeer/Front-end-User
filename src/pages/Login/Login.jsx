@@ -101,7 +101,7 @@ export default function Login() {
       if (response.status === 200) {
         console.log("Login Successful:", response.data);
         localStorage.setItem("token", response.data.token);
-        navigate("/fillter"); 
+        navigate("/homepage"); 
       }
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);

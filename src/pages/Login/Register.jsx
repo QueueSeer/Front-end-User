@@ -124,7 +124,7 @@ export default function Register() {
   
       if (response.ok) {
         alert("เข้าสู่ระบบด้วย Google สำเร็จ");
-        navigate("/login");
+        navigate("/fillter");
       } else {
         console.error("Login failed", data);
         alert("ไม่สามารถเข้าสู่ระบบด้วย Google ได้");
