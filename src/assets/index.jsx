@@ -16,7 +16,7 @@ import SectionEnd from "./images/landingpage/SectionEnd.png";
 import Facebook from "./icon/Footer/Facebook.png";
 import Instagram from "./icon/Footer/Instagram.png";
 import Twitter from "./icon/Footer/Twitter.png";
-import logout from "./images/logout/logout.png";
+import Logout from "./images/logout/Logout.png";
 
 // ไอคอนใน homeicon
 import call from "./icon/homeicon/call.png";
@@ -171,7 +171,7 @@ const images = {
   keyIcon,
   letterIcon,
   profile_seer,
-  logout,
+  Logout,
 
   // Navnar and Sidebar
   UserIcon,
