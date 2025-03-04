@@ -8,7 +8,7 @@ import Fillter from "./pages/Login/Fillter";
 import ForgotPassword from "./pages/Login/ForgotPassword";
 import ResetPassword from "./pages/Login/ResetPassword";
 import LandingPage from "./pages/landing/LandingPage";
-import Homepage from "./pages/home/Homepage";
+import Homepage from "./pages/home/homepage";
 import QseerSchedulePage from "./pages/ProfileSeer/QseerSchedulePage";
 import BookingSeer from "./pages/bookingseer/BookingSeer";
 import BookingSeer2 from "./pages/bookingseer/BookingSeer2";
