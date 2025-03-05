@@ -101,7 +101,13 @@ export default function Login() {
       if (response.status === 200) {
         console.log("Login Successful:", response.data);
         localStorage.setItem("token", response.data.token);
-        navigate("/homepage"); 
+        
+        // เก็บ refresh token ด้วย (ถ้ามี)
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
+        
+        navigate("/homepage");
       }
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
@@ -120,8 +126,7 @@ export default function Login() {
         setEmailError("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
       }
     }
-};
-
+  };
   
   
   
@@ -293,6 +298,7 @@ export default function Login() {
                   }}
                 />
               </div>
+              
             </div>
           </div>
         </div>

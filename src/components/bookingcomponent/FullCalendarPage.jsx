@@ -10,46 +10,73 @@ import NextButton from "./NextButton";
 
 dayjs.locale("th");
 
-const FullCalendarPage = () => {
+const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSelectedTime }) => { 
+
+
   const navigate = useNavigate();
   const location = useLocation();
   const packageInfo = location.state?.packageInfo;
   
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [calendarData, setCalendarData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // 🟢 โหลดข้อมูลปฏิทินจาก API
   useEffect(() => {
-    fetch("http://localhost:5000/api/calendar") // เปลี่ยนเป็น API จริงเมื่อพร้อม
-      .then((response) => {
-        if (!response.ok) throw new Error("โหลดข้อมูลปฏิทินล้มเหลว");
-        return response.json();
-      })
-      .then((data) => {
-        setCalendarData(data);
+    const fetchSeerCalendar = async () => {
+      try {
+        const response = await fetch("https://backend.qseer.app/api/seer/1/calendar", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+          },
+        });
+  
+        if (!response.ok) throw new Error("โหลดตารางเวลาหมอดูล้มเหลว");
+  
+        const data = await response.json();
+  
+        // 🔹 แปลงข้อมูล `schedules` ให้เป็นวันที่ของเดือนปัจจุบัน
+        const schedules = data.schedules.map((schedule) => {
+          const today = dayjs().startOf("week"); // วันอาทิตย์ของสัปดาห์นี้
+          return {
+            date: today.add(schedule.day, "day").format("YYYY-MM-DD"),
+            startTime: schedule.start_time,
+            endTime: schedule.end_time,
+            status: "available",
+          };
+        });
+  
+        // 🔹 จัดรูปแบบวันหยุด (day_offs)
+        const dayOffs = data.day_offs.map((dayOff) => ({
+          date: dayOff,
+          status: "full",
+        }));
+  
+        setCalendarData([...schedules, ...dayOffs]); // รวมวันทำงานกับวันหยุด
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching calendar:", err);
-        // 🟢 ใช้ Mock Data ถ้า API ล้มเหลว
-        setCalendarData([
-          { date: "2025-01-14", status: "available" },
-          { date: "2025-01-15", status: "full" },
-          { date: "2025-01-16", status: "available" },
-        ]);
+      } catch (err) {
+        console.error("Error fetching seer calendar:", err);
         setLoading(false);
-      });
+      }
+    };
+  
+    fetchSeerCalendar();
   }, []);
+  
 
   // ตรวจสอบว่าวันไหนเต็ม/ว่าง
   const getStatus = (date) => {
-    const dayData = calendarData.find((item) => item.date === date.format("YYYY-MM-DD"));
-    return dayData ? dayData.status : "available";
+    const formattedDate = date.format("YYYY-MM-DD");
+    const dayOfWeek = date.day(); // ได้ค่า 0-6 (อาทิตย์ - เสาร์)
+  
+    const availableDay = calendarData.find((item) => item.date === formattedDate || item.day === dayOfWeek);
+    return availableDay ? availableDay.status : "full"; // ถ้าไม่มีวันนั้นถือว่าเต็ม
   };
+  
 
   // เปลี่ยนเดือนที่แสดง
   const handleDateChange = (date) => {
@@ -59,10 +86,12 @@ const FullCalendarPage = () => {
 
   // เลือกวัน
   const handleSelectDate = (date) => {
-    if (!dayjs().isAfter(date, "day") && getStatus(date) !== "full") {
-      setSelectedDate(date);
+    if (!dayjs().isAfter(date, "day") && getStatus(date) === "available") {
+      setSelectedDate(dayjs(date).startOf("day")); // ✅ ใช้ startOf("day") ป้องกันปัญหาเวลา
     }
   };
+  
+  
 
   return (
     <div className="flex flex-col items-center mb-6">
@@ -116,7 +145,8 @@ const FullCalendarPage = () => {
                 const date = currentDate.date(day);
                 const status = getStatus(date);
                 const isPast = dayjs().isAfter(date, "day");
-                const isSelected = selectedDate && selectedDate.isSame(date, "day");
+                const isSelected = selectedDate && selectedDate.isSame(date, "day"); // ✅ ป้องกัน error
+
 
                 return (
                   <div key={day} className="relative flex flex-col items-center justify-center w-14 h-14 cursor-pointer">
@@ -145,21 +175,25 @@ const FullCalendarPage = () => {
       </LocalizationProvider>
 
       {selectedDate && (
-        <>
-          <div className="mt-6">
-            <SlotComponent selectedDate={selectedDate} />
-          </div>
+  <>
+    <div className="mt-6">
+      <SlotComponent 
+        selectedDate={selectedDate} 
+        setSelectedTime={setSelectedTime}  // ✅ ส่งไปให้ SlotComponent
+      />
+    </div>
 
-          {/* ปุ่ม NextButton */}
-          <div className="fixed bottom-4 right-4">
-            <NextButton
-              onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate } })}
-              disabled={!selectedDate}
-              className="w-auto"
-            />
-          </div>
-        </>
-      )}
+    {/* ปุ่ม NextButton */}
+    <div className="fixed bottom-4 right-4">
+      <NextButton
+        onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, selectedTime } })} // ✅ เพิ่ม selectedTime
+        disabled={!selectedDate || !selectedTime} // ✅ ป้องกันการกดถ้าไม่ได้เลือกเวลา
+        className="w-auto"
+      />
+    </div>
+  </>
+)}
+
     </div>
   );
 };

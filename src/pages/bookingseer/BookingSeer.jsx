@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar";
 import BookingSteps from "../../components/bookingcomponent/BookingSteps";
 import HeaderSection from "../../components/bookingcomponent/HeaderSection";
 import FullCalendarPage from "../../components/bookingcomponent/FullCalendarPage";
@@ -12,11 +12,12 @@ const BookingSeer = () => {
   const navigate = useNavigate();
   const [packageInfo, setPackageInfo] = useState(location.state?.packageInfo || null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
   const [numQuestions, setNumQuestions] = useState(4);
   const [loading, setLoading] = useState(!packageInfo);
   const [error, setError] = useState(null);
-
-  // 🟢 โหลด `packageInfo` จาก API ถ้าไม่มีค่าเข้ามา
+  
+  // โหลด `packageInfo` จาก API ถ้าไม่มีค่าเข้ามา
   useEffect(() => {
     if (!packageInfo) {
       fetch("http://localhost:5000/api/package/1") // เปลี่ยนเป็น API จริงเมื่อพร้อม
@@ -41,29 +42,56 @@ const BookingSeer = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Debug logging to see the values before navigation
+  const handleNextButtonClick = () => {
+    console.log("Before navigation - selectedDate:", selectedDate);
+    console.log("Before navigation - selectedTime:", selectedTime);
+    console.log("Before navigation - packageInfo:", packageInfo);
+    
+    navigate("/bookingSeer2", { 
+      state: { 
+        packageInfo, 
+        selectedDate: selectedDate instanceof Date ? selectedDate.toISOString() : selectedDate, 
+        selectedTime, 
+        numQuestions 
+      } 
+    });
+  };
+
   if (loading) return <p className="text-center text-gray-500">กำลังโหลดแพ็กเกจ...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <>
-    {/* Navbar ตรึงด้านบน */}
-    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-      <Navbar />
-    </div>
+      {/* Navbar ตรึงด้านบน */}
+      <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        <Navbar />
+      </div>
       <div className="p-6 mt-8">
         <BackButton />
         <BookingSteps />
         <HeaderSection packageInfo={packageInfo} setNumQuestions={setNumQuestions} />
 
         <div className="w-full">
-          <FullCalendarPage setSelectedDate={setSelectedDate} />
+          <FullCalendarPage 
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            selectedTime={selectedTime}
+            setSelectedTime={setSelectedTime}
+          />
         </div>
 
+        
+
+        {/* Next Button: กดได้ก็ต่อเมื่อเลือกวันและเวลาแล้ว */}
         <div className="fixed bottom-4 right-4">
-          <NextButton onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, numQuestions } })} />
+          <NextButton 
+            onClick={handleNextButtonClick} 
+            disabled={!selectedDate || !selectedTime}
+          />
         </div>
       </div>
-      </>
+    </>
   );
 };
 

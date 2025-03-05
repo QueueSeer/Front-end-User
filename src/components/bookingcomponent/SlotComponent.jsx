@@ -1,75 +1,91 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import dayjs from "dayjs";
 
-const SlotComponent = ({ selectedDate }) => {
-  if (!selectedDate) return null; // ไม่แสดงถ้ายังไม่มีการเลือกวัน
+const SlotComponent = ({ selectedDate, setSelectedTime }) => { 
+  if (!selectedDate) return null; 
 
-  const [bookedTimes, setBookedTimes] = useState([]); // เวลาที่ถูกจองจาก API
+  const [availableSlots, setAvailableSlots] = useState([]); // เวลาว่างจาก API
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedTime, setLocalSelectedTime] = useState(null);
   const [timePeriod, setTimePeriod] = useState("morning"); // ค่าเริ่มต้นเป็นช่วงเช้า
 
-  // 🟢 โหลดเวลาที่ถูกจองจาก API
-  useEffect(() => {
-    if (!selectedDate) return;
+  const location = useLocation();
+  const seerId = location.state?.seerId || 1; // ค่าเริ่มต้นเป็น 1
+  const packageId = location.state?.packageId || 1; // ค่าเริ่มต้นเป็น 1
 
-    fetch(`http://localhost:5000/api/slots?date=${selectedDate.format("YYYY-MM-DD")}`)
+  // 🟢 โหลดเวลาที่ว่างจาก API
+  useEffect(() => {
+    if (!selectedDate || !selectedDate.isValid()) return;
+  
+    const startDate = selectedDate.format("YYYY-MM-DD");
+    const endDate = startDate;
+  
+    fetch(`https://backend.qseer.app/api/seer/${seerId}/package/fortune/${packageId}/time-slots?start_date=${startDate}&end_date=${endDate}`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+      },
+    })
       .then((response) => {
-        if (!response.ok) throw new Error("โหลดเวลาที่จองล้มเหลว");
+        if (!response.ok) throw new Error("โหลดเวลาที่ว่างล้มเหลว");
         return response.json();
       })
       .then((data) => {
-        setBookedTimes(data.bookedTimes);
+        console.log("เวลาที่ว่างจาก API:", data); // ✅ Debug
+  
+        // 🔹 แปลง `start_time` เป็น HH:mm อย่างถูกต้อง
+        const slots = data.map(slot => {
+          const formattedTime = dayjs(slot.start_time).format("HH:mm");
+          console.log("🔹 เวลาที่แปลงแล้ว:", formattedTime); // ✅ Debug
+          return formattedTime;
+        });
+  
+        setAvailableSlots(slots);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching slots:", err);
-        // 🟢 ใช้ Mock Data ถ้า API ล้มเหลว
-        setBookedTimes(["09:30", "10:30", "11:00", "13:00", "14:15"]);
+        console.error("Error fetching time slots:", err);
         setLoading(false);
       });
-  }, [selectedDate]);
+  }, [selectedDate, seerId, packageId]);
+  
+  
 
+  // 🟢 ฟังก์ชันเลือกเวลา
   const handleSelectTime = (time) => {
-    if (!bookedTimes.includes(time)) {
-      setSelectedTime(time);
-    }
+    setLocalSelectedTime(time);
+    setSelectedTime(time); // ✅ ส่งค่าไปให้ `FullCalendarPage`
   };
 
-  const morningSlots = ["09:30", "09:45", "10:00", "10:15", "10:30", "10:45", "11:00", "11:15", "11:30", "11:45"];
-  const afternoonSlots = ["13:00", "13:15", "13:30", "13:45", "14:00", "14:15", "14:30", "14:45", "15:00", "15:15"];
+  // 🔹 แยกเวลาว่างเป็นช่วงเช้าและช่วงบ่าย
+  const morningSlots = availableSlots.filter(time => time >= "09:00" && time < "12:00");
+  const afternoonSlots = availableSlots.filter(time => time >= "13:00" && time < "16:00");
 
   return (
     <div className="w-[650px] mt-5">
       {/* ปุ่มเลือกช่วงเวลา */}
       <div className="flex items-center space-x-6 mb-4">
-        <button
-          className={`flex items-center space-x-2 ${
-            timePeriod === "morning" ? "text-[#6B5B95] font-semibold" : "text-gray-500"
-          }`}
-          onClick={() => setTimePeriod("morning")}
-        >
-          <div
-            className={`w-4 h-4 rounded-full ${
-              timePeriod === "morning" ? "bg-[#6B5B95]" : "bg-gray-300"
-            }`}
-          ></div>
-          <span>ช่วงเช้า</span>
-        </button>
+        {morningSlots.length > 0 && (
+          <button
+            className={`flex items-center space-x-2 ${timePeriod === "morning" ? "text-[#6B5B95] font-semibold" : "text-gray-500"}`}
+            onClick={() => setTimePeriod("morning")}
+          >
+            <div className={`w-4 h-4 rounded-full ${timePeriod === "morning" ? "bg-[#6B5B95]" : "bg-gray-300"}`}></div>
+            <span>ช่วงเช้า</span>
+          </button>
+        )}
 
-        <button
-          className={`flex items-center space-x-2 ${
-            timePeriod === "afternoon" ? "text-[#6B5B95] font-semibold" : "text-gray-500"
-          }`}
-          onClick={() => setTimePeriod("afternoon")}
-        >
-          <div
-            className={`w-4 h-4 rounded-full ${
-              timePeriod === "afternoon" ? "bg-[#6B5B95]" : "bg-gray-300"
-            }`}
-          ></div>
-          <span>ช่วงบ่าย</span>
-        </button>
+        {afternoonSlots.length > 0 && (
+          <button
+            className={`flex items-center space-x-2 ${timePeriod === "afternoon" ? "text-[#6B5B95] font-semibold" : "text-gray-500"}`}
+            onClick={() => setTimePeriod("afternoon")}
+          >
+            <div className={`w-4 h-4 rounded-full ${timePeriod === "afternoon" ? "bg-[#6B5B95]" : "bg-gray-300"}`}></div>
+            <span>ช่วงบ่าย</span>
+          </button>
+        )}
       </div>
 
       {/* แสดงสถานะโหลดข้อมูล */}
@@ -83,14 +99,11 @@ const SlotComponent = ({ selectedDate }) => {
             <button
               key={time}
               className={`px-6 py-2 border rounded-full text-center transition ${
-                bookedTimes.includes(time)
-                  ? "bg-gray-400 text-white cursor-not-allowed" // เวลาที่ถูกจองแล้ว (เทา)
-                  : selectedTime === time
+                selectedTime === time
                   ? "bg-[#420F75] text-white" // เวลาที่เลือก (ม่วง)
                   : "text-gray-700 border-gray-300 hover:bg-gray-100" // เวลาที่ยังว่าง
               }`}
-              onClick={() => handleSelectTime(time)}
-              disabled={bookedTimes.includes(time)}
+              onClick={() => handleSelectTime(time)} // ✅ ใช้ฟังก์ชันที่ถูกต้อง
             >
               {time}
             </button>
