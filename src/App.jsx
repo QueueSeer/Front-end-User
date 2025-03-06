@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./pages/Login/contexts/AuthContext";
 import BookingSteps from "./components/bookingcomponent/BookingSteps";
-import BackButton from "./components/bookingcomponent/BackButton";  // ✅ Import BookingSteps
+import BackButton from "./components/bookingcomponent/BackButton";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Login/Register";
 import Fillter from "./pages/Login/Fillter";
@@ -28,17 +29,14 @@ import Queuedetails from "./pages/Menu/Queue/Queuedetails";
 import PaymentHistoryPage from "./pages/Menu/PaymentHistoryPage";
 import ProfileMe from "./pages/Profile/Profile";
 
-
-
-
 import "./index.css";
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
-    <Router>
-      
+    <AuthProvider> {/* ครอบ Router ด้วย AuthProvider */}
+      <Router>
         <Routes>
           <Route path="/" element={<Login/>} />
           <Route path="/register" element={<Register />} />
@@ -63,13 +61,7 @@ export default function App() {
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
           <Route path="/qr-summary" element={<QrSummary/>} />
-
-
-       
-
-
-         
-       
+          
           <Route
             path="/bookingSeer2"
             element={
@@ -90,18 +82,17 @@ export default function App() {
               </>
             }
           />
-        <Route
-          path="/bookingSeer4"
-          element={
-            <div className="mt-[130px]">
-              <BookingSteps />
-              <BookingSeer4 />
-            </div>
-          }
-        />
-
+          <Route
+            path="/bookingSeer4"
+            element={
+              <div className="mt-[130px]">
+                <BookingSteps />
+                <BookingSeer4 />
+              </div>
+            }
+          />
         </Routes>
-     
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }

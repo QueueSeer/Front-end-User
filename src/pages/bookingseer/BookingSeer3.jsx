@@ -1,17 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../../pages/Login/contexts/AuthContext"; // ปรับเส้นทางตามโครงสร้างโฟลเดอร์ของคุณ
 import Images from "../../assets"; 
 import Navbar from "../../components/navbar";
 import axios from "axios";
 
-
 const BookingSeer3 = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  // ส่วนที่รับข้อมูลจาก BookingSeer2
+const location = useLocation();
+const { user } = useContext(AuthContext);
+
+// รับค่าจาก BookingSeer2 แบบปรับปรุงใหม่
+const bookingData = location.state || {};
+const { 
+  packageInfo, 
+  finalPrice, 
+  userInfo, 
+  questions, 
+  selectedDate, 
+  selectedTime,
+  fortuneTeller, // ชื่อหมอดูที่ส่งมาจาก BookingSeer2
+  id // รหัสการจองที่ได้จาก API
+} = bookingData;
+
+// ตรวจสอบว่ามีข้อมูลที่จำเป็นหรือไม่
+useEffect(() => {
+  console.log("BookingSeer3 received data:", bookingData);
   
-  // รับค่าจาก BookingSeer2
-  const bookingData = location.state || {};
-  const { packageInfo, finalPrice, userInfo } = bookingData;
+  if (!finalPrice) {
+    console.error("ไม่พบข้อมูลราคา");
+    navigate("/bookingSeer2");
+  }
+}, [finalPrice, navigate, bookingData]);
+
+
   
   // QR Code state
   const [qrCodeUrl, setQrCodeUrl] = useState("");
@@ -23,28 +46,32 @@ const BookingSeer3 = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [expiryTime, setExpiryTime] = useState("");
   
-  // ดึง QR Code จาก API โดยใช้ token จาก localStorage
+  // ดึง QR Code จาก API
   useEffect(() => {
     const fetchQrCode = async () => {
       try {
         setQrLoading(true);
-        // ใช้ finalPrice จาก bookingData หรือค่าเริ่มต้น 49
-        const amount = finalPrice || 49;
         
-        // ดึง token จาก localStorage
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          throw new Error("ไม่พบ token กรุณาเข้าสู่ระบบใหม่");
+        // ตรวจสอบข้อมูลที่จำเป็น
+        if (!finalPrice) {
+          throw new Error("ไม่พบข้อมูลราคา กรุณากลับไปเลือกแพ็คเกจใหม่");
         }
         
-        // เรียกใช้ API ด้วย axios และส่ง token ใน header
-        const response = await axios.get(`https://backend.qseer.app/api/transaction/qr_promptpay?amount=${amount}`, {
-          headers: {
-            'accept': 'text/plain',
-            'Authorization': `Bearer ${token}`
+        // ตรวจสอบว่ามีการล็อกอินหรือไม่
+        if (!user) {
+          throw new Error("ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่");
+        }
+        
+        // เรียกใช้ API ด้วย withCredentials เพื่อส่ง cookies
+        const response = await axios.get(
+          `https://backend.qseer.app/api/transaction/qr_promptpay?amount=${finalPrice}`, 
+          {
+            headers: {
+              'accept': 'text/plain'
+            },
+            withCredentials: true // สำคัญ! ทำให้ browser ส่ง cookies ไปด้วย
           }
-        });
+        );
         
         // กำหนด URL ของ QR code จาก response
         setQrCodeUrl(response.data);
@@ -53,11 +80,14 @@ const BookingSeer3 = () => {
       } catch (error) {
         console.error("Error fetching QR code:", error);
         
-        // จัดการกรณี token หมดอายุหรือไม่ถูกต้อง
-        if (error.response && error.response.status === 401) {
+        // จัดการข้อผิดพลาดแตกต่างกันตามสาเหตุ
+        if (error.message.includes("ไม่พบข้อมูลราคา")) {
+          setQrError(error.message);
+          // redirect กลับไปที่ BookingSeer2 หลังจากผ่านไปสักพัก
+          setTimeout(() => navigate("/bookingSeer2"), 3000);
+        } else if (error.response && error.response.status === 401) {
           setQrError("Token หมดอายุหรือไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่");
-          // อาจจะ redirect ไปหน้า login
-          // setTimeout(() => navigate("/login"), 3000);
+          setTimeout(() => navigate("/login"), 3000);
         } else {
           setQrError(error.message || "ไม่สามารถโหลด QR Code ได้");
         }
@@ -79,7 +109,7 @@ const BookingSeer3 = () => {
       minute: '2-digit'
     }));
     
-  }, [finalPrice, navigate]);
+  }, [finalPrice, navigate, user]);
 
   // แสดง Popup เพียง 1 วินาที
   useEffect(() => {
@@ -124,6 +154,11 @@ const BookingSeer3 = () => {
     navigate("/login");
   };
 
+  // ฟังก์ชันกลับไปหน้า BookingSeer2
+  const handleReturnToBookingSeer2 = () => {
+    navigate("/bookingSeer2");
+  };
+
   // แสดง Loading
   if (qrLoading) {
     return (
@@ -150,7 +185,14 @@ const BookingSeer3 = () => {
           <div className="bg-red-50 p-6 rounded-lg max-w-md">
             <h3 className="text-red-700 font-medium text-lg">เกิดข้อผิดพลาด</h3>
             <p className="text-red-600 mt-2">{qrError}</p>
-            {qrError.includes("token") ? (
+            {qrError.includes("ราคา") ? (
+              <button 
+                className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
+                onClick={handleReturnToBookingSeer2}
+              >
+                กลับไปเลือกแพ็คเกจ
+              </button>
+            ) : qrError.includes("token") || qrError.includes("ผู้ใช้") ? (
               <button 
                 className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
                 onClick={handleReturnToLogin}
@@ -171,6 +213,29 @@ const BookingSeer3 = () => {
     );
   }
 
+  // หากไม่มี finalPrice ให้กลับไปที่ BookingSeer2
+  if (!finalPrice) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+          <Navbar />
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="bg-red-50 p-6 rounded-lg max-w-md">
+            <h3 className="text-red-700 font-medium text-lg">ไม่พบข้อมูลราคา</h3>
+            <p className="text-red-600 mt-2">กรุณากลับไปเลือกแพ็คเกจใหม่</p>
+            <button 
+              className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
+              onClick={() => navigate("/bookingSeer2")}
+            >
+              กลับไปเลือกแพ็คเกจ
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       {/* Navbar ตรึงด้านบน */}
@@ -183,7 +248,7 @@ const BookingSeer3 = () => {
           {/* แสดงยอดชำระ */}
           <div className="flex justify-between text-lg font-semibold">
             <span>ยอดชำระเงิน</span>
-            <span>{finalPrice || 49.00} บาท</span>
+            <span>{finalPrice} บาท</span>
           </div>
 
           {/* ระยะเวลาชำระเงิน */}
@@ -202,7 +267,7 @@ const BookingSeer3 = () => {
             ) : (
               <img src={Images.qr} alt="QR Code" className="w-60 mt-2" />
             )}
-            <p className="text-lg font-semibold mt-2 text-[#65558F]">{finalPrice || 49.00} บาท</p>
+            <p className="text-lg font-semibold mt-2 text-[#65558F]">{finalPrice} บาท</p>
             <p className="text-gray-600 text-sm">บัญชี: นางสาวสุรางคนางค์ เกตุยั่งยืนวงศ์ </p>
           </div>
         </div>
