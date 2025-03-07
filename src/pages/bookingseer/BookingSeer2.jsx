@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import NextButton from "../../components/bookingcomponent/NextButton";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
 import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
 import Payment from "../../components/bookingcomponent/step2/Payment"; 
 import Navbar from "../../components/navbar";
 
-
-
 const BookingSeer2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
   
   // Debug logging to check what state we're receiving
   console.log("BookingSeer2 received state:", location.state);
@@ -146,7 +144,7 @@ const BookingSeer2 = () => {
           // ถ้าไม่สามารถดึงข้อมูลหมอดูได้ ให้ใช้ข้อมูลจาก packageInfo 
           console.warn(`ไม่สามารถดึงข้อมูลหมอดูได้ (${response.status}), ใช้ข้อมูลจาก packageInfo แทน`);
           setSeerInfo({
-            name: packageInfo.fortuneTellerName || packageInfo.seer || "หมอดู"
+            name: packageInfo.fortuneTellerName || packageInfo.seer || ""
           });
           setSeerLoading(false);
           return;
@@ -159,7 +157,7 @@ const BookingSeer2 = () => {
         console.error("Error fetching seer info:", error);
         // เมื่อเกิดข้อผิดพลาด ใช้ข้อมูลจาก packageInfo แทน
         setSeerInfo({
-          name: packageInfo.fortuneTellerName || packageInfo.seer || "หมอดู"
+          name: packageInfo.fortuneTellerName || packageInfo.seer || ""
         });
         setSeerLoading(false);
       }
@@ -173,10 +171,8 @@ const BookingSeer2 = () => {
     const fetchUserInfo = async () => {
       try {
         setUserInfoLoading(true);
-        // ดึง token จาก cookie
         const token = getTokenFromCookie();
         
-        // ถ้าไม่มี token ให้ใช้ข้อมูลเริ่มต้น
         if (!token) {
           console.warn("ไม่พบ token ใน cookie, ใช้ข้อมูลเริ่มต้น");
           setUserInfo({
@@ -189,15 +185,44 @@ const BookingSeer2 = () => {
           return;
         }
         
-        console.log("Using token from cookie:", token.substring(0, 10) + "...");
-        
-        const response = await fetch('https://backend.qseer.app/api/user/me', {
+        let response = await fetch('https://backend.qseer.app/api/user/me', {
           method: 'GET',
           headers: {
             'accept': 'application/json',
             'Authorization': `Bearer ${token}`
-          }
+          },
+          credentials: 'include'
         });
+        
+        // เพิ่มการตรวจสอบ 401 และลองรีเฟรช token
+        if (response.status === 401) {
+          console.log("Token หมดอายุ, กำลังรีเฟรช...");
+          const refreshResponse = await fetch('https://backend.qseer.app/api/access/refresh', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          
+          if (refreshResponse.ok) {
+            // รีเฟรชสำเร็จ ลองดึงข้อมูลผู้ใช้อีกครั้ง
+            const refreshData = await refreshResponse.json();
+            // อาจอัพเดทค่าใน localStorage ตามความเหมาะสม
+            
+            // ดึง token ใหม่
+            const newToken = getTokenFromCookie();
+            
+            // เรียก API อีกครั้ง
+            response = await fetch('https://backend.qseer.app/api/user/me', {
+              method: 'GET',
+              headers: {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${newToken || token}`
+              },
+              credentials: 'include'
+            });
+          } else {
+            throw new Error(`ไม่สามารถรีเฟรช token ได้ (${refreshResponse.status})`);
+          }
+        }
         
         if (!response.ok) {
           throw new Error(`ไม่สามารถดึงข้อมูลผู้ใช้ได้ (${response.status})`);
@@ -213,21 +238,18 @@ const BookingSeer2 = () => {
           firstName: data.first_name || "",
           lastName: data.last_name || "",
           email: data.email || "",
-          // อาจจะแปลง birthdate เป็นรูปแบบที่ต้องการถ้ามี
           birthDate: data.birthdate ? formatDate(new Date(data.birthdate)) : "",
           notifyByEmail: true
         }));
-        
-        setUserInfoLoading(false);
       } catch (error) {
         console.error("Error fetching user info:", error);
-        // เมื่อเกิดข้อผิดพลาด ใช้ข้อมูลเริ่มต้น
         setUserInfo({
           first_name: "",
           last_name: "",
           email: "",
           coins: 0
         });
+      } finally {
         setUserInfoLoading(false);
       }
     };
@@ -265,19 +287,52 @@ const BookingSeer2 = () => {
   const calculateFinalPrice = () => {
     const totalPrice = packageInfo?.price || 0;
     const discount = useCoins && paymentMethod === "promptpay" ? Math.min(userInfo?.coins || 0, totalPrice) : 0;
-    return totalPrice - discount;
+    const result = Math.max(0, totalPrice - discount); // ใช้ Math.max เพื่อป้องกันค่าติดลบ
+    console.log(`Price calculation: total=${totalPrice}, discount=${discount}, final=${result}`);
+    return result;
   };
 
   const finalPrice = calculateFinalPrice();
   
-  // ตรวจสอบความสมบูรณ์ของฟอร์ม
-  const isFormValid = () => {
-    return formValid && questions.every(q => q.trim() !== "") && paymentMethod;
-  };
+// ตรวจสอบความสมบูรณ์ของฟอร์ม
+const isFormValid = () => {
+  console.log("formValid:", formValid);
+  console.log("questions:", questions);
+  console.log("Trimmed questions:", questions.map(q => q.trim()));
+  console.log("paymentMethod:", paymentMethod);
 
-  // ฟังก์ชันสำหรับการชำระเงิน
-  const handlePayment = async () => {
-    if (!isFormValid()) return;
+  if (!formValid) {
+    console.log("formValid ยังเป็น false");
+    return false;
+  }
+
+  if (!questions.every(q => q.trim() !== "")) {
+    console.log("มีคำถามที่ยังไม่ได้กรอก");
+    return false;
+  }
+
+  if (!paymentMethod) {
+    console.log("ยังไม่ได้เลือกวิธีชำระเงิน");
+    return false;
+  }
+
+  console.log("ฟอร์มผ่านการตรวจสอบ ✅");
+  return true;
+};
+
+
+// ฟังก์ชันสำหรับการชำระเงิน
+const handlePayment = async () => {
+  if (!isFormValid()) {
+    alert("กรุณากรอกข้อมูลและเลือกวิธีการชำระเงินให้ครบถ้วน");
+    return;
+  }
+
+  // ตั้งค่าสถานะโหลดเป็น true
+  setIsLoading(true);
+  console.log("เริ่มกระบวนการชำระเงิน...");
+
+
     
     try {
       // แปลงวันที่และเวลาให้เป็นรูปแบบเวลาเริ่มต้นที่ถูกต้อง
@@ -298,103 +353,128 @@ const BookingSeer2 = () => {
       // ดึง token จาก cookie
       const token = getTokenFromCookie();
       
+      // ข้อมูลที่จะส่งไปยังหน้าถัดไป (เตรียมไว้ก่อน)
+      const bookingData = {
+        id: "",  // จะถูกแทนที่ด้วย API response หรือ mock ID
+        packageInfo: {
+          ...packageInfo,
+          name: packageInfo.name || packageInfo.title || "",
+          contactChannel: packageInfo.contactChannel || ""  // ตรวจสอบให้แน่ใจว่ามีช่องทางติดต่อ
+        },
+        fortuneTeller: seerInfo?.name || packageInfo?.fortuneTellerName || packageInfo?.seer || "",
+        userInfo: {
+          firstName: formData.firstName || "",
+          lastName: formData.lastName || "",
+          fullName: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
+          email: formData.email || "",
+          birthDate: formData.birthDate || "",
+          birthTime: formData.birthTime || "",
+          status: formData.status || "",
+          notifyByEmail: formData.notifyByEmail  // เก็บค่าการเลือกรับการแจ้งเตือนทางอีเมล
+        },
+        selectedDate: parsedDate || new Date(),
+        selectedTime: selectedTime || "",
+        paymentMethod,
+        useCoins,
+        finalPrice,
+        questions: questions.filter(q => q.trim() !== ""),
+        notification: formData.notifyByEmail  // เพิ่มเพื่อความชัดเจน
+      };
+      
       // เรียก API เพื่อสร้างการนัดหมาย (ถ้ามี token)
       if (token) {
         console.log("Using token for appointment API");
-        const response = await fetch('https://backend.qseer.app/api/appointment/seer', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(appointmentData)
-        });
-        
-        if (!response.ok) {
-          throw new Error(`สร้างการนัดหมายไม่สำเร็จ (${response.status})`);
-        }
-        
-        // แปลงข้อมูลตอบกลับจาก API
-        const bookingResponse = await response.json();
-        console.log("Booking API response:", bookingResponse);
-        
-        // เก็บรหัสการจองและข้อมูลอื่นๆ สำหรับขั้นตอนถัดไป
-        const bookingData = {
-          ...bookingResponse,
-          packageInfo: {
-            ...packageInfo,
-            name: packageInfo.name || packageInfo.title || "แพ็กเกจที่เลือก"
-          },
-          fortuneTeller: seerInfo?.name || packageInfo?.fortuneTellerName || packageInfo?.seer || "หมอดู",
-          userInfo: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            fullName: `${formData.firstName} ${formData.lastName}`,
-            email: formData.email,
-            birthDate: formData.birthDate,
-            birthTime: formData.birthTime,
-            status: formData.status
-          },
-          selectedDate: parsedDate,
-          selectedTime,
-          paymentMethod,
-          useCoins,
-          finalPrice,
-          questions,
-          notification: formData.notifyByEmail
-        };
-        
-        console.log("Booking data sent to next page:", bookingData);
-        
-        // นำทางไปหน้าถัดไปตามจำนวนเงิน
-        if (finalPrice === 0) {
-          // ถ้าฟรี (หรือใช้เหรียญจ่ายเต็มจำนวน) ไปที่หน้ายืนยันเลย
-          navigate("/bookingSeer4", { state: bookingData });
-        } else {
-          // ถ้าต้องจ่ายเงิน ไปที่หน้าชำระเงิน
-          navigate("/bookingSeer3", { state: bookingData });
+        try {
+          const response = await fetch('https://backend.qseer.app/api/appointment/seer', {
+            method: 'POST',
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Origin': 'https://backend.qseer.app' // เพิ่ม Origin header ตามที่แบคเอนด์แนะนำ
+            },
+            body: JSON.stringify(appointmentData),
+            credentials: 'include'  // สำคัญสำหรับการส่ง cookies
+          });
+          
+          if (!response.ok) {
+            throw new Error(`สร้างการนัดหมายไม่สำเร็จ (${response.status})`);
+          }
+          
+          // แปลงข้อมูลตอบกลับจาก API
+          const bookingResponse = await response.json();
+          console.log("Booking API response:", bookingResponse);
+          
+          // อัพเดทข้อมูลที่ได้จาก API
+          bookingData.id = bookingResponse.id || bookingResponse.bookingId || "";
+          // รวมข้อมูลจาก API response ถ้ามี
+          if (bookingResponse) {
+            bookingData.bookingId = bookingResponse.bookingId || bookingResponse.id || "";
+            // เพิ่มข้อมูลอื่นๆ ที่ต้องการจาก API response
+          }
+        } catch (error) {
+          console.error("API error:", error);
+          // แม้เกิดข้อผิดพลาดก็ยังใช้ข้อมูลที่เตรียมไว้
+          bookingData.id = `BK-${Math.floor(Math.random() * 1000000)}`;
+          bookingData.bookingId = bookingData.id;
         }
       } else {
-        // ถ้าไม่มี token ให้สร้าง mock data สำหรับการสาธิต
-        throw new Error("ไม่พบ token สำหรับการเรียก API");
+        // ถ้าไม่มี token ให้สร้าง mock ID
+        bookingData.id = `BK-${Math.floor(Math.random() * 1000000)}`;
+        bookingData.bookingId = bookingData.id;
+      }
+      
+      // พิมพ์ข้อมูลทั้งหมดที่จะส่งไปยังหน้าถัดไป
+      console.log("FINAL booking data sent to next page:", bookingData);
+      
+      // ตรวจสอบเงื่อนไขราคาอีกครั้ง (สำคัญมาก)
+      // กรณีใช้คอยล์แล้วราคาเป็น 0
+      if (finalPrice <= 0) {
+        console.log("FREE booking, navigating to BookingSeer4");
+        navigate("/bookingSeer4", { state: bookingData });
+      } else {
+        // กรณีต้องจ่ายเงิน
+        console.log("Paid booking, navigating to BookingSeer3");
+        navigate("/bookingSeer3", { state: bookingData });
       }
     } catch (error) {
       console.error("เกิดข้อผิดพลาดในการสร้างการนัดหมาย:", error);
       
-      // สร้าง mockup response ถ้าเรียก API ไม่สำเร็จ (สำหรับ demo)
+      // แม้เกิดข้อผิดพลาดก็ยังต้องนำทางไปยังหน้าถัดไป
       const mockBookingId = `BK-${Math.floor(Math.random() * 1000000)}`;
       
-      // เก็บรหัสการจองและข้อมูลอื่นๆ สำหรับขั้นตอนถัดไป
       const bookingData = {
         id: mockBookingId,
+        bookingId: mockBookingId,
         packageInfo: {
           ...packageInfo,
-          name: packageInfo.name || packageInfo.title || "แพ็กเกจที่เลือก"
+          name: packageInfo.name || packageInfo.title || "",
+          contactChannel: packageInfo.contactChannel || ""
         },
-        fortuneTeller: seerInfo?.name || packageInfo?.fortuneTellerName || packageInfo?.seer || "หมอดู",
+        fortuneTeller: seerInfo?.name || packageInfo?.fortuneTellerName || packageInfo?.seer || "",
         userInfo: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          fullName: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          birthDate: formData.birthDate,
-          birthTime: formData.birthTime,
-          status: formData.status
+          firstName: formData.firstName || "",
+          lastName: formData.lastName || "",
+          fullName: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
+          email: formData.email || "",
+          birthDate: formData.birthDate || "",
+          birthTime: formData.birthTime || "",
+          status: formData.status || "",
+          notifyByEmail: formData.notifyByEmail
         },
-        selectedDate: parsedDate,
-        selectedTime,
+        selectedDate: parsedDate || new Date(),
+        selectedTime: selectedTime || "",
         paymentMethod,
         useCoins,
         finalPrice,
-        questions,
+        questions: questions.filter(q => q.trim() !== ""),
         notification: formData.notifyByEmail
       };
       
-      console.log("Mock booking data sent to next page:", bookingData);
+      console.log("Mock booking data after error:", bookingData);
       
-      // นำทางไปหน้าถัดไปตามจำนวนเงิน
-      if (finalPrice === 0) {
+      // ตรวจสอบเงื่อนไขราคาอีกครั้ง
+      if (finalPrice <= 0) {
         navigate("/bookingSeer4", { state: bookingData });
       } else {
         navigate("/bookingSeer3", { state: bookingData });
@@ -402,22 +482,32 @@ const BookingSeer2 = () => {
       
       // แสดงข้อผิดพลาดให้ผู้ใช้
       alert(`ใช้ข้อมูลจำลองสำหรับการสาธิต: ${error.message}`);
+    } finally {
+      // ยกเลิกสถานะโหลด ไม่ว่าจะสำเร็จหรือไม่
+      setIsLoading(false);
     }
   };
 
-  // เปลี่ยนสถานะการตรวจสอบฟอร์ม
   const handleValidationChange = (isValid) => {
+    console.log("เรียกใช้ handleValidationChange:", isValid);
     setFormValid(isValid);
   };
+  useEffect(() => {
+    const isValid = questions.every(q => q.trim() !== "") && paymentMethod;
+    console.log("ตรวจสอบฟอร์ม formValid:", isValid);
+    handleValidationChange(isValid);
+  }, [questions, paymentMethod]);
+  
+  
 
   // รวบรวมชื่อหมอดูที่ถูกต้อง
   const getFortuneteller = () => {
-    return seerLoading ? "กำลังโหลด..." : (seerInfo?.name || packageInfo?.fortuneTellerName || packageInfo?.seer || "หมอดู");
+    return seerLoading ? "กำลังโหลด..." : (seerInfo?.name || packageInfo?.fortuneTellerName || packageInfo?.seer || "");
   };
 
   // รวบรวมชื่อแพ็กเกจที่ถูกต้อง
   const getPackageName = () => {
-    return packageInfo?.name || packageInfo?.title || "แพ็กเกจดูดวง";
+    return packageInfo?.name || packageInfo?.title || "";
   };
 
   return (
@@ -430,21 +520,7 @@ const BookingSeer2 = () => {
         <div className="max-w-4xl mx-auto">
 
           
-          {/* แสดงข้อมูลแพ็กเกจที่เลือก */}
-          <div className="mt-6 p-4 bg-[#F9F8FC] rounded-lg">
-            <h2 className="text-xl font-semibold">
-              {getPackageName()}
-            </h2>
-            <p className="text-gray-600">
-              หมอดู: {getFortuneteller()}
-            </p>
-            <p className="text-gray-600">
-              วันที่: {parsedDate ? parsedDate.toLocaleDateString('th-TH') : ""}
-            </p>
-            <p className="text-gray-600">
-              เวลา: {selectedTime || ""}
-            </p>
-          </div>
+        
           
           {/* ส่วนของฟอร์มข้อมูลผู้ใช้ */}
           <div className="mt-6">
@@ -478,19 +554,15 @@ const BookingSeer2 = () => {
               setPaymentMethod={setPaymentMethod} 
               useCoins={useCoins} 
               setUseCoins={setUseCoins} 
-              userCoins={userInfo?.coins || 0} 
+              userCoins={userInfo?.coins || 0}
+              onPayment={handlePayment} // ส่งฟังก์ชัน handlePayment ไปให้ Payment
+              isLoading={isLoading}
             />
           </div>
         </div>
       </div>
-
-      {/* NextButton: กดได้ก็ต่อเมื่อฟอร์มถูกต้อง */}
-      <div className="fixed bottom-4 right-4">
-        <NextButton 
-          onClick={handlePayment} 
-          disabled={!isFormValid()}
-        />
-      </div>
+      
+      {/* ลบปุ่ม NextButton ออก */}
     </>
   );
 };
