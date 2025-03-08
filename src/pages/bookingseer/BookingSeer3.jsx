@@ -1,24 +1,127 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../../pages/Login/contexts/AuthContext"; // ปรับเส้นทางตามโครงสร้างโฟลเดอร์ของคุณ
 import Images from "../../assets"; 
-import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar";
+import axios from "axios";
 
 const BookingSeer3 = () => {
   const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // ✅ ควบคุมการแสดงผล Popup
-  
+  // ส่วนที่รับข้อมูลจาก BookingSeer2
+const location = useLocation();
+const { user } = useContext(AuthContext);
 
-  // ⏳ นับเวลาถอยหลัง
-  // ✅ ใช้ useEffect ควบคุมให้ Popup หายไปเองใน 3 วินาที
+// รับค่าจาก BookingSeer2 แบบปรับปรุงใหม่
+const bookingData = location.state || {};
+const { 
+  packageInfo, 
+  finalPrice, 
+  userInfo, 
+  questions, 
+  selectedDate, 
+  selectedTime,
+  fortuneTeller, // ชื่อหมอดูที่ส่งมาจาก BookingSeer2
+  id // รหัสการจองที่ได้จาก API
+} = bookingData;
+
+// ตรวจสอบว่ามีข้อมูลที่จำเป็นหรือไม่
 useEffect(() => {
-  if (isPopupOpen) {
-    const timer = setTimeout(() => {
-      setIsPopupOpen(false);
-    }, 1000); // 1 วินาที
-    return () => clearTimeout(timer);
+  console.log("BookingSeer3 received data:", bookingData);
+  
+  if (!finalPrice) {
+    console.error("ไม่พบข้อมูลราคา");
+    navigate("/bookingSeer2");
   }
-}, [isPopupOpen]);
+}, [finalPrice, navigate, bookingData]);
+
+
+  
+  // QR Code state
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [qrLoading, setQrLoading] = useState(true);
+  const [qrError, setQrError] = useState(null);
+  
+  // นับเวลาถอยหลัง state
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [expiryTime, setExpiryTime] = useState("");
+  
+  // ดึง QR Code จาก API
+  useEffect(() => {
+    const fetchQrCode = async () => {
+      try {
+        setQrLoading(true);
+        
+        // ตรวจสอบข้อมูลที่จำเป็น
+        if (!finalPrice) {
+          throw new Error("ไม่พบข้อมูลราคา กรุณากลับไปเลือกแพ็คเกจใหม่");
+        }
+        
+        // ตรวจสอบว่ามีการล็อกอินหรือไม่
+        if (!user) {
+          throw new Error("ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่");
+        }
+        
+        // เรียกใช้ API ด้วย withCredentials เพื่อส่ง cookies
+        const response = await axios.get(
+          `https://backend.qseer.app/api/transaction/qr_promptpay?amount=${finalPrice}`, 
+          {
+            headers: {
+              'accept': 'text/plain'
+            },
+            withCredentials: true // สำคัญ! ทำให้ browser ส่ง cookies ไปด้วย
+          }
+        );
+        
+        // กำหนด URL ของ QR code จาก response
+        setQrCodeUrl(response.data);
+        setQrLoading(false);
+        
+      } catch (error) {
+        console.error("Error fetching QR code:", error);
+        
+        // จัดการข้อผิดพลาดแตกต่างกันตามสาเหตุ
+        if (error.message.includes("ไม่พบข้อมูลราคา")) {
+          setQrError(error.message);
+          // redirect กลับไปที่ BookingSeer2 หลังจากผ่านไปสักพัก
+          setTimeout(() => navigate("/bookingSeer2"), 3000);
+        } else if (error.response && error.response.status === 401) {
+          setQrError("Token หมดอายุหรือไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่");
+          setTimeout(() => navigate("/login"), 3000);
+        } else {
+          setQrError(error.message || "ไม่สามารถโหลด QR Code ได้");
+        }
+        
+        setQrLoading(false);
+      }
+    };
+    
+    fetchQrCode();
+    
+    // คำนวณเวลาหมดอายุ
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15);
+    setExpiryTime(now.toLocaleString('th-TH', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }));
+    
+  }, [finalPrice, navigate, user]);
+
+  // แสดง Popup เพียง 1 วินาที
+  useEffect(() => {
+    if (isPopupOpen) {
+      const timer = setTimeout(() => {
+        setIsPopupOpen(false);
+      }, 1000); // 1 วินาที
+      return () => clearTimeout(timer);
+    }
+  }, [isPopupOpen]);
+  
+  // นับเวลาถอยหลัง
   useEffect(() => {
     if (timeLeft <= 0) return;
     const timer = setInterval(() => {
@@ -27,90 +130,188 @@ useEffect(() => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // 🕒 แปลงเวลาถอยหลังเป็น นาที : วินาที
+  // แปลงเวลาถอยหลังเป็น นาที : วินาที
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes} นาที ${secs} วินาที`;
   };
+  
+  // ฟังก์ชันบันทึก QR Code
+  const handleSaveQR = () => {
+    // ในสภาพแวดล้อมจริง อาจจะใช้ canvas-to-blob หรือ html-to-image libraries
+    // แต่ในที่นี้เราจะแค่แสดง popup
+    setIsPopupOpen(true);
+  };
+
+  // ฟังก์ชันเมื่อคลิกปุ่มตกลง
+  const handleConfirm = () => {
+    navigate("/bookingSeer4", { state: bookingData });
+  };
+
+  // ฟังก์ชันกลับไปหน้า login
+  const handleReturnToLogin = () => {
+    navigate("/login");
+  };
+
+  // ฟังก์ชันกลับไปหน้า BookingSeer2
+  const handleReturnToBookingSeer2 = () => {
+    navigate("/bookingSeer2");
+  };
+
+  // แสดง Loading
+  if (qrLoading) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+          <Navbar />
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#65558F]"></div>
+          <p className="mt-4 text-gray-600">กำลังโหลด QR Code...</p>
+        </div>
+      </>
+    );
+  }
+
+  // แสดง Error
+  if (qrError) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+          <Navbar />
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="bg-red-50 p-6 rounded-lg max-w-md">
+            <h3 className="text-red-700 font-medium text-lg">เกิดข้อผิดพลาด</h3>
+            <p className="text-red-600 mt-2">{qrError}</p>
+            {qrError.includes("ราคา") ? (
+              <button 
+                className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
+                onClick={handleReturnToBookingSeer2}
+              >
+                กลับไปเลือกแพ็คเกจ
+              </button>
+            ) : qrError.includes("token") || qrError.includes("ผู้ใช้") ? (
+              <button 
+                className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
+                onClick={handleReturnToLogin}
+              >
+                กลับไปหน้าเข้าสู่ระบบ
+              </button>
+            ) : (
+              <button 
+                className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
+                onClick={() => window.location.reload()}
+              >
+                ลองใหม่
+              </button>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // หากไม่มี finalPrice ให้กลับไปที่ BookingSeer2
+  if (!finalPrice) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+          <Navbar />
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="bg-red-50 p-6 rounded-lg max-w-md">
+            <h3 className="text-red-700 font-medium text-lg">ไม่พบข้อมูลราคา</h3>
+            <p className="text-red-600 mt-2">กรุณากลับไปเลือกแพ็คเกจใหม่</p>
+            <button 
+              className="mt-4 bg-[#65558F] text-white px-4 py-2 rounded-md"
+              onClick={() => navigate("/bookingSeer2")}
+            >
+              กลับไปเลือกแพ็คเกจ
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-    {/* Navbar ตรึงด้านบน */}
-    <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-      <Navbar />
-    </div>
-    <div className="flex flex-col items-center p-6">
-      {/* 🛑 กล่องข้อมูลการชำระเงิน */}
-      <div className="border rounded-lg p-6 shadow-md bg-white max-w-lg w-full">
-        {/* 💰 แสดงยอดชำระ */}
-        <div className="flex justify-between text-lg font-semibold">
-          <span>ยอดชำระเงิน</span>
-          <span>49.00 บาท</span>
-        </div>
-
-        {/* ⏳ ระยะเวลาชำระเงิน */}
-        <div className="flex justify-between text-lg mt-2">
-          <span>กรุณาชำระภายใน</span>
-          <span>{formatTime(timeLeft)}</span>
-        </div>
-        <div className="text-sm text-gray-700 text-right mt-2">
-          <span>หมดเวลา 24 กุมภาพันธ์ 2568, 3.00 น.</span>
-        </div>
-
-        {/* 🔳 QR Code สำหรับชำระเงิน */}
-        <div className="flex flex-col items-center mt-4">
-          <img src={Images.qr} alt="QR Code" className="w-60 mt-2" />
-          <p className="text-lg font-semibold mt-2 text-[#65558F]">49.00 บาท</p>
-          <p className="text-gray-600 text-sm">บัญชี: นางสาวสุรางคนางค์ เกตุยั่งยืนวงศ์ </p>
-        </div>
+      {/* Navbar ตรึงด้านบน */}
+      <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        <Navbar />
       </div>
+      <div className="flex flex-col items-center p-6 mt-16">
+        {/* กล่องข้อมูลการชำระเงิน */}
+        <div className="border rounded-lg p-6 shadow-md bg-white max-w-lg w-full">
+          {/* แสดงยอดชำระ */}
+          <div className="flex justify-between text-lg font-semibold">
+            <span>ยอดชำระเงิน</span>
+            <span>{finalPrice} บาท</span>
+          </div>
 
-      {/* 🔘 ปุ่มการกระทำ */}
-<div className="flex gap-6 mt-8">
-  {/* ปุ่ม บันทึก QR (ขอบม่วง, พื้นหลังขาว, ตัวอักษรม่วง) */}
-  <button
-    className="px-12 py-4 rounded-lg border-2 border-[#8677A7] font-semibold text-[#65558F] text-lg bg-white hover:bg-[#F4F1FA] transition"
-    onClick={() => setIsPopupOpen(true)}
-  >
-    บันทึก QR
-  </button>
+          {/* ระยะเวลาชำระเงิน */}
+          <div className="flex justify-between text-lg mt-2">
+            <span>กรุณาชำระภายใน</span>
+            <span>{formatTime(timeLeft)}</span>
+          </div>
+          <div className="text-sm text-gray-700 text-right mt-2">
+            <span>หมดเวลา {expiryTime}</span>
+          </div>
 
-  {/* ปุ่ม ตกลง (พื้นหลังม่วง, ตัวอักษรสีขาว) */}
-  <button
-    className="px-12 py-4 rounded-lg font-semibold text-white bg-[#8677A7] hover:bg-[#564477] text-lg transition"
-    onClick={() => navigate("/bookingSeer4")}
-  >
-    ตกลง
-  </button>
-</div>
+          {/* QR Code สำหรับชำระเงิน */}
+          <div className="flex flex-col items-center mt-4">
+            {qrCodeUrl ? (
+              <img src={qrCodeUrl} alt="QR Code" className="w-60 mt-2" />
+            ) : (
+              <img src={Images.qr} alt="QR Code" className="w-60 mt-2" />
+            )}
+            <p className="text-lg font-semibold mt-2 text-[#65558F]">{finalPrice} บาท</p>
+            <p className="text-gray-600 text-sm">บัญชี: นางสาวสุรางคนางค์ เกตุยั่งยืนวงศ์ </p>
+          </div>
+        </div>
 
+        {/* ปุ่มการกระทำ */}
+        <div className="flex gap-6 mt-8">
+          {/* ปุ่ม บันทึก QR */}
+          <button
+            className="px-12 py-4 rounded-lg border-2 border-[#8677A7] font-semibold text-[#65558F] text-lg bg-white hover:bg-[#F4F1FA] transition"
+            onClick={handleSaveQR}
+          >
+            บันทึก QR
+          </button>
 
-      {/* ℹ️ ข้อความแนะนำการชำระเงิน */}
-      <div className="text-sm text-gray-700 mt-6 text-left max-w-lg">
-        <ol className="list-decimal pl-5 space-y-1">
-          <li>คลิกปุ่ม “บันทึก QR” หรือบันทึกหน้าจอ</li>
-          <li>เปิดแอปพลิเคชันธนาคารบนอุปกรณ์ของคุณ</li>
-          <li>เลือกไปที่ “สแกน” แล้วถ่ายหน้าจอ หรือกดไอคอน “รูปภาพ”</li>
-          <li>เลือกภาพที่คุณบันทึกไว้ และทำการชำระเงิน</li>
-          <li>หลังจากชำระเงินเสร็จสิ้น กรุณาตรวจสอบสถานะการชำระเงินในหน้า “ประวัติการเติมเงิน”</li>
-          <li>หากสถานะไม่มีการเปลี่ยนแปลง ให้ติดต่อ 095-708-3131</li>
-        </ol>
+          {/* ปุ่ม ตกลง */}
+          <button
+            className="px-12 py-4 rounded-lg font-semibold text-white bg-[#8677A7] hover:bg-[#564477] text-lg transition"
+            onClick={handleConfirm}
+          >
+            ตกลง
+          </button>
+        </div>
+
+        {/* ข้อความแนะนำการชำระเงิน */}
+        <div className="text-sm text-gray-700 mt-6 text-left max-w-lg">
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>คลิกปุ่ม "บันทึก QR" หรือบันทึกหน้าจอ</li>
+            <li>เปิดแอปพลิเคชันธนาคารบนอุปกรณ์ของคุณ</li>
+            <li>เลือกไปที่ "สแกน" แล้วถ่ายหน้าจอ หรือกดไอคอน "รูปภาพ"</li>
+            <li>เลือกภาพที่คุณบันทึกไว้ และทำการชำระเงิน</li>
+            <li>หลังจากชำระเงินเสร็จสิ้น กรุณาตรวจสอบสถานะการชำระเงินในหน้า "ประวัติการเติมเงิน"</li>
+            <li>หากสถานะไม่มีการเปลี่ยนแปลง ให้ติดต่อ 095-708-3131</li>
+          </ol>
+        </div>
+
+        {/* Popup Modal */}
+        {isPopupOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+              <h3 className="text-lg font-semibold text-center text-gray-800">บันทึก QR สำเร็จ</h3>
+            </div>
+          </div>
+        )}
       </div>
-
-    {/* ✅ Popup Modal (แสดง 3 วินาทีแล้วหายไป) */}
-{isPopupOpen && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
-    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-      <h3 className="text-lg font-semibold text-center text-gray-800">บันทึก QR สำเร็จ</h3>
-    </div>
-  </div>
-)}
-
-
-
- 
-    </div>
     </>
   );
 };
