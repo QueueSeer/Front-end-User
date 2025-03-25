@@ -1,30 +1,48 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Images from "../../assets"; // ✅ Import Images ให้เรียบร้อย
+import Images from "../../assets";
 
 const PaymentTable = ({ payments }) => {
   const navigate = useNavigate();
 
+  // ฟังก์ชันสำหรับการนำทางไปยังหน้ารายละเอียด
+  const handleNavigateToDetails = (payment) => {
+    // สร้าง URL พร้อมพารามิเตอร์ตามประเภทกิจกรรม
+    let targetUrl = "/queuedetails";
+    
+    if (payment.activityId) {
+      if (payment.activityType === "appointment") {
+        targetUrl = `/appointment/${payment.activityId}`;
+      } else if (payment.activityType === "question") {
+        targetUrl = `/question/${payment.activityId}`;
+      } else if (payment.activityType === "auction") {
+        targetUrl = `/auction/${payment.activityId}`;
+      }
+    }
+    
+    navigate(targetUrl);
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-4">
+    <div className="bg-white dark:bg-gray-800 p-4 overflow-x-auto">
       {/* Table */}
       <table className="w-full text-left border-collapse text-sm">
         <thead>
-          <tr className="text-gray-700 text-base ">
-            <th className="px-4 py-4 ">วันที่ซื้อ</th>
+          <tr className="text-gray-700 text-base">
+            <th className="px-4 py-4">วันที่ซื้อ</th>
             <th className="px-4 py-4">ชื่อแพ็กเกจ</th>
-            <th className="px-4 py-4 ">สถานะ</th>
+            <th className="px-4 py-4">สถานะ</th>
             <th className="px-4 py-4">หมอดู</th>
-            <th className="px-4 py-4 ">จำนวนคอยน์</th>
-            <th className="px-4 py-4 text-left">รายละเอียด</th> {/* ✅ แก้ text-left */}
+            <th className="px-4 py-4">จำนวนคอยน์</th>
+            <th className="px-4 py-4 text-left">รายละเอียด</th>
           </tr>
         </thead>
         <tbody>
           {payments.map((payment, index) => (
             <tr key={index} className="border-b border-gray-200">
-              <td className="px-4 py-5 ">{payment.purchaseDate}</td>
+              <td className="px-4 py-5">{payment.purchaseDate}</td>
               <td className="px-4 py-5">{payment.packageName}</td>
-              <td className="px-4 py-5 ">
+              <td className="px-4 py-5">
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
                     payment.status === "รอเข้ารับบริการ"
@@ -40,7 +58,10 @@ const PaymentTable = ({ payments }) => {
               <td className="px-4 py-3.5">{payment.fortuneTeller}</td>
               <td className="px-4 py-3.5 text-center">{payment.coinAmount.toLocaleString()}</td>
               <td className="px-4 py-3.5 text-left cursor-pointer text-purple-700 hover:text-purple-600">
-                <div className="flex items-center gap-2" onClick={() => navigate("/queuedetails")}>
+                <div 
+                  className="flex items-center gap-2" 
+                  onClick={() => handleNavigateToDetails(payment)}
+                >
                   <span>รายละเอียด</span>
                   <img src={Images.next2} alt="details" className="w-2 h-3" />
                 </div>

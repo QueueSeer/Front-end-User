@@ -1,32 +1,57 @@
 import React from "react";
 import Images from "../../../assets";
+import { useNavigate } from "react-router-dom";
 
 const SeerHeader = ({ onPrev, onNext, currentIndex, totalSeers }) => {
-    return (
-        <div className="flex justify-between items-center mb-4">
-            <div className="flex flex-col">
-                <h2 className="text-2xl font-bold flex items-center">
-                    <span className="w-2 h-6 bg-purple-700 mr-2"></span> หมอดูมาแรง
-                </h2>
-                <p className="text-gray-500 text-xl">เลือกหมอดูที่คุณชื่นชอบ</p>
-            </div>
-            {/* ซ่อนปุ่ม Next/Prev เฉพาะบนมือถือ */}
-            <div className="hidden sm:flex items-center gap-4">
-                <button className="border border-gray-400 px-4 py-1 rounded-full text-purple-700 text-xl font-medium">
-                    ทั้งหมด
-                </button>
-                <div className="flex items-center gap-2">
-                    <button onClick={onPrev} disabled={currentIndex === 0} className="p-2 rounded-full shadow-md">
-                        <img src={currentIndex === 0 ? Images.Arrowleft : Images.Arrowleftcolor} alt="prev" className="w-8 h-8" />
-                    </button>
-                    <span className="text-gray-600 text-xl">{currentIndex + 1} of {totalSeers}</span>
-                    <button onClick={onNext} disabled={currentIndex >= totalSeers - 3} className="p-2 rounded-full shadow-md">
-                        <img src={Images.ArrowRight} alt="next" className="w-8 h-8" />
-                    </button>
-                </div>
-            </div>
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    navigate("/search-booking-seer", { state: { category: "มาแรง" } });
+  };
+
+  return (
+    <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col">
+        <h2 className="text-2xl font-bold flex items-center">
+          <span className="w-2 h-6 bg-purple-700 mr-2"></span> หมอดูมาแรง
+        </h2>
+        <p className="text-gray-500 text-xl">เลือกหมอดูที่คุณชื่นชอบ</p>
+      </div>
+
+      <div className="hidden sm:flex items-center gap-4">
+        <button
+          className="border border-gray-400 px-4 py-1 rounded-full text-purple-700 text-xl font-medium"
+          onClick={handleViewAll}
+        >
+          ทั้งหมด
+        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onPrev}
+            disabled={currentIndex === 0}
+            className="p-2 rounded-full shadow-md"
+          >
+            <img
+              src={currentIndex === 0 ? Images.Arrowleft : Images.Arrowleftcolor}
+              alt="prev"
+              className="w-8 h-8"
+            />
+          </button>
+          <span className="text-gray-600 text-xl">
+            {currentIndex + 1} of {totalSeers}
+          </span>
+          <button
+            onClick={onNext}
+            disabled={currentIndex >= totalSeers - 3}
+            className="p-2 rounded-full shadow-md"
+          >
+            <img src={Images.ArrowRight} alt="next" className="w-8 h-8" />
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default SeerHeader;

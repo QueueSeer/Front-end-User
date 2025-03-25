@@ -1,77 +1,87 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 
 const ResetPassword = ({ isDarkMode }) => {
-  const { token } = useParams(); // รับ token จาก URL
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
+  const [isReset, setIsReset] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setMessage("รหัสผ่านไม่ตรงกัน กรุณาลองใหม่");
+      setMessage("รหัสผ่านไม่ตรงกัน");
       return;
     }
 
     try {
-      const response = await fetch(`https://your-api.com/api/reset-password/${token}`, {
-        method: "POST",
+      const response = await fetch("https://backend.qseer.app/api/user/password", {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ token, password }),
       });
 
       if (response.ok) {
-        setMessage("ตั้งค่ารหัสผ่านใหม่สำเร็จ! กรุณาเข้าสู่ระบบ");
-        setTimeout(() => navigate("/login"), 2000);
+        setIsReset(true);
+        setMessage("ตั้งค่ารหัสผ่านใหม่สำเร็จแล้ว");
       } else {
-        setMessage("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+        const data = await response.json();
+        setMessage(data.detail || "เกิดข้อผิดพลาด โปรดลองอีกครั้ง");
       }
     } catch (error) {
-      setMessage("ไม่สามารถตั้งค่ารหัสผ่านได้ โปรดลองใหม่ภายหลัง");
+      setMessage("ไม่สามารถตั้งรหัสผ่านได้ โปรดลองใหม่ภายหลัง");
     }
   };
 
   return (
-    <div className={`flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}>
-      <div className={`p-8 rounded-xl shadow-lg w-full max-w-lg sm:max-w-xl lg:max-w-2xl ${isDarkMode ? "bg-gray-800 text-white" : "bg-white"}`}>
+    <div className={`flex items-center justify-center min-h-screen px-4 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}>
+      <div className={`p-8 rounded-xl shadow-lg w-full max-w-lg ${isDarkMode ? "bg-gray-800 text-white" : "bg-white"}`}>
         <h2 className="text-3xl font-semibold mb-8 text-center">Reset Password</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label htmlFor="password" className={`block text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-              New Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className={`mt-2 p-3 w-full border rounded-lg focus:outline-none focus:ring-2 ${isDarkMode ? "border-gray-600 bg-gray-700 text-white focus:ring-purple-700" : "border-gray-300 bg-white text-gray-900 focus:ring-purple-500"}`}
-            />
-          </div>
-          <div className="mb-6">
-            <label htmlFor="confirm-password" className={`block text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirm-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className={`mt-2 p-3 w-full border rounded-lg focus:outline-none focus:ring-2 ${isDarkMode ? "border-gray-600 bg-gray-700 text-white focus:ring-purple-700" : "border-gray-300 bg-white text-gray-900 focus:ring-purple-500"}`}
-            />
-          </div>
-          <button type="submit" className="w-full py-3 px-6 rounded-lg bg-purple-500 text-white hover:bg-purple-600">
-            Set New Password
-          </button>
-        </form>
-        {message && <p className="mt-6 text-base text-center text-gray-500">{message}</p>}
+        {!isReset ? (
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="password" className="block text-lg font-medium">New Password</label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-2 p-3 w-full border rounded-lg focus:outline-none focus:ring-2"
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="confirmPassword" className="block text-lg font-medium">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="mt-2 p-3 w-full border rounded-lg focus:outline-none focus:ring-2"
+              />
+            </div>
+            <button type="submit" className="w-full py-3 px-6 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+              Set New Password
+            </button>
+          </form>
+        ) : (
+          <p className="mt-6 text-base text-center text-green-500">{message}</p>
+        )}
+        {message && !isReset && (
+          <p className="mt-4 text-base text-center text-red-500">{message}</p>
+        )}
+        <div className="mt-8 text-center text-base">
+          <Link to="/login" className="text-purple-500 hover:underline">
+            Back to Login
+          </Link>
+        </div>
       </div>
     </div>
   );

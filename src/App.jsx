@@ -28,6 +28,10 @@ import QueueHistory from "./pages/Menu/Queue/QueueHistory";
 import Queuedetails from "./pages/Menu/Queue/Queuedetails";
 import PaymentHistoryPage from "./pages/Menu/PaymentHistoryPage";
 import ProfileMe from "./pages/Profile/Profile";
+import EmailVerification from "./pages/Login/EmailVerification";
+import SearchBookingPage from './pages/SearchBooking/SearchBookingPage';
+import SearchBookingSeer from './pages/SearchBooking/SearchBookingSeer';
+
 
 import "./index.css";
 
@@ -38,7 +42,7 @@ export default function App() {
     <AuthProvider> {/* ครอบ Router ด้วย AuthProvider */}
       <Router>
         <Routes>
-          <Route path="/" element={<Login/>} />
+          <Route path="/" element={<SearchBookingSeer />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
@@ -61,6 +65,9 @@ export default function App() {
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
           <Route path="/qr-summary" element={<QrSummary/>} />
+          <Route path="/EmailVerification" element={<EmailVerification/>} />
+          <Route path="/search-booking" element={<SearchBookingPage />} />
+          <Route path="/search-booking-seer" element={<SearchBookingSeer />} />
           
           <Route
             path="/bookingSeer2"

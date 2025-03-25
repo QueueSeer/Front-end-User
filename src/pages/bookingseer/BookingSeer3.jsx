@@ -3,43 +3,46 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../pages/Login/contexts/AuthContext"; // ปรับเส้นทางตามโครงสร้างโฟลเดอร์ของคุณ
 import Images from "../../assets"; 
 import Navbar from "../../components/navbar";
+import Loading from "../../components/isloading/Loading"; // Import Loading component
 import axios from "axios";
 
 const BookingSeer3 = () => {
   const navigate = useNavigate();
   // ส่วนที่รับข้อมูลจาก BookingSeer2
-const location = useLocation();
-const { user } = useContext(AuthContext);
+  const location = useLocation();
+  const { user } = useContext(AuthContext);
 
-// รับค่าจาก BookingSeer2 แบบปรับปรุงใหม่
-const bookingData = location.state || {};
-const { 
-  packageInfo, 
-  finalPrice, 
-  userInfo, 
-  questions, 
-  selectedDate, 
-  selectedTime,
-  fortuneTeller, // ชื่อหมอดูที่ส่งมาจาก BookingSeer2
-  id // รหัสการจองที่ได้จาก API
-} = bookingData;
+  // รับค่าจาก BookingSeer2 แบบปรับปรุงใหม่
+  const bookingData = location.state || {};
+  const { 
+    packageInfo, 
+    finalPrice, 
+    userInfo, 
+    questions, 
+    selectedDate, 
+    selectedTime,
+    fortuneTeller, // ชื่อหมอดูที่ส่งมาจาก BookingSeer2
+    id // รหัสการจองที่ได้จาก API
+  } = bookingData;
 
-// ตรวจสอบว่ามีข้อมูลที่จำเป็นหรือไม่
-useEffect(() => {
-  console.log("BookingSeer3 received data:", bookingData);
-  
-  if (!finalPrice) {
-    console.error("ไม่พบข้อมูลราคา");
-    navigate("/bookingSeer2");
-  }
-}, [finalPrice, navigate, bookingData]);
-
-
+  // ตรวจสอบว่ามีข้อมูลที่จำเป็นหรือไม่
+  useEffect(() => {
+    console.log("BookingSeer3 received data:", bookingData);
+    
+    if (!finalPrice) {
+      console.error("ไม่พบข้อมูลราคา");
+      navigate("/bookingSeer2");
+    }
+    
+    // เลื่อนหน้าไปยังส่วนบนของหน้าเมื่อ component ถูกโหลด
+    window.scrollTo(0, 0);
+  }, [finalPrice, navigate, bookingData]);
   
   // QR Code state
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [qrLoading, setQrLoading] = useState(true);
   const [qrError, setQrError] = useState(null);
+  const [isConfirmLoading, setIsConfirmLoading] = useState(false); // State สำหรับ loading เมื่อกดตกลง
   
   // นับเวลาถอยหลัง state
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที
@@ -146,7 +149,13 @@ useEffect(() => {
 
   // ฟังก์ชันเมื่อคลิกปุ่มตกลง
   const handleConfirm = () => {
-    navigate("/bookingSeer4", { state: bookingData });
+    setIsConfirmLoading(true); // แสดง loading
+    
+    // จำลองการตรวจสอบการชำระเงิน
+    setTimeout(() => {
+      setIsConfirmLoading(false); // ซ่อน loading
+      navigate("/bookingSeer4", { state: bookingData });
+    }, 3000); // แสดง loading 3 วินาที
   };
 
   // ฟังก์ชันกลับไปหน้า login
@@ -238,6 +247,12 @@ useEffect(() => {
 
   return (
     <>
+      {/* Loading component - แสดงเมื่อกดปุ่มตกลง */}
+      <Loading 
+        isVisible={isConfirmLoading} 
+        message="กำลังตรวจสอบการชำระเงิน..." 
+      />
+      
       {/* Navbar ตรึงด้านบน */}
       <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
         <Navbar />
@@ -278,6 +293,7 @@ useEffect(() => {
           <button
             className="px-12 py-4 rounded-lg border-2 border-[#8677A7] font-semibold text-[#65558F] text-lg bg-white hover:bg-[#F4F1FA] transition"
             onClick={handleSaveQR}
+            disabled={isConfirmLoading}
           >
             บันทึก QR
           </button>
@@ -286,6 +302,7 @@ useEffect(() => {
           <button
             className="px-12 py-4 rounded-lg font-semibold text-white bg-[#8677A7] hover:bg-[#564477] text-lg transition"
             onClick={handleConfirm}
+            disabled={isConfirmLoading}
           >
             ตกลง
           </button>
