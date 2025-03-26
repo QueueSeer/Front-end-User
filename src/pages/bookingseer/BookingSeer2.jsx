@@ -598,11 +598,12 @@ const handlePayment = async () => {
           {/* ส่วนของคำถามสำหรับการดูดวง */}
           <div className="mt-6">
             <h3 className="text-lg font-semibold">คำถามสำหรับการดูดวง</h3>
-            <QuestionForm 
-              numQuestions={numQuestions} 
-              questions={questions} 
-              onChange={handleQuestionChange} 
+            <QuestionForm
+              numQuestions={packageInfo?.question_limit ?? 4}
+              questions={questions}
+              onChange={handleQuestionChange}
             />
+
           </div>
 
           {/* ส่วนของการชำระเงิน */}
