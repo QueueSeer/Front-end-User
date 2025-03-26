@@ -6,39 +6,39 @@ import { useNavigate } from "react-router-dom";
 const PackageCard = ({ packageInfo }) => {
     const navigate = useNavigate();
 
-    // ตรวจสอบว่า packageInfo มีโครงสร้างเดิมหรือโครงสร้าง API
-    const isApiFormat = packageInfo.hasOwnProperty('seer_display_name');
-    
-    // แปลงข้อมูลให้เข้ากับรูปแบบที่ต้องการ
-    const packageData = isApiFormat 
+
+    const adaptedPackage = packageInfo.hasOwnProperty('title') 
         ? {
             id: packageInfo.id,
-            title: packageInfo.name,
-            category: packageInfo.category || packageInfo.reading_type,
-            seer: packageInfo.seer_display_name,
-            rating: parseFloat(packageInfo.seer_rating),
-            reviews: packageInfo.seer_review_count,
-            price: parseFloat(packageInfo.price),
+            name: packageInfo.title,
+            category: packageInfo.category,
+            reading_type: packageInfo.category,
+            seer_display_name: packageInfo.seer,
+            seer_rating: packageInfo.rating,
+            seer_review_count: packageInfo.reviews,
+            price: packageInfo.price.toString(),
             duration: packageInfo.duration,
-            icon: packageInfo.foretell_channel === "chat" ? "chat" : 
-                  packageInfo.foretell_channel === "phone" ? "call" : "video",
+            foretell_channel: packageInfo.icon === "call" ? "phone" : packageInfo.icon,
             image: packageInfo.image,
-            seerImage: packageInfo.seer_image
+            seer_image: packageInfo.seerImage
         }
-        : packageInfo; // ใช้ข้อมูลเดิมถ้าไม่ใช่รูปแบบ API
+        : packageInfo; // ใช้ข้อมูล API ตามที่ส่งมา
 
-    const iconMap = {
-        call: Images.call,
-        chat: Images.ChatLine,
-        video: Images.videocall,
+    // แปลง foretell_channel เป็นไอคอน
+    const getIcon = (channel) => {
+        switch(channel) {
+            case "phone": return Images.call;
+            case "chat": return Images.ChatLine;
+            case "video": return Images.videocall;
+            default: return Images.call;
+        }
     };
 
     // ฟังก์ชันนำทางไปยังหน้า BookingSeer
     const handleBooking = () => {
-        // ส่งข้อมูลในรูปแบบเดิมเพื่อรักษาความเข้ากันได้กับหน้า BookingSeer
         navigate("/bookingseer", { 
             state: { 
-                packageInfo: isApiFormat ? packageData : packageInfo 
+                packageInfo: adaptedPackage 
             } 
         });
     };
@@ -48,51 +48,51 @@ const PackageCard = ({ packageInfo }) => {
             {/* รูปภาพ + ป้ายกำกับ */}
             <div className="relative w-full h-40">
                 <img 
-                    src={packageData.image || Images.pic} 
-                    alt={packageData.title} 
+                    src={adaptedPackage.image || Images.pic} 
+                    alt={adaptedPackage.name} 
                     className="w-full h-full object-cover" 
                 />
                 {/* หมวดหมู่แสดงที่มุมซ้ายล่าง */}
                 <span className="absolute bottom-2 left-2 bg-[#8677A7] text-white px-3 py-1 rounded-full text-xs">
-                    {packageData.category}
+                    {adaptedPackage.category || adaptedPackage.reading_type}
                 </span>
             </div>
 
             {/* รายละเอียดแพ็กเกจ */}
             <div className="p-4">
-                <h3 className="mt-2 font-semibold text-gray-800">{packageData.title}</h3>
+                <h3 className="mt-2 font-semibold text-gray-800">{adaptedPackage.name}</h3>
                 
                 <div className="flex items-center mt-2">
                     <img 
-                        src={packageData.seerImage || Images.profileshot} 
-                        alt={packageData.seer} 
+                        src={adaptedPackage.seer_image || Images.profileshot} 
+                        alt={adaptedPackage.seer_display_name} 
                         className="w-6 h-6 rounded-full mr-2" 
                     />
-                    <span className="text-sm text-gray-600">{packageData.seer}</span>
+                    <span className="text-sm text-gray-600">{adaptedPackage.seer_display_name}</span>
                 </div>
 
                 <div className="flex items-center mt-1">
                     <span className="text-sm text-gray-700 font-semibold mr-1">
-                        {typeof packageData.rating === 'number' ? packageData.rating.toFixed(1) : parseFloat(packageData.rating).toFixed(1)}
+                        {parseFloat(adaptedPackage.seer_rating).toFixed(1)}
                     </span>
-                    <SeerRating rating={packageData.rating} />
-                    <span className="text-sm text-gray-500 ml-1">{packageData.reviews} reviews</span>
+                    <SeerRating rating={parseFloat(adaptedPackage.seer_rating)} />
+                    <span className="text-sm text-gray-500 ml-1">{adaptedPackage.seer_review_count} reviews</span>
                 </div>
 
                 {/* ราคา */}
                 <div className="mt-3 text-2xl font-bold text-purple-900">
-                    {typeof packageData.price === 'number' ? packageData.price : parseFloat(packageData.price)} Coins
+                    {parseFloat(adaptedPackage.price)} Coins
                 </div>
 
                 {/* ระยะเวลา + ปุ่มจอง */}
                 <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center text-gray-500 text-sm">
                         <img 
-                            src={iconMap[packageData.icon]} 
+                            src={getIcon(adaptedPackage.foretell_channel)} 
                             alt="duration" 
                             className="w-8 h-8 mr-2" 
                         />
-                        {packageData.duration} นาที
+                        {adaptedPackage.duration} นาที
                     </div>
                     <button 
                         onClick={handleBooking} 
