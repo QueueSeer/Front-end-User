@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import UserMenu from "./UserMenu";
-import md5 from "md5"; // ต้องติดตั้ง: npm install md5
+import md5 from "md5"; 
 
 export default function UserProfile() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
