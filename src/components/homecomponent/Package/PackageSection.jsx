@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import PackageHeader from "./PackageHeader";
+import React, { useEffect, useState } from "react";
+
 import PackageCard from "./PackageCard";
+import PackageHeader from "./PackageHeader";
 import axios from "axios";
 
 const PackageSection = () => {
@@ -17,9 +18,6 @@ const PackageSection = () => {
 
     const fetchPackages = async () => {
         try {
-            // เรียกใช้ API เพื่อดึงข้อมูลแพ็คเกจ
-            // ในกรณีที่ API ยังไม่พร้อมใช้งาน เราจะใช้ข้อมูลจำลองแทน
-            
             // ข้อมูลจำลอง (mock data) สำหรับการพัฒนา
             const mockApiResponse = {
                 packages: [
@@ -110,9 +108,19 @@ const PackageSection = () => {
                     }
                 ]
             };
-
+            const params = new URLSearchParams();
+            params.append("limit", 5);
+            params.append("direction", "asc");
+            const apiResponse = await fetch(`https://backend.qseer.app/api/seer/package/fortune/search?${params}`,{
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json"
+                }
+            }).then((res) => res.json())
+            console.log(apiResponse)
             
             setPackages(mockApiResponse.packages);
+            setPackages(apiResponse.packages);
             setLoading(false);
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการโหลดข้อมูลแพ็คเกจ:", error);
@@ -127,7 +135,7 @@ const PackageSection = () => {
         title: pkg.name,
         category: pkg.category,
         seer: pkg.seer_display_name,
-        rating: pkg.seer_rating,
+        rating: pkg.seer_rating || 0,
         reviews: pkg.seer_review_count,
         price: parseFloat(pkg.price),
         duration: pkg.duration,

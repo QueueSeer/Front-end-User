@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+
 import Images from "../../assets"; // Import รูปจาก assets
 
 const HeaderSection = ({ packageInfo, setNumQuestions }) => {

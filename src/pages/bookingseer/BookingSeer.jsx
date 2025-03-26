@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../../components/navbar";
-import BookingSteps from "../../components/bookingcomponent/BookingSteps";
-import HeaderSection from "../../components/bookingcomponent/HeaderSection";
-import FullCalendarPage from "../../components/bookingcomponent/FullCalendarPage";
+
 import BackButton from "../../components/bookingcomponent/BackButton";
+import BookingSteps from "../../components/bookingcomponent/BookingSteps";
+import FullCalendarPage from "../../components/bookingcomponent/FullCalendarPage";
+import HeaderSection from "../../components/bookingcomponent/HeaderSection";
+import Navbar from "../../components/navbar";
 import NextButton from "../../components/bookingcomponent/NextButton";
 
 const BookingSeer = () => {
@@ -20,22 +21,41 @@ const BookingSeer = () => {
   // โหลด `packageInfo` จาก API ถ้าไม่มีค่าเข้ามา
   useEffect(() => {
     if (!packageInfo) {
-      fetch("http://localhost:5000/api/package/1") // เปลี่ยนเป็น API จริงเมื่อพร้อม
-        .then((response) => {
-          if (!response.ok) throw new Error("โหลดแพ็กเกจล้มเหลว");
-          return response.json();
-        })
-        .then((data) => {
-          setPackageInfo(data);
-          setNumQuestions(data.numQuestions || 4);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error fetching package:", err);
-          setError("ไม่สามารถโหลดแพ็กเกจได้");
-          setLoading(false);
-        });
-    }
+    /* packageInfo = {
+        seer_id: 1,
+        id: 1,
+        name: "Fate Seeker",
+        price: "100.00",
+        duration: 3600,
+        description: "Knowing won't change.",
+        question_limit: 0,
+        status: "published",
+        foretell_channel: "video",
+        reading_type: "tarot",
+        category: "love",
+        required_data: [
+          "name",
+          "birthdate"
+        ],
+        image: "",
+        date_created: "2025-02-23T23:47:22.149309+07:00"
+      }*/
+    fetch("http://localhost:5000/api/package/1") // เปลี่ยนเป็น API จริงเมื่อพร้อม
+      .then((response) => {
+        if (!response.ok) throw new Error("โหลดแพ็กเกจล้มเหลว");
+        return response.json();
+      })
+      .then((data) => {
+        setPackageInfo(data);
+        setNumQuestions(data.numQuestions || 4);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching package:", err);
+        setError("ไม่สามารถโหลดแพ็กเกจได้");
+        setLoading(false);
+      });
+    } 
   }, [packageInfo]);
 
   useEffect(() => {
