@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
 import ActionSearchBar from "../../components/Searchbar/ActionsearchBar";
 import PackageCard from "../../components/homecomponent/Package/PackageCard";
 import SidebarFilter from "../../components/Searchbar/SidebarFilter";

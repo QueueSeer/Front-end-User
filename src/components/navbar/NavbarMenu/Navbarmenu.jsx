@@ -9,7 +9,7 @@ const NavbarLinks = () => {
           <Link to="/homepage">หน้าหลัก</Link>
         </li>
         <li>
-          <Link to="/packages">แพ็กเกจ</Link>
+          <Link to="/search-booking">แพ็กเกจ</Link>
         </li>
         <li>
           <Link to="/top-up-coins">เติมโชค</Link>

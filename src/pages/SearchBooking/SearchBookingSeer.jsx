@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
 import AuctionSearchBar from "../../components/Auctioncomponent/AuctionSearchBar";
 import SidebarFilter from "../../components/Searchbar/SidebarFilter";
 import SeerCard from "../../components/homecomponent/SeerPopular/SeerCard";
