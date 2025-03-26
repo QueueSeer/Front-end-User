@@ -4,7 +4,7 @@ import LuckCard from "../../components/TopupComponent/LuckCard";
 import TopUpPackageCard from "../../components/TopupComponent/TopUpPackageCard";
 import PaymentOptionCard from "../../components/TopupComponent/PaymentOptionCard";
 import Images from "../../assets";
-import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
 
 const TopUpCoins = () => {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import FullCalendarPage from "../../components/Profilecomponent/FullCalendarPage
 import ProfileCard from "../../components/Profilecomponent/ProfileCard";
 import ActionButtons from "../../components/Profilecomponent/ActionButtons";
 import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
-import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
 
 
 const QseerSchedulePage = () => {
@@ -16,6 +16,7 @@ const QseerSchedulePage = () => {
   }, []);
 
   const seer = location.state?.seer || {
+    id: null, // เพิ่ม id เพื่อใช้กับ API
     profileImageUrl: "", 
     name: "ไม่พบข้อมูลหมอดู",
     category: "ไม่ระบุ",
@@ -42,6 +43,7 @@ const QseerSchedulePage = () => {
             experience={seer.experience}
             followers={seer.followers}
             rating={seer.rating}
+            seerId={seer.id} // ส่ง id ไปให้ ProfileCard เพื่อใช้กับ API
           />
           <ActionButtons />
         </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Images from "../../assets";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
 
 const SummaryPage = () => {
   const navigate = useNavigate();

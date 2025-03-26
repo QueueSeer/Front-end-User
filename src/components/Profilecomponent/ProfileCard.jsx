@@ -1,8 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Images from "./../../assets";
+import axios from "axios";
 
-const ProfileCard = ({ profileImageUrl, name, category, experience, followers, rating }) => {
+const ProfileCard = ({ 
+  profileImageUrl = null, 
+  name = "หมอดูเพียงฟ้า พาขวัญ", 
+  category = "ศาสตร์ไพ่ยิปซี", 
+  experience = "10+", 
+  followers = "0", 
+  rating = "0", 
+  seerId = null 
+}) => {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(followers);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if user is already following this seer when component mounts
+  useEffect(() => {
+    // You might need an API endpoint to check if the user is following a specific seer
+    // This is a placeholder - you would need to implement this endpoint on your backend
+    const checkFollowStatus = async () => {
+      try {
+        // Example API call to get user's followed seers
+        const response = await axios.get("/api/user/me/follows");
+        // Check if current seer is in the list of followed seers
+        const isAlreadyFollowing = response.data.some(follow => follow.seer_id === seerId);
+        setIsFollowing(isAlreadyFollowing);
+      } catch (error) {
+        console.error("Error checking follow status:", error);
+      }
+    };
+
+    if (seerId) {
+      checkFollowStatus();
+    }
+  }, [seerId]);
+
+  const handleFollowToggle = async () => {
+    if (!seerId) {
+      console.error("No seer ID provided");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (isFollowing) {
+        // Unfollow the seer
+        await axios.delete(`/api/user/me/follow/${seerId}`);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+      } else {
+        // Follow the seer
+        await axios.post(`/api/user/me/follow/${seerId}`);
+        setFollowerCount(prev => prev + 1);
+      }
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.error("Error toggling follow status:", error);
+      
+      // Handle specific error cases
+      if (error.response) {
+        if (error.response.status === 401) {
+          alert("กรุณาเข้าสู่ระบบก่อนดำเนินการ");
+        } else if (error.response.status === 404) {
+          alert("ไม่พบข้อมูลหมอดู");
+        } else {
+          alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-6 flex items-center space-x-6 border border-gray-200">
@@ -20,10 +89,11 @@ const ProfileCard = ({ profileImageUrl, name, category, experience, followers, r
             <p className="text-[#615E83] text-sm font-medium">{category}</p>
           </div>
           <button 
-            className={`border border-black px-4 py-1 rounded-lg font-medium transition-colors duration-300 ${isFollowing ? 'bg-[#420F75] text-white' : 'bg-white text-black hover:bg-gray-100'}`}
-            onClick={() => setIsFollowing(!isFollowing)}
+            className={`border border-black px-4 py-1 rounded-lg font-medium transition-colors duration-300 ${isFollowing ? 'bg-[#420F75] text-white' : 'bg-white text-black hover:bg-gray-100'} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            onClick={handleFollowToggle}
+            disabled={isLoading}
           >
-            {isFollowing ? "กำลังติดตาม" : "ติดตาม"}
+            {isLoading ? "กำลังดำเนินการ..." : (isFollowing ? "กำลังติดตาม" : "ติดตาม")}
           </button>
         </div>
         <hr className="border-gray-300 my-2" />
@@ -34,7 +104,7 @@ const ProfileCard = ({ profileImageUrl, name, category, experience, followers, r
             <span className="text-[#8677A7] text-sm font-medium">ประสบการณ์</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-black text-lg font-semibold">{followers}</span>
+            <span className="text-black text-lg font-semibold">{followerCount}</span>
             <span className="text-[#8677A7] text-sm font-medium">ผู้ติดตาม</span>
           </div>
           <div className="flex flex-col">
@@ -47,12 +117,6 @@ const ProfileCard = ({ profileImageUrl, name, category, experience, followers, r
   );
 };
 
-ProfileCard.defaultProps = {
-  name: "หมอดูเพียงฟ้า พาขวัญ",
-  category: "ศาสตร์ไพ่ยิปซี",
-  experience: "10+",
-  followers: "0",
-  rating: "0",
-};
+// Default parameters are now defined directly in the function signature above
 
 export default ProfileCard;

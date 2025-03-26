@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Images from "../../assets"; 
-import Navbar from "../../components/navbar"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
 
 const QrSummary = () => {
   const navigate = useNavigate();
