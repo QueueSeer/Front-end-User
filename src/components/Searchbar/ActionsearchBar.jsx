@@ -1,7 +1,7 @@
 import React from "react";
 import { FaSearch } from "react-icons/fa";
 
-const AuctionSearchBar = ({ searchTerm, setSearchTerm, onSearch }) => {
+const ActionSearchBar = ({ searchTerm, setSearchTerm, onSearch }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (typeof onSearch === 'function') {
@@ -20,7 +20,7 @@ const AuctionSearchBar = ({ searchTerm, setSearchTerm, onSearch }) => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full flex justify-center">
-      <div className="flex items-center bg-white border border-gray-300 rounded-full w-full max-w-2xl px-4 py-3 mt-10">
+      <div className="flex items-center bg-white border border-gray-300 rounded-full w-full max-w-3xl px-4 py-3 mt-10">
         {/* ไอคอนค้นหา */}
         <FaSearch className="text-gray-400 ml-2" />
 
@@ -46,4 +46,4 @@ const AuctionSearchBar = ({ searchTerm, setSearchTerm, onSearch }) => {
   );
 };
 
-export default AuctionSearchBar;
+export default ActionSearchBar;

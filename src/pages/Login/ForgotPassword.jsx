@@ -10,7 +10,7 @@ const ForgotPassword = ({ isDarkMode }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://your-api.com/api/forgot-password", {
+      const response = await fetch("https://backend.qseer.app/api/user/change/password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,8 +30,8 @@ const ForgotPassword = ({ isDarkMode }) => {
   };
 
   return (
-    <div className={`flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}>
-      <div className={`p-8 rounded-xl shadow-lg w-full max-w-lg sm:max-w-xl lg:max-w-2xl ${isDarkMode ? "bg-gray-800 text-white" : "bg-white"}`}>
+    <div className={`flex items-center justify-center min-h-screen px-4 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}>
+      <div className={`p-8 rounded-xl shadow-lg w-full max-w-lg ${isDarkMode ? "bg-gray-800 text-white" : "bg-white"}`}>
         <h2 className="text-3xl font-semibold mb-8 text-center">Forgot Password</h2>
         {!isSent ? (
           <form onSubmit={handleSubmit}>
@@ -53,7 +53,7 @@ const ForgotPassword = ({ isDarkMode }) => {
               type="submit"
               className={`w-full py-3 px-6 rounded-lg focus:outline-none focus:ring-2 ${isDarkMode ? "bg-purple-500 text-white hover:bg-purple-600" : "bg-[rgb(126,34,206)] text-white hover:bg-[rgb(104,20,180)]"}`}
             >
-              Reset Password
+              Send Reset Email
             </button>
           </form>
         ) : (

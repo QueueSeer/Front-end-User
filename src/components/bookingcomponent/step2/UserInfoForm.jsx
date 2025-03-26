@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => {
+const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requiredData = [] }) => {
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    birthDate: false,
+    birthTime: false,
+    status: false
+  });
 
   // เช็คความถูกต้องของฟอร์ม
   const validateForm = (data) => {
@@ -9,55 +17,109 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
 
     // ตรวจสอบข้อมูลที่จำเป็นตาม requiredData
     if (requiredData.includes("name")) {
-      if (!data.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อจริง";
-      if (!data.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
+      if (!data.firstName.trim() && touched.firstName) newErrors.firstName = "กรุณากรอกชื่อจริง";
+      if (!data.lastName.trim() && touched.lastName) newErrors.lastName = "กรุณากรอกนามสกุล";
     }
 
     if (requiredData.includes("birthdate")) {
-      if (!data.birthDate) newErrors.birthDate = "กรุณากรอกวันเกิด";
-      else if (typeof data.birthDate === 'string' && !/^\d{2}\/\d{2}\/\d{2}$/.test(data.birthDate)) {
+      if (!data.birthDate && touched.birthDate) {
+        newErrors.birthDate = "กรุณากรอกวันเกิด";
+      } else if (touched.birthDate && typeof data.birthDate === 'string' && 
+                 data.birthDate.trim() !== "" && !/^\d{2}\/\d{2}\/\d{2}$/.test(data.birthDate)) {
         newErrors.birthDate = "รูปแบบวันที่ต้องเป็น DD/MM/YY";
       }
     }
 
     if (requiredData.includes("birthtime")) {
-      if (!data.birthTime) newErrors.birthTime = "กรุณากรอกเวลาเกิด";
-      else if (!/^\d{2}:\d{2}$/.test(data.birthTime)) {
+      if (!data.birthTime && touched.birthTime) {
+        newErrors.birthTime = "กรุณากรอกเวลาเกิด";
+      } else if (touched.birthTime && data.birthTime && !/^\d{2}:\d{2}$/.test(data.birthTime)) {
         newErrors.birthTime = "รูปแบบเวลาต้องเป็น HH:MM";
       }
     }
 
     if (requiredData.includes("email")) {
-      if (!data.email || !data.email.trim()) {
+      if ((!data.email || !data.email.trim()) && touched.email) {
         newErrors.email = "กรุณากรอกอีเมล";
-      } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(data.email)) {
+      } else if (touched.email && data.email && !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(data.email)) {
         newErrors.email = "กรุณากรอกอีเมลให้ถูกต้อง";
       }
     }
 
-    if (requiredData.includes("status") && !data.status) {
+    if (requiredData.includes("status") && !data.status && touched.status) {
       newErrors.status = "กรุณาเลือกสถานะ";
     }
 
     // ถ้าไม่มี requiredData ให้ตรวจสอบข้อมูลพื้นฐาน
     if (requiredData.length === 0) {
-      if (!data.firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อจริง";
-      if (!data.lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
-      if (!data.email || !data.email.trim()) {
+      if (!data.firstName.trim() && touched.firstName) newErrors.firstName = "กรุณากรอกชื่อจริง";
+      if (!data.lastName.trim() && touched.lastName) newErrors.lastName = "กรุณากรอกนามสกุล";
+      if ((!data.email || !data.email.trim()) && touched.email) {
         newErrors.email = "กรุณากรอกอีเมล";
-      } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(data.email)) {
+      } else if (touched.email && data.email && !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(data.email)) {
         newErrors.email = "กรุณากรอกอีเมลให้ถูกต้อง";
       }
     }
 
     setErrors(newErrors);
+    
+    // ส่งสถานะการตรวจสอบกลับไปยังคอมโพเนนต์หลัก (ถ้ามี)
+    if (onValidationChange) {
+      // ตรวจสอบความถูกต้องทั้งหมด โดยไม่สนใจว่า touched หรือไม่
+      const realValidation = checkRealValidation(data);
+      onValidationChange(realValidation);
+    }
+    
     return Object.keys(newErrors).length === 0;
+  };
+
+  // ตรวจสอบความถูกต้องจริงของข้อมูล (ไม่สนใจ touched)
+  const checkRealValidation = (data) => {
+    // ตรวจสอบข้อมูลที่จำเป็นตาม requiredData
+    if (requiredData.includes("name")) {
+      if (!data.firstName.trim() || !data.lastName.trim()) return false;
+    }
+
+    if (requiredData.includes("birthdate")) {
+      if (!data.birthDate) return false;
+      if (typeof data.birthDate === 'string' && 
+          data.birthDate.trim() !== "" && !/^\d{2}\/\d{2}\/\d{2}$/.test(data.birthDate)) {
+        return false;
+      }
+    }
+
+    if (requiredData.includes("birthtime")) {
+      if (!data.birthTime) return false;
+      if (data.birthTime && !/^\d{2}:\d{2}$/.test(data.birthTime)) return false;
+    }
+
+    if (requiredData.includes("email")) {
+      if (!data.email || !data.email.trim()) return false;
+      if (data.email && !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(data.email)) return false;
+    }
+
+    if (requiredData.includes("status") && !data.status) return false;
+
+    // ถ้าไม่มี requiredData ให้ตรวจสอบข้อมูลพื้นฐาน
+    if (requiredData.length === 0) {
+      if (!data.firstName.trim() || !data.lastName.trim()) return false;
+      if (!data.email || !data.email.trim()) return false;
+      if (data.email && !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(data.email)) return false;
+    }
+
+    return true;
   };
 
   // ฟังก์ชันอัปเดตค่าในฟอร์ม
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
+    
+    // บันทึกว่าฟิลด์นี้ถูกแตะต้องแล้ว
+    setTouched(prev => ({
+      ...prev,
+      [name]: true
+    }));
     
     // ส่งค่าไปที่คอมโพเนนต์แม่
     setFormData(name, newValue);
@@ -68,38 +130,107 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
       [name]: newValue
     });
   };
+  
+  // ฟังก์ชันจัดการเฉพาะการกรอกวันที่ (DD/MM/YY)
+  const handleDateChange = (e) => {
+    let value = e.target.value;
+    
+    // บันทึกว่าฟิลด์นี้ถูกแตะต้องแล้ว
+    setTouched(prev => ({
+      ...prev,
+      birthDate: true
+    }));
+    
+    // กรองให้เหลือแต่ตัวเลขและเครื่องหมาย /
+    value = value.replace(/[^\d/]/g, '');
+    
+    // จัดรูปแบบ DD/MM/YY
+    if (value.length) {
+      // ลบเครื่องหมาย / ทั้งหมดออกก่อน
+      let digitsOnly = value.replace(/\//g, '');
+      
+      // จำกัดความยาวให้ไม่เกิน 6 ตัว (DDMMYY)
+      digitsOnly = digitsOnly.slice(0, 6);
+      
+      // เพิ่มเครื่องหมาย / ตามตำแหน่ง
+      if (digitsOnly.length > 0) {
+        if (digitsOnly.length <= 2) {
+          // ถ้ามีแค่ตัวเลขวันที่
+          value = digitsOnly;
+        } else if (digitsOnly.length <= 4) {
+          // วันที่และเดือน
+          value = digitsOnly.slice(0, 2) + '/' + digitsOnly.slice(2);
+        } else {
+          // วันที่ เดือน และปี
+          value = digitsOnly.slice(0, 2) + '/' + digitsOnly.slice(2, 4) + '/' + digitsOnly.slice(4);
+        }
+      }
+    }
+    
+    // ส่งค่าไปที่คอมโพเนนต์แม่
+    setFormData("birthDate", value);
+    
+    // ตรวจสอบความถูกต้องของฟอร์ม
+    validateForm({
+      ...formData,
+      birthDate: value
+    });
+  };
+  
+  // ฟังก์ชันจัดการเฉพาะการกรอกเวลา (HH:MM)
+  const handleTimeChange = (e) => {
+    let value = e.target.value;
+    
+    // บันทึกว่าฟิลด์นี้ถูกแตะต้องแล้ว
+    setTouched(prev => ({
+      ...prev,
+      birthTime: true
+    }));
+    
+    // กรองให้เหลือแต่ตัวเลขและเครื่องหมาย :
+    value = value.replace(/[^\d:]/g, '');
+    
+    // จัดรูปแบบ HH:MM
+    if (value.length) {
+      // ลบเครื่องหมาย : ทั้งหมดออกก่อน
+      let digitsOnly = value.replace(/:/g, '');
+      
+      // จำกัดความยาวให้ไม่เกิน 4 ตัว (HHMM)
+      digitsOnly = digitsOnly.slice(0, 4);
+      
+      // เพิ่มเครื่องหมาย : ตามตำแหน่ง
+      if (digitsOnly.length > 0) {
+        if (digitsOnly.length <= 2) {
+          // ถ้ามีแค่ตัวเลขชั่วโมง
+          value = digitsOnly;
+        } else {
+          // ชั่วโมงและนาที
+          value = digitsOnly.slice(0, 2) + ':' + digitsOnly.slice(2);
+        }
+      }
+    }
+    
+    // ส่งค่าไปที่คอมโพเนนต์แม่
+    setFormData("birthTime", value);
+    
+    // ตรวจสอบความถูกต้องของฟอร์ม
+    validateForm({
+      ...formData,
+      birthTime: value
+    });
+  };
 
-  // แสดง loading skeleton ระหว่างโหลดข้อมูล
-  if (loading) {
-    return (
-      <div className="grid grid-cols-2 gap-6 w-full max-w-4xl animate-pulse">
-        <div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-        <div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-        <div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-        <div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-        <div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-        <div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  // ส่งข้อมูลการตรวจสอบไปยังคอมโพเนนต์หลัก เมื่อโหลดข้อมูลเสร็จสิ้น
+  useEffect(() => {
+    if (!loading && formData) {
+      // เมื่อข้อมูลถูกโหลดเสร็จแล้ว ให้ตรวจสอบความถูกต้องโดยไม่สนใจ touched
+      if (onValidationChange) {
+        const isValid = checkRealValidation(formData);
+        onValidationChange(isValid);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, formData]);
 
   // รูปแบบวันเกิดสำหรับแสดงผล
   const formatBirthdate = (birthdate) => {
@@ -135,6 +266,40 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
 
     return requiredData.includes(fieldMapping[fieldName]);
   };
+  
+  console.log("User data loaded:", formData);
+
+  // แสดง loading skeleton ระหว่างโหลดข้อมูล
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 gap-6 w-full max-w-4xl animate-pulse">
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 gap-6 w-full max-w-4xl">
@@ -149,7 +314,8 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
             name="firstName"
             value={formData.firstName}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
+            className={`w-full p-2 border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
         </div>
@@ -166,13 +332,14 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
             name="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
+            className={`w-full p-2 border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
         </div>
       )}
 
-      {/* วันเกิด */}
+      {/* วันเกิด - ปรับให้ใช้ handleDateChange เพื่อจัดรูปแบบอัตโนมัติ */}
       {(shouldShowField("birthDate")) && (
         <div>
           <label className="text-gray-700 font-semibold">
@@ -182,15 +349,17 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
             type="text"
             name="birthDate"
             value={formatBirthdate(formData.birthDate)}
-            onChange={handleChange}
+            onChange={handleDateChange}
+            onBlur={() => setTouched(prev => ({ ...prev, birthDate: true }))}
             placeholder="08/04/45"
-            className="w-full p-2 border rounded-md"
+            className={`w-full p-2 border ${errors.birthDate ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.birthDate && <p className="text-red-500 text-sm">{errors.birthDate}</p>}
+          <p className="text-gray-500 text-xs mt-1">รูปแบบวันที่ วว/ดด/ปป (เช่น 08/04/45)</p>
         </div>
       )}
 
-      {/* เวลาเกิด */}
+      {/* เวลาเกิด - ปรับให้ใช้ handleTimeChange เพื่อจัดรูปแบบอัตโนมัติ */}
       {(shouldShowField("birthTime")) && (
         <div>
           <label className="text-gray-700 font-semibold">
@@ -200,11 +369,13 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
             type="text"
             name="birthTime"
             value={formData.birthTime || ""}
-            onChange={handleChange}
+            onChange={handleTimeChange}
+            onBlur={() => setTouched(prev => ({ ...prev, birthTime: true }))}
             placeholder="08:45"
-            className="w-full p-2 border rounded-md"
+            className={`w-full p-2 border ${errors.birthTime ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.birthTime && <p className="text-red-500 text-sm">{errors.birthTime}</p>}
+          <p className="text-gray-500 text-xs mt-1">รูปแบบเวลา ชช:นน (เช่น 08:45)</p>
         </div>
       )}
 
@@ -219,7 +390,8 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
+            className={`w-full p-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
         </div>
@@ -235,7 +407,8 @@ const UserInfoForm = ({ formData, setFormData, loading, requiredData = [] }) => 
             name="status"
             value={formData.status || ""}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            onBlur={() => setTouched(prev => ({ ...prev, status: true }))}
+            className={`w-full p-2 border ${errors.status ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           >
             <option value="">เลือกสถานะ</option>
             <option value="single">โสด</option>
