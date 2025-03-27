@@ -42,7 +42,7 @@ export default function App() {
     <AuthProvider> {/* ครอบ Router ด้วย AuthProvider */}
       <Router>
         <Routes>
-          <Route path="/" element={<SearchBookingSeer />} />
+          <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
@@ -65,7 +65,7 @@ export default function App() {
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
           <Route path="/qr-summary" element={<QrSummary/>} />
-          <Route path="/EmailVerification" element={<EmailVerification/>} />
+          <Route path="/verify" element={<EmailVerification />} />
           <Route path="/search-booking" element={<SearchBookingPage />} />
           <Route path="/search-booking-seer" element={<SearchBookingSeer />} />
           

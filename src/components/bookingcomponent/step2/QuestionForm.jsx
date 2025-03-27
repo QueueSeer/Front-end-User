@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 
 const QuestionForm = ({ numQuestions, bookingId, onChange }) => {
-  const [questions, setQuestions] = useState(Array(numQuestions).fill(""));
+  const isUnlimited = numQuestions === 0;
+
+  // ถ้าไม่จำกัดคำถามให้ใช้ 1 ช่องใหญ่
+  const [questions, setQuestions] = useState(
+    isUnlimited ? [""] : Array(numQuestions).fill("")
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 🟢 โหลดคำถามจาก API ถ้ามี
+  // โหลดคำถาม (ถ้ามี bookingId)
   useEffect(() => {
     if (!bookingId) {
       setLoading(false);
@@ -18,7 +23,8 @@ const QuestionForm = ({ numQuestions, bookingId, onChange }) => {
         return response.json();
       })
       .then((data) => {
-        setQuestions(data.questions || Array(numQuestions).fill(""));
+        const loadedQuestions = data.questions || (isUnlimited ? [""] : Array(numQuestions).fill(""));
+        setQuestions(loadedQuestions);
         setLoading(false);
       })
       .catch((err) => {
@@ -26,9 +32,9 @@ const QuestionForm = ({ numQuestions, bookingId, onChange }) => {
         setError("ไม่สามารถโหลดคำถามได้");
         setLoading(false);
       });
-  }, [bookingId, numQuestions]);
+  }, [bookingId, numQuestions, isUnlimited]);
 
-  // 🟢 Auto-save คำถามเมื่อมีการแก้ไข (บันทึกทันที)
+  // Auto-save เมื่อคำถามเปลี่ยน
   useEffect(() => {
     if (!bookingId) return;
 
@@ -36,11 +42,7 @@ const QuestionForm = ({ numQuestions, bookingId, onChange }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ bookingId, questions }),
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error("บันทึกคำถามล้มเหลว");
-      })
-      .catch((err) => console.error("Error saving questions:", err));
+    }).catch((err) => console.error("Error saving questions:", err));
   }, [questions, bookingId]);
 
   const handleQuestionChange = (index, value) => {
@@ -53,6 +55,25 @@ const QuestionForm = ({ numQuestions, bookingId, onChange }) => {
   if (loading) return <p className="text-center text-gray-500">กำลังโหลดคำถาม...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
+  // 🟣 กรณีไม่จำกัดคำถาม (แสดงช่องเดียว)
+  if (isUnlimited) {
+    return (
+      <div className="w-full max-w-4xl mt-4">
+        <label className="text-gray-700 font-semibold">
+          พิมพ์คำถามของคุณทั้งหมดในช่องด้านล่าง <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          className="w-full p-3 border rounded-md focus:ring-2 focus:ring-[#6B5B95] focus:outline-none"
+          rows="6"
+          value={questions[0]}
+          onChange={(e) => handleQuestionChange(0, e.target.value)}
+          placeholder="พิมพ์คำถามของคุณทั้งหมดในช่องนี้..."
+        />
+      </div>
+    );
+  }
+
+  // 🟣 กรณีจำกัดคำถาม (หลายช่อง)
   return (
     <div className="grid grid-cols-2 gap-6 w-full max-w-4xl mt-6">
       {questions.map((question, index) => (

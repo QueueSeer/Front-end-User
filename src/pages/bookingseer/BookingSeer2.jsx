@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
-import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
-import Payment from "../../components/bookingcomponent/step2/Payment"; 
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import Navbar from "../../components/navbar";
+import Payment from "../../components/bookingcomponent/step2/Payment";
+import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
+import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
 
 const BookingSeer2 = () => {
   const navigate = useNavigate();
@@ -363,14 +364,14 @@ const handlePayment = async () => {
     const [hours, minutes] = selectedTime.split(':').map(Number);
     startDate.setHours(hours, minutes, 0);
     
+    
     // เตรียมข้อมูลสำหรับส่งไป API
     const appointmentData = {
-      seer_id: packageInfo.fortuneTellerId || 0,
-      package_id: packageInfo.id || 0,
+      seer_id: packageInfo.fortuneTellerId,
+      package_id: packageInfo.id,
       start_time: startDate.toISOString(),
       questions: questions.filter(q => q.trim() !== "")
     };
-    
     console.log("Sending appointment data:", appointmentData);
     
     // ดึง token จาก cookie
@@ -597,11 +598,12 @@ const handlePayment = async () => {
           {/* ส่วนของคำถามสำหรับการดูดวง */}
           <div className="mt-6">
             <h3 className="text-lg font-semibold">คำถามสำหรับการดูดวง</h3>
-            <QuestionForm 
-              numQuestions={numQuestions} 
-              questions={questions} 
-              onChange={handleQuestionChange} 
+            <QuestionForm
+              numQuestions={packageInfo?.question_limit ?? 4}
+              questions={questions}
+              onChange={handleQuestionChange}
             />
+
           </div>
 
           {/* ส่วนของการชำระเงิน */}

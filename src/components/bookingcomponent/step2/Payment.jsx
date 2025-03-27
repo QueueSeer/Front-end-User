@@ -44,7 +44,11 @@ const Payment = ({
   const formattedDate = formatDate(selectedDate);
   const formattedTime = selectedTime || "ไม่ระบุเวลา";
 
-  const totalPrice = packageInfo?.price || 0;
+  const totalPrice = packageInfo?.price ?? 0;
+const isFree = totalPrice === 0;
+
+
+
   
   // ใช้คอยน์ตามที่ผู้ใช้มีจริง
   const discount = useCoins && paymentMethod === "promptpay" ? Math.min(userCoins, totalPrice) : 0;
@@ -110,7 +114,12 @@ const Payment = ({
         </div>
         <hr className="my-2 border-gray-300" />
         <div className="flex items-center space-x-3 mt-2">
-          <img src={Images.picbill} alt="Package" className="w-20 h-20 rounded-md object-cover" />
+        <img 
+  src={packageInfo?.image === "/default-image.jpg" ? Images.picbill : packageInfo?.image} 
+  alt="Package" 
+  className="w-20 h-20 rounded-md object-cover" 
+/>
+
           <div className="flex-1">
             <p className="text-[#65558F] font-semibold text-sm leading-tight">
               {packageInfo?.name || packageInfo?.title || ""}
@@ -120,7 +129,10 @@ const Payment = ({
               <span>{packageInfo?.fortuneTellerName || packageInfo?.seer || ""}</span>
             </div>
           </div>
-          <p className="text-gray-800 font-semibold">{totalPrice} คอยน์</p>
+          <p className="text-gray-800 font-semibold">
+  {isFree ? "ฟรี" : `${totalPrice} คอยน์`}
+</p>
+
         </div>
       </div>
 
@@ -195,7 +207,10 @@ const Payment = ({
             </>
           )}
           <p className="font-bold text-gray-900 mt-1">รวมทั้งหมด</p>
-          <p className="text-right font-bold">{finalPrice} คอยน์</p>
+          <p className="text-right font-bold">
+  {isFree ? "ฟรี" : `${finalPrice} คอยน์`}
+</p>
+
         </div>
       </div>
 
