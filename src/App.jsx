@@ -42,12 +42,12 @@ export default function App() {
     <AuthProvider> {/* ครอบ Router ด้วย AuthProvider */}
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<EmailVerification />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/landingPage" element={<LandingPage />} />
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />
