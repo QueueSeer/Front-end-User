@@ -1,5 +1,6 @@
+import React, { useEffect } from "react";
+
 import Images from "../../../assets";
-import React from "react";
 import SeerRating from "../SeerPopular/SeerRating";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +17,10 @@ const PackageCard = ({ packageInfo }) => {
             default: return Images.call;
         }
     };
+
+    useEffect(()=>{
+        console.log(packageInfo)
+    },[]);
 
     // ฟังก์ชันนำทางไปยังหน้า BookingSeer
     const handleBooking = () => {
@@ -60,14 +65,20 @@ const PackageCard = ({ packageInfo }) => {
                         {adaptedPackage.seer_display_name}
                     </span>
                 </div>
-
-                <div className="flex items-center mt-1">
-                    <span className="text-sm text-gray-700 font-semibold mr-1">
-                        {parseFloat(adaptedPackage.seer_rating).toFixed(1)}
-                    </span>
-                    <SeerRating rating={parseFloat(adaptedPackage.seer_rating)} />
-                    <span className="text-sm text-gray-500 ml-1">{adaptedPackage.seer_review_count} reviews</span>
-                </div>
+                { 
+                    adaptedPackage.seer_rating && adaptedPackage.seer_rating > 0 ?
+                    <div className="flex items-center mt-1">
+                        <span className="text-sm text-gray-700 font-semibold mr-1">
+                            {parseFloat(adaptedPackage.seer_rating).toFixed(1)}
+                        </span> 
+                        <SeerRating rating={parseFloat(adaptedPackage.seer_rating)} />
+                        <span className="text-sm text-gray-500 ml-1">{adaptedPackage.seer_review_count} reviews</span>
+                    </div>
+                    : 
+                    <div>
+                        ยังไม่มีการรีวิว
+                    </div>
+                }
 
                 {/* ส่วนด้านล่างที่มี margin-top:auto เพื่อผลักไปด้านล่างเสมอ */}
                 <div className="mt-auto">

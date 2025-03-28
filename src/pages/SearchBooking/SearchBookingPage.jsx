@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/navbar/index";
+import React, { useEffect, useState } from "react";
+
 import ActionSearchBar from "../../components/Searchbar/ActionsearchBar";
+import Navbar from "../../components/navbar/index";
 import PackageCard from "../../components/homecomponent/Package/PackageCard";
 import SidebarFilter from "../../components/Searchbar/SidebarFilter";
+import { useNavigate } from "react-router-dom";
 
 const SearchBookingPage = () => {
   const navigate = useNavigate();
@@ -59,27 +60,6 @@ const SearchBookingPage = () => {
       setLoading(true);
       setError(null);
       
-      // ข้อมูลจำลอง (mock data) สำหรับใช้เมื่อ API ไม่ทำงาน
-      const mockApiResponse = {
-        packages: Array.from({ length: 16 }).map((_, index) => ({
-          id: index + 1,
-          name: `แพ็คเกจดูดวง ${index + 1}`,
-          category: "ดูดวงพิเศษ",
-          seer_id: 100 + index,
-          seer_display_name: `หมอดูหมายเลข ${index + 1}`,
-          seer_image: null,
-          seer_rating: 4.0,
-          seer_review_count: 935,
-          price: "99.00",
-          duration: 15,
-          foretell_channel: index % 3 === 0 ? "chat" : (index % 3 === 1 ? "phone" : "video"),
-          reading_type: "ไพ่ยิปซี",
-          status: "active",
-          image: null,
-          date_created: "2025-01-01T00:00:00Z"
-        }))
-      };
-      
       try {
         // ใช้ฟิลเตอร์ที่ส่งมาหรือใช้ state ปัจจุบัน
         const activeFilters = customFilters || filters;
@@ -134,8 +114,6 @@ const SearchBookingPage = () => {
         }
       } catch (apiError) {
         console.error("เกิดข้อผิดพลาดในการเรียก API:", apiError);
-        // ถ้าเรียก API ไม่สำเร็จ ใช้ข้อมูลจำลองแทน
-        setPackages(mockApiResponse.packages);
       } finally {
         setLoading(false);
       }
@@ -240,7 +218,7 @@ const SearchBookingPage = () => {
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   >
-                    <PackageCard packageInfo={mapPackageToCardProps(pkg)} />
+                    <PackageCard packageInfo={pkg} />
                   </div>
                 ))}
               </div>

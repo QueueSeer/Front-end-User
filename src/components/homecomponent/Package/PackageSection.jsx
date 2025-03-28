@@ -42,7 +42,7 @@ const PackageSection = () => {
             setLoading(false);
         }
     };
-
+ 
     // ปุ่มถัดไป (Next)
     const nextSlide = () => {
         if (currentIndex < packages.length - visiblePackages) {
