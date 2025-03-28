@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
+
 import { FaRegFileAlt } from "react-icons/fa";
 import Images from "../../../assets";
+import dayjs from "dayjs";
 
 const Payment = ({ 
   packageInfo, 
@@ -15,14 +16,6 @@ const Payment = ({
   onPayment,  // รับฟังก์ชันจาก BookingSeer2
   isLoading = false  // รับสถานะโหลดจาก BookingSeer2
 }) => {
-  // Log received props for debugging
-  useEffect(() => {
-    console.log("Payment component props:");
-    console.log("- selectedDate:", selectedDate);
-    console.log("- selectedTime:", selectedTime);
-    console.log("- packageInfo:", packageInfo);
-    console.log("- userCoins:", userCoins);
-  }, [selectedDate, selectedTime, packageInfo, userCoins]);
   
   // Format date safely
   const formatDate = (date) => {

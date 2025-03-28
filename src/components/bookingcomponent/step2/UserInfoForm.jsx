@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requiredData = [] }) => {
   const [errors, setErrors] = useState({});
@@ -267,7 +267,6 @@ const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requ
     return requiredData.includes(fieldMapping[fieldName]);
   };
   
-  console.log("User data loaded:", formData);
 
   // แสดง loading skeleton ระหว่างโหลดข้อมูล
   if (loading) {
@@ -351,7 +350,7 @@ const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requ
             value={formatBirthdate(formData.birthDate)}
             onChange={handleDateChange}
             onBlur={() => setTouched(prev => ({ ...prev, birthDate: true }))}
-            placeholder="08/04/45"
+            placeholder="dd/mm/yyyy"
             className={`w-full p-2 border ${errors.birthDate ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.birthDate && <p className="text-red-500 text-sm">{errors.birthDate}</p>}

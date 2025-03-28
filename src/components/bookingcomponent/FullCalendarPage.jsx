@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import SlotComponent from "./SlotComponent";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import NextButton from "./NextButton";
+import SlotComponent from "./SlotComponent";
+import dayjs from "dayjs";
 
 dayjs.locale("th");
 
@@ -57,6 +59,7 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
         }));
   
         setCalendarData([...schedules, ...dayOffs]); // รวมวันทำงานกับวันหยุด
+        console.log(calendarData);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching seer calendar:", err);

@@ -1,5 +1,5 @@
-import React from "react";
 import Images from "../../../assets";
+import React from "react";
 import SeerRating from "../SeerPopular/SeerRating";
 import { useNavigate } from "react-router-dom";
 
@@ -7,22 +7,7 @@ const PackageCard = ({ packageInfo }) => {
     const navigate = useNavigate();
 
 
-    const adaptedPackage = packageInfo.hasOwnProperty('title') 
-        ? {
-            id: packageInfo.id,
-            name: packageInfo.title,
-            category: packageInfo.category,
-            reading_type: packageInfo.category,
-            seer_display_name: packageInfo.seer,
-            seer_rating: packageInfo.rating,
-            seer_review_count: packageInfo.reviews,
-            price: packageInfo.price.toString(),
-            duration: packageInfo.duration,
-            foretell_channel: packageInfo.icon === "call" ? "phone" : packageInfo.icon,
-            image: packageInfo.image,
-            seer_image: packageInfo.seerImage
-        }
-        : packageInfo; // ใช้ข้อมูล API ตามที่ส่งมา
+    const adaptedPackage = packageInfo; // ใช้ข้อมูล API ตามที่ส่งมา
 
     // แปลง foretell_channel เป็นไอคอน
     const getIcon = (channel) => {

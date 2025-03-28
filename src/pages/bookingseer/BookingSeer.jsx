@@ -14,7 +14,7 @@ const BookingSeer = () => {
   const [packageInfo, setPackageInfo] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
-  const [numQuestions, setNumQuestions] = useState(4);
+  const [numQuestions, setNumQuestions] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,64 +25,34 @@ const BookingSeer = () => {
     return lines.map((line, index) => `${index + 1}. ${line.trim()}`).join("\n");
   };
 
-  // ฟังก์ชันจัด format ข้อมูล package ทั้งชุด
-  const formatPackageInfo = (raw) => {
-    return {
-      id: raw.id ?? 0,
-      seer_id: raw.seer_id ?? 0,
-      name: raw.name ?? "แพ็กเกจไม่มีชื่อ",
-      price: raw.price != null ? parseFloat(raw.price) : 0,
-      duration: raw.duration ?? 0,
-      description: formatDescription(raw.description),
-      image: raw.image || "/default-image.jpg",
-      question_limit: raw.question_limit ?? 0,
-      status: raw.status ?? "unknown",
-      foretell_channel: raw.foretell_channel ?? "-",
-      reading_type: raw.reading_type ?? "-",
-      category: raw.category ?? "-",
-      required_data: raw.required_data ?? [],
-      date_created: raw.date_created ?? null
-    };
-  };
-
-  // โหลดข้อมูลเมื่อเริ่มหน้า หรือรับจาก state
   useEffect(() => {
     const statePackageInfo = location.state?.packageInfo;
-    if (statePackageInfo) {
-      setPackageInfo(formatPackageInfo(statePackageInfo));
-      setNumQuestions(statePackageInfo.question_limit || 4);
+    const seerId = statePackageInfo.seer_id;
+    const packageId = statePackageInfo.id;
+    const fetchPackage = async() => {
+      await fetch(`https://backend.qseer.app/api/seer/${seerId}/package/fortune/${packageId}`,{
+        method: "GET",
+        headers: {
+          "Content-type": "application/json"
+        }
+      })
+      .then((res)=>res.json())
+      .then((res)=>setPackageInfo(res))
       setLoading(false);
-    } else {
-      fetch("http://localhost:5000/api/package/1")
-        .then((response) => {
-          if (!response.ok) throw new Error("โหลดแพ็กเกจล้มเหลว");
-          return response.json();
-        })
-        .then((data) => {
-          const formatted = formatPackageInfo(data);
-          setPackageInfo(formatted);
-          setNumQuestions(formatted.question_limit || 4);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error fetching package:", err);
-          setError("ไม่สามารถโหลดแพ็กเกจได้");
-          setLoading(false);
-        });
     }
-  }, [location.state]);
+    fetchPackage();
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleNextButtonClick = () => {
-    navigate("/bookingSeer2", {
+    navigate("/bookingSeer_2", {
       state: {
         packageInfo,
         selectedDate: selectedDate instanceof Date ? selectedDate.toISOString() : selectedDate,
-        selectedTime,
-        numQuestions
+        selectedTime
       }
     });
   };
@@ -100,7 +70,7 @@ const BookingSeer = () => {
       <div className="p-6 mt-8">
         <BackButton />
         <BookingSteps />
-        <HeaderSection packageInfo={packageInfo} setNumQuestions={setNumQuestions} />
+        <HeaderSection packageInfo={packageInfo} />
 
         <div className="w-full">
           <FullCalendarPage 

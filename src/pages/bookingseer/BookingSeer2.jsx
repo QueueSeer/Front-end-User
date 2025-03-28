@@ -10,12 +10,10 @@ const BookingSeer2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Debug logging to check what state we're receiving
-  console.log("BookingSeer2 received state:", location.state);
+  const [packageInfo, setPackageInfo] = useState(null); 
   
   // Safely extract data from location state
-  const packageInfo = location.state?.packageInfo || null;
+  //const packageInfo = location.state?.packageInfo;
   const selectedDate = location.state?.selectedDate || null;
   const selectedTime = location.state?.selectedTime || null;
   const numQuestions = location.state?.numQuestions || 4;
@@ -54,7 +52,6 @@ const BookingSeer2 = () => {
       const cookieString = document.cookie;
       const match = cookieString.match(new RegExp('(^| )token=([^;]+)'));
       if (match) {
-        console.log("Token found in cookie:", match[2].substring(0, 10) + "...");
         return match[2];
       }
       
@@ -64,7 +61,6 @@ const BookingSeer2 = () => {
         const cookie = cookies[i].trim();
         if (cookie.startsWith('token=')) {
           const token = cookie.substring('token='.length);
-          console.log("Token found by splitting:", token.substring(0, 10) + "...");
           return token;
         }
       }
@@ -72,13 +68,11 @@ const BookingSeer2 = () => {
       // วิธีที่ 3: ดึงจาก localStorage หรือ sessionStorage
       const localToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
       if (localToken) {
-        console.log("Token found in localStorage:", localToken.substring(0, 10) + "...");
         return localToken;
       }
       
       const sessionToken = sessionStorage.getItem('token') || sessionStorage.getItem('auth_token');
       if (sessionToken) {
-        console.log("Token found in sessionStorage:", sessionToken.substring(0, 10) + "...");
         return sessionToken;
       }
       
@@ -215,8 +209,6 @@ const BookingSeer2 = () => {
           token = match ? match[1] : null;
         }
         
-        console.log("Token found:", token ? "Yes (first 10 chars: " + token.substring(0, 10) + "...)" : "No");
-        
         if (!token) {
           console.warn("ไม่พบ token ไม่ว่าจะที่ใด");
           setUserInfo({
@@ -240,14 +232,11 @@ const BookingSeer2 = () => {
           credentials: 'include'  // สำคัญ! ส่ง cookies ไปกับ request
         });
         
-        console.log("API response status:", response.status);
-        
         if (!response.ok) {
           throw new Error(`ไม่สามารถดึงข้อมูลผู้ใช้ได้ (${response.status})`);
         }
         
         const data = await response.json();
-        console.log("User data received from API:", data);
         
         // บันทึกข้อมูลผู้ใช้ลง state
         setUserInfo(data);
@@ -262,8 +251,6 @@ const BookingSeer2 = () => {
           status: "",     // ถ้า API ไม่มี status อาจต้องกรอกเอง
           notifyByEmail: true
         };
-        
-        console.log("Setting form data from API:", userFormData);
         
         // อัพเดต form data
         setFormData(userFormData);
@@ -316,7 +303,6 @@ const BookingSeer2 = () => {
     const totalPrice = packageInfo?.price || 0;
     const discount = useCoins && paymentMethod === "promptpay" ? Math.min(userInfo?.coins || 0, totalPrice) : 0;
     const result = Math.max(0, totalPrice - discount); // ใช้ Math.max เพื่อป้องกันค่าติดลบ
-    console.log(`Price calculation: total=${totalPrice}, discount=${discount}, final=${result}`);
     return result;
   };
 
@@ -324,11 +310,6 @@ const BookingSeer2 = () => {
   
 // ตรวจสอบความสมบูรณ์ของฟอร์ม
 const isFormValid = () => {
-  console.log("formValid:", formValid);
-  console.log("questions:", questions);
-  console.log("Trimmed questions:", questions.map(q => q.trim()));
-  console.log("paymentMethod:", paymentMethod);
-
   if (!formValid) {
     console.log("formValid ยังเป็น false");
     return false;
@@ -343,8 +324,6 @@ const isFormValid = () => {
     console.log("ยังไม่ได้เลือกวิธีชำระเงิน");
     return false;
   }
-
-  console.log("ฟอร์มผ่านการตรวจสอบ ✅");
   return true;
 };
 // ฟังก์ชันสำหรับการชำระเงิน
@@ -356,7 +335,6 @@ const handlePayment = async () => {
 
   // ตั้งค่าสถานะโหลดเป็น true
   setIsLoading(true);
-  console.log("เริ่มกระบวนการชำระเงิน...");
 
   try {
     // แปลงวันที่และเวลาให้เป็นรูปแบบเวลาเริ่มต้นที่ถูกต้อง
@@ -410,7 +388,6 @@ const handlePayment = async () => {
     
     // เรียก API เพื่อสร้างการนัดหมาย (ถ้ามี token)
     if (token) {
-      console.log("Using token for appointment API:", token.substring(0, 10) + "...");
       try {
         const response = await fetch('https://backend.qseer.app/api/appointment/seer', {
           method: 'POST',
@@ -425,7 +402,6 @@ const handlePayment = async () => {
         });
         
         const responseText = await response.text();
-        console.log("Raw API response:", responseText);
         
         let bookingResponse;
         try {
@@ -439,8 +415,6 @@ const handlePayment = async () => {
           throw new Error(`สร้างการนัดหมายไม่สำเร็จ (${response.status}): ${bookingResponse.detail || responseText}`);
         }
         
-        console.log("Booking API response:", bookingResponse);
-        
         // อัพเดทข้อมูลที่ได้จาก API
         bookingData.id = bookingResponse.id || bookingResponse.appointment_id || "";
         bookingData.appointmentId = bookingResponse.id || bookingResponse.appointment_id || "";
@@ -452,7 +426,6 @@ const handlePayment = async () => {
           bookingData.appointmentData = bookingResponse;  // เก็บข้อมูลทั้งหมดจาก API
         }
         
-        console.log("🎉 การนัดหมายสำเร็จ! ID:", bookingData.appointmentId);
       } catch (error) {
         console.error("API error:", error);
         // เก็บข้อมูลข้อผิดพลาด
@@ -483,11 +456,9 @@ const handlePayment = async () => {
     // ตรวจสอบเงื่อนไขราคาอีกครั้ง (สำคัญมาก)
     // กรณีใช้คอยล์แล้วราคาเป็น 0
     if (finalPrice <= 0) {
-      console.log("FREE booking, navigating to BookingSeer4");
       navigate("/bookingSeer4", { state: bookingData });
     } else {
       // กรณีต้องจ่ายเงิน
-      console.log("Paid booking, navigating to BookingSeer3");
       navigate("/bookingSeer3", { state: bookingData });
     }
   } catch (error) {
@@ -526,8 +497,6 @@ const handlePayment = async () => {
       appointmentError: error.message
     };
     
-    console.log("Mock booking data after error:", bookingData);
-    
     // บันทึกข้อมูลความผิดพลาดลง localStorage
     localStorage.setItem('lastBookingError', JSON.stringify({
       error: error.message,
@@ -550,12 +519,10 @@ const handlePayment = async () => {
 };
 
   const handleValidationChange = (isValid) => {
-    console.log("เรียกใช้ handleValidationChange:", isValid);
     setFormValid(isValid);
   };
   useEffect(() => {
     const isValid = questions.every(q => q.trim() !== "") && paymentMethod;
-    console.log("ตรวจสอบฟอร์ม formValid:", isValid);
     handleValidationChange(isValid);
   }, [questions, paymentMethod]);
   
@@ -579,10 +546,6 @@ const handlePayment = async () => {
       </div>
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
-
-          
-        
-          
           {/* ส่วนของฟอร์มข้อมูลผู้ใช้ */}
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-3">ข้อมูลผู้จอง</h3>
