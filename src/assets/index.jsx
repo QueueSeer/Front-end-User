@@ -130,6 +130,8 @@ import LogoutIcon from "./icon/Navbar/LogoutIcon.png";
 import BoltIcon from "./icon/Navbar/BoltIcon.png";
 import bellIcon from "./icon/Navbar/bellIcon.png";
 import bellClickIcon from "./icon/Navbar/bellClickIcon.png";
+import chock from "./icon/Navbar/chock.png";
+import plus from "./icon/Navbar/plus.png";
 
 // ✅ ไอคอนที่เกี่ยวข้องกับโปรไฟล์
 import StarsIcon from "./icon/Profile/StarsIcon.png";
@@ -182,6 +184,8 @@ const images = {
   BoltIcon,
   bellIcon,
   bellClickIcon,
+  plus,
+  chock,
 
   // ✅ ไอคอนที่เกี่ยวข้องกับโปรไฟล์
   StarsIcon,

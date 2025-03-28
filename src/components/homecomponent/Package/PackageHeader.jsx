@@ -1,13 +1,27 @@
 import React from "react";
 import Images from "../../../assets";
-import { useNavigate } from "react-router-dom"; // ✅ นำเข้า useNavigate
+import { useNavigate } from "react-router-dom";
 
 const PackageHeader = ({ onPrev, onNext, currentIndex, totalPackages }) => {
-    const navigate = useNavigate(); // ✅ สร้าง instance navigate
+    const navigate = useNavigate();
 
-    // ✅ ฟังก์ชันเมื่อกดปุ่ม "ทั้งหมด"
+    // ฟังก์ชันเมื่อกดปุ่ม "ทั้งหมด"
     const handleViewAll = () => {
-        navigate("/search-booking"); // ไปหน้า search-booking
+        navigate("/search-booking");
+    };
+
+    // ✅ แก้ไขฟังก์ชันสำหรับปุ่มก่อนหน้า
+    const handlePrev = () => {
+        if (currentIndex > 0) {
+            onPrev();
+        }
+    };
+
+    // ✅ แก้ไขฟังก์ชันสำหรับปุ่มถัดไป
+    const handleNext = () => {
+        if (currentIndex < totalPackages - 4) {
+            onNext();
+        }
     };
 
     return (
@@ -23,12 +37,17 @@ const PackageHeader = ({ onPrev, onNext, currentIndex, totalPackages }) => {
             <div className="hidden sm:flex items-center gap-4">
                 <button
                     className="border border-gray-400 px-4 py-1 rounded-full text-purple-700 text-xl font-medium"
-                    onClick={handleViewAll} // ✅ ไปหน้า search-booking
+                    onClick={handleViewAll}
                 >
                     ทั้งหมด
                 </button>
                 <div className="flex items-center gap-2">
-                    <button onClick={onPrev} disabled={currentIndex === 0} className="p-2 rounded-full shadow-md">
+                    {/* ✅ แก้ไขเป็นใช้ handlePrev แทนการส่ง onPrev โดยตรง */}
+                    <button 
+                        onClick={handlePrev} 
+                        className="p-2 rounded-full shadow-md"
+                        disabled={currentIndex === 0}
+                    >
                         <img
                             src={currentIndex === 0 ? Images.Arrowleft : Images.Arrowleftcolor}
                             alt="prev"
@@ -38,12 +57,17 @@ const PackageHeader = ({ onPrev, onNext, currentIndex, totalPackages }) => {
                     <span className="text-gray-600 text-xl">
                         {currentIndex + 1} of {totalPackages}
                     </span>
+                    {/* ✅ แก้ไขเป็นใช้ handleNext แทนการส่ง onNext โดยตรง */}
                     <button
-                        onClick={onNext}
-                        disabled={currentIndex >= totalPackages - 4}
+                        onClick={handleNext}
                         className="p-2 rounded-full shadow-md"
+                        disabled={currentIndex >= totalPackages - 4}
                     >
-                        <img src={Images.ArrowRight} alt="next" className="w-8 h-8" />
+                        <img 
+                            src={currentIndex >= totalPackages - 4 ? Images.Arrowleft : Images.ArrowRight} 
+                            alt="next" 
+                            className="w-8 h-8"
+                        />
                     </button>
                 </div>
             </div>

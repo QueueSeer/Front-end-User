@@ -1,27 +1,30 @@
 import React, { useEffect, useState } from "react";
-import Images from "../../assets";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 const EmailVerification = () => {
-  const [status, setStatus] = useState(null); // null | "success" | "fail"
+  const [status, setStatus] = useState("loading"); // "loading" | "success" | "fail"
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const getCookie = (name) => {
-      const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-      return match ? match[2] : null;
-    };
-
-    const token = getCookie("verificationToken"); // cookie จริงจาก backend
-    console.log("Token from Cookie:", token);
+    // รับ token จาก URL parameter
+    const token = searchParams.get("token");
+    console.log("Token from URL:", token);
 
     if (token) {
+      // แสดงสถานะ loading
+      setStatus("loading");
+      
+      // เรียก API เพื่อตรวจสอบ token
       fetch(`https://backend.qseer.app/api/user/verify/${token}`, {
         method: "GET",
         headers: { Accept: "application/json" },
-        credentials: "include", // สำคัญ! ต้องส่ง cookie กลับไป
+        credentials: "include", 
       })
         .then(async (response) => {
           const data = await response.json();
           console.log("Response:", response.status, data);
+          
           if (response.status === 200) {
             setStatus("success");
           } else {
@@ -33,38 +36,102 @@ const EmailVerification = () => {
           setStatus("fail");
         });
     } else {
-      console.log("ไม่พบ token ใน Cookie");
+      console.log("ไม่พบ token ใน URL");
       setStatus("fail");
     }
-  }, []);
+  }, [searchParams]);
+
+  // ฟังก์ชันสำหรับเข้าสู่ระบบ
+  const handleLogin = () => {
+    navigate("/login");
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#65558F] p-4 sm:p-6 relative">
-      <div className="bg-cover bg-center rounded-lg w-full max-w-md sm:max-w-lg md:max-w-xl h-[300px] sm:h-[350px] md:h-[400px] p-4 sm:p-6 text-center relative overflow-hidden"
-        style={{ backgroundImage: `url(${Images.cardverify})` }}>
-        
-        {status === "success" && (
-          <div className="absolute top-[100px] sm:top-[120px] left-1/2 transform -translate-x-1/2 w-12 h-12 flex items-center justify-center">
-            <img src={Images.tickcircle} alt="Tick" className="w-10 h-10" />
-          </div>
-        )}
-
-        <div className="absolute bottom-[40px] left-1/2 transform -translate-x-1/2 text-center">
-          {status === "success" ? (
-            <>
-              <h1 className="text-base font-semibold text-black">เปิดใช้งานบัญชีแล้ว</h1>
-              <p className="text-xs text-gray-600 mt-2">มาเริ่มการเป็นหมอดูที่ยอดเยี่ยมกันเถอะ</p>
-            </>
-          ) : status === "fail" ? (
-            <>
-              <h1 className="text-base font-semibold text-red-600">การยืนยันล้มเหลว</h1>
-              <p className="text-xs text-gray-600 mt-2">กรุณาลองอีกครั้งหรือติดต่อผู้ดูแลระบบ</p>
-            </>
-          ) : (
-            <p className="text-sm text-gray-600">กำลังยืนยันบัญชี...</p>
-          )}
+    <div className="min-h-screen flex items-center justify-center bg-purple-700 p-4 relative">
+      {/* ลวดลาย + ในพื้นหลัง */}
+      <div className="absolute top-8 left-8">
+        <div className="grid grid-cols-8 gap-2">
+          {Array(64).fill().map((_, i) => (
+            <div key={i} className="w-2 h-2 text-white flex items-center justify-center">+</div>
+          ))}
         </div>
       </div>
+      
+      <div className="absolute bottom-8 left-8">
+        <div className="grid grid-cols-6 gap-2">
+          {Array(36).fill().map((_, i) => (
+            <div key={i} className="w-2 h-2 text-white flex items-center justify-center">+</div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="absolute top-8 right-8">
+        <div className="grid grid-cols-6 gap-2">
+          {Array(36).fill().map((_, i) => (
+            <div key={i} className="w-2 h-2 text-white flex items-center justify-center">+</div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="absolute bottom-8 right-8">
+        <div className="grid grid-cols-8 gap-2">
+          {Array(64).fill().map((_, i) => (
+            <div key={i} className="w-2 h-2 text-white flex items-center justify-center">+</div>
+          ))}
+        </div>
+      </div>
+      
+      {/* กล่องตรงกลาง */}
+      <div className="bg-white rounded-lg w-full max-w-md overflow-hidden shadow-xl">
+        {/* ส่วนบนสีม่วง */}
+        <div className="bg-purple-500 h-24 rounded-b-full relative">
+          {/* วงกลมตรงกลางสำหรับไอคอน */}
+          <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center">
+            {status === "loading" ? (
+              <div className="w-6 h-6 border-3 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            ) : status === "success" ? (
+              <svg className="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            ) : (
+              <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            )}
+          </div>
+        </div>
+        
+        {/* เนื้อหา */}
+        <div className="py-8 px-6 pt-12 text-center">
+          <h1 className="text-base font-semibold text-gray-900 mb-1">
+            {status === "loading" 
+              ? "กำลังตรวจสอบ..." 
+              : status === "success" 
+                ? "เปิดใช้งานบัญชีแล้ว" 
+                : "การยืนยันล้มเหลว"}
+          </h1>
+          <p className="text-xs text-gray-500 mb-6">
+            {status === "loading" 
+              ? "กรุณารอสักครู่..." 
+              : status === "success" 
+                ? "มาเริ่มการเป็นหมอดูที่ยอดเยี่ยมกันเถอะ" 
+                : "กรุณาลองอีกครั้งหรือติดต่อผู้ดูแลระบบ"}
+          </p>
+          
+          <button 
+            onClick={handleLogin}
+            className="w-full py-2.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition duration-200"
+          >
+            เข้าสู่ระบบ
+          </button>
+        </div>
+      </div>
+      
+      {/* วงกลมเส้นประตกแต่งในพื้นหลัง */}
+      <div className="absolute top-16 right-16 border border-dashed border-white/40 rounded-full w-8 h-8"></div>
+      <div className="absolute top-32 right-24 border border-dashed border-white/40 rounded-full w-16 h-16"></div>
+      <div className="absolute bottom-24 left-16 border border-dashed border-white/40 rounded-full w-16 h-16"></div>
+      <div className="absolute bottom-16 left-36 border border-dashed border-white/40 rounded-full w-8 h-8"></div>
     </div>
   );
 };

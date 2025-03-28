@@ -13,8 +13,6 @@ import dayjs from "dayjs";
 dayjs.locale("th");
 
 const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSelectedTime }) => { 
-
-
   const navigate = useNavigate();
   const location = useLocation();
   const packageInfo = location.state?.packageInfo;
@@ -94,8 +92,6 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
     }
   };
   
-  
-
   return (
     <div className="flex flex-col items-center mb-6">
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -135,6 +131,15 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
             </div>
           </div>
 
+          {/* Days Header - เพิ่มหัวข้อวันในสัปดาห์ */}
+          <div className="grid grid-cols-7 text-center mb-2">
+            {["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."].map((day, index) => (
+              <div key={index} className="text-[#8677A7] text-sm font-medium flex items-center justify-center h-10 w-14">
+                {day}
+              </div>
+            ))}
+          </div>
+
           {/* ตารางวัน */}
           {loading ? (
             <p className="text-center text-gray-500">กำลังโหลดข้อมูลปฏิทิน...</p>
@@ -149,10 +154,10 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
                 const status = getStatus(date);
                 const isPast = dayjs().isAfter(date, "day");
                 const isSelected = selectedDate && selectedDate.isSame(date, "day"); // ✅ ป้องกัน error
-
+                const isAvailable = !isPast && status === "available";
 
                 return (
-                  <div key={day} className="relative flex flex-col items-center justify-center w-14 h-14 cursor-pointer">
+                  <div key={day} className="relative flex flex-col items-center justify-center w-14 h-14">
                     {isSelected && (
                       <span className="absolute inset-0 flex items-center justify-center z-0">
                         <span className="w-12 h-12 border-2 border-[#420F75] rounded-full"></span>
@@ -160,12 +165,16 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
                     )}
                     <span
                       className={`relative w-10 h-10 flex items-center justify-center rounded-full transition ${
-                        isPast ? "text-gray-500 cursor-default" : "text-gray-800 hover:border-gray-400"
-                      }`}
-                      onClick={() => handleSelectDate(date)}
+                        isPast 
+                          ? "text-gray-500" 
+                          : status === "available" 
+                            ? "text-gray-800" 
+                            : "text-gray-500"
+                      } ${isAvailable ? "cursor-pointer" : "cursor-default"}`}
+                      onClick={() => isAvailable && handleSelectDate(date)}
                     >
                       {day}
-                      {!isPast && status !== "full" && (
+                      {isAvailable && (
                         <span className="absolute bottom-0 w-2 h-2 bg-green-500 rounded-full"></span>
                       )}
                     </span>
@@ -178,25 +187,24 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
       </LocalizationProvider>
 
       {selectedDate && (
-  <>
-    <div className="mt-6">
-      <SlotComponent 
-        selectedDate={selectedDate} 
-        setSelectedTime={setSelectedTime}  // ✅ ส่งไปให้ SlotComponent
-      />
-    </div>
+        <>
+          <div className="mt-6">
+            <SlotComponent 
+              selectedDate={selectedDate} 
+              setSelectedTime={setSelectedTime}  // ✅ ส่งไปให้ SlotComponent
+            />
+          </div>
 
-    {/* ปุ่ม NextButton */}
-    <div className="fixed bottom-4 right-4">
-      <NextButton
-        onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, selectedTime } })} // ✅ เพิ่ม selectedTime
-        disabled={!selectedDate || !selectedTime} // ✅ ป้องกันการกดถ้าไม่ได้เลือกเวลา
-        className="w-auto"
-      />
-    </div>
-  </>
-)}
-
+          {/* ปุ่ม NextButton */}
+          <div className="fixed bottom-4 right-4">
+            <NextButton
+              onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, selectedTime } })} // ✅ เพิ่ม selectedTime
+              disabled={!selectedDate || !selectedTime} // ✅ ป้องกันการกดถ้าไม่ได้เลือกเวลา
+              className="w-auto"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

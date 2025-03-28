@@ -4,6 +4,11 @@ import Images from "../../../assets";
 
 const menuItems = [
   {
+    icon: Images.UserIcon,
+    label: "โปรไฟล์",
+    to: "/profileme", // กำหนดเส้นทางที่จะไปเมื่อคลิก
+  },
+  {
     icon: Images.calendarIcon,
     label: "จองคิว",
     to: "/queuehistory", // กำหนดเส้นทางที่จะไปเมื่อคลิก
@@ -15,7 +20,7 @@ const menuItems = [
   },
   {
     icon: Images.Users_GroupIcon,
-    label: "ผู้ติดตาม",
+    label: "กำลังติดตาม",
     to: "/follower", // กำหนดเส้นทางที่จะไปเมื่อคลิก
   },
 ];

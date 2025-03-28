@@ -48,7 +48,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword isDarkMode={isDarkMode} />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/landingPage" element={<LandingPage />} />
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />
@@ -66,7 +66,7 @@ export default function App() {
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
           <Route path="/qr-summary" element={<QrSummary/>} />
-          <Route path="/EmailVerification" element={<EmailVerification/>} />
+          <Route path="/verify" element={<EmailVerification />} />
           <Route path="/search-booking" element={<SearchBookingPage />} />
           <Route path="/search-booking-seer" element={<SearchBookingSeer />} />
           

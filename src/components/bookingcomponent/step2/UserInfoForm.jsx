@@ -350,7 +350,7 @@ const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requ
             value={formatBirthdate(formData.birthDate)}
             onChange={handleDateChange}
             onBlur={() => setTouched(prev => ({ ...prev, birthDate: true }))}
-            placeholder="dd/mm/yyyy"
+            
             className={`w-full p-2 border ${errors.birthDate ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.birthDate && <p className="text-red-500 text-sm">{errors.birthDate}</p>}
@@ -370,7 +370,7 @@ const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requ
             value={formData.birthTime || ""}
             onChange={handleTimeChange}
             onBlur={() => setTouched(prev => ({ ...prev, birthTime: true }))}
-            placeholder="08:45"
+           
             className={`w-full p-2 border ${errors.birthTime ? 'border-red-500' : 'border-gray-300'} rounded-md`}
           />
           {errors.birthTime && <p className="text-red-500 text-sm">{errors.birthTime}</p>}
