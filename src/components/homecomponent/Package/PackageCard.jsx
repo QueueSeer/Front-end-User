@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 const PackageCard = ({ packageInfo }) => {
     const navigate = useNavigate();
 
-
     const adaptedPackage = packageInfo.hasOwnProperty('title') 
         ? {
             id: packageInfo.id,
@@ -44,9 +43,9 @@ const PackageCard = ({ packageInfo }) => {
     };
 
     return (
-        <div className="flex flex-col w-64 bg-[#E9E9EB] rounded-lg shadow-md overflow-hidden">
+        <div className="flex flex-col w-64 bg-[#E9E9EB] rounded-lg shadow-md overflow-hidden h-[400px]">
             {/* รูปภาพ + ป้ายกำกับ */}
-            <div className="relative w-full h-40">
+            <div className="relative w-full h-40 flex-shrink-0">
                 <img 
                     src={adaptedPackage.image || Images.pic} 
                     alt={adaptedPackage.name} 
@@ -59,8 +58,13 @@ const PackageCard = ({ packageInfo }) => {
             </div>
 
             {/* รายละเอียดแพ็กเกจ */}
-            <div className="p-4">
-                <h3 className="mt-2 font-semibold text-gray-800">{adaptedPackage.name}</h3>
+            <div className="p-4 flex flex-col flex-grow">
+                {/* ชื่อแพ็กเกจที่มีความสูงคงที่ */}
+                <div className="h-[50px] mb-2">
+                    <h3 className="font-semibold text-gray-800 line-clamp-2">
+                        {adaptedPackage.name}
+                    </h3>
+                </div>
                 
                 <div className="flex items-center mt-2">
                     <img 
@@ -68,7 +72,9 @@ const PackageCard = ({ packageInfo }) => {
                         alt={adaptedPackage.seer_display_name} 
                         className="w-6 h-6 rounded-full mr-2" 
                     />
-                    <span className="text-sm text-gray-600">{adaptedPackage.seer_display_name}</span>
+                    <span className="text-sm text-gray-600 truncate">
+                        {adaptedPackage.seer_display_name}
+                    </span>
                 </div>
 
                 <div className="flex items-center mt-1">
@@ -79,27 +85,30 @@ const PackageCard = ({ packageInfo }) => {
                     <span className="text-sm text-gray-500 ml-1">{adaptedPackage.seer_review_count} reviews</span>
                 </div>
 
-                {/* ราคา */}
-                <div className="mt-3 text-2xl font-bold text-purple-900">
-                    {parseFloat(adaptedPackage.price)} Coins
-                </div>
-
-                {/* ระยะเวลา + ปุ่มจอง */}
-                <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center text-gray-500 text-sm">
-                        <img 
-                            src={getIcon(adaptedPackage.foretell_channel)} 
-                            alt="duration" 
-                            className="w-8 h-8 mr-2" 
-                        />
-                        {adaptedPackage.duration} นาที
+                {/* ส่วนด้านล่างที่มี margin-top:auto เพื่อผลักไปด้านล่างเสมอ */}
+                <div className="mt-auto">
+                    {/* ราคา */}
+                    <div className="text-2xl font-bold text-purple-900 mt-2">
+                        {parseFloat(adaptedPackage.price)} Coins
                     </div>
-                    <button 
-                        onClick={handleBooking} 
-                        className="bg-[#8677A7] text-white px-4 py-2 rounded-md text-sm"
-                    >
-                        จองเลย
-                    </button>
+
+                    {/* ระยะเวลา + ปุ่มจอง */}
+                    <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center text-gray-500 text-sm">
+                            <img 
+                                src={getIcon(adaptedPackage.foretell_channel)} 
+                                alt="duration" 
+                                className="w-8 h-8 mr-2" 
+                            />
+                            {adaptedPackage.duration} นาที
+                        </div>
+                        <button 
+                            onClick={handleBooking} 
+                            className="bg-[#8677A7] text-white px-4 py-2 rounded-md text-sm"
+                        >
+                            จองเลย
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
