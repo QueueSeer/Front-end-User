@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import Images from "./../../assets";
 import axios from "axios";
 
+// กำหนด API Base URL อย่างชัดเจน
+const API_BASE_URL = "https://backend.qseer.app";
+
 const ProfileCard = ({ 
   profileImageUrl = null, 
   name = "หมอดูเพียงฟ้า พาขวัญ", 
@@ -12,64 +15,133 @@ const ProfileCard = ({
   seerId = null 
 }) => {
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(followers);
+  const [followerCount, setFollowerCount] = useState(parseInt(followers) || 0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Check if user is already following this seer when component mounts
+  // ตรวจสอบสถานะล็อกอินและอัปเดตสถานะการติดตามจาก local storage
   useEffect(() => {
-    // You might need an API endpoint to check if the user is following a specific seer
-    // This is a placeholder - you would need to implement this endpoint on your backend
-    const checkFollowStatus = async () => {
+    if (!seerId) return;
+
+    const checkLoginStatus = async () => {
       try {
-        // Example API call to get user's followed seers
-        const response = await axios.get("/api/user/me/follows");
-        // Check if current seer is in the list of followed seers
-        const isAlreadyFollowing = response.data.some(follow => follow.seer_id === seerId);
-        setIsFollowing(isAlreadyFollowing);
+        // ตรวจสอบสถานะล็อกอิน
+        const loginResponse = await axios.get(`${API_BASE_URL}/api/user/me`, {
+          withCredentials: true
+        });
+        setIsLoggedIn(true);
+        
+        // พยายามดึงสถานะการติดตามจาก localStorage
+        const followStateKey = `follow_state_${seerId}`;
+        const savedFollowState = localStorage.getItem(followStateKey);
+        
+        if (savedFollowState === 'true') {
+          console.log(`Found saved follow state for seer ${seerId}: following`);
+          setIsFollowing(true);
+        }
       } catch (error) {
-        console.error("Error checking follow status:", error);
+        // ไม่ได้ล็อกอิน หรือมีข้อผิดพลาดอื่นๆ
+        console.error("Error checking login status:", error);
+        setIsLoggedIn(false);
+        setIsFollowing(false);
+        
+        // ลบสถานะการติดตามใน localStorage เมื่อไม่ได้ล็อกอิน
+        const followStateKey = `follow_state_${seerId}`;
+        localStorage.removeItem(followStateKey);
       }
     };
 
-    if (seerId) {
-      checkFollowStatus();
-    }
+    checkLoginStatus();
   }, [seerId]);
 
-  const handleFollowToggle = async () => {
-    if (!seerId) {
-      console.error("No seer ID provided");
+  // ฟังก์ชันสำหรับการล็อกอิน
+  const handleLogin = () => {
+    window.location.href = "/login";
+  };
+
+  // ฟังก์ชันสำหรับการติดตาม
+  const handleFollow = async () => {
+    if (!seerId || !isLoggedIn) {
+      !isLoggedIn && handleLogin();
       return;
     }
-
+    
+    // ถ้ากำลังติดตามอยู่แล้ว ไม่ต้องเรียก API
+    if (isFollowing) return;
+    
     setIsLoading(true);
-
+    
     try {
-      if (isFollowing) {
-        // Unfollow the seer
-        await axios.delete(`/api/user/me/follow/${seerId}`);
-        setFollowerCount(prev => Math.max(0, prev - 1));
-      } else {
-        // Follow the seer
-        await axios.post(`/api/user/me/follow/${seerId}`);
-        setFollowerCount(prev => prev + 1);
-      }
-      setIsFollowing(!isFollowing);
-    } catch (error) {
-      console.error("Error toggling follow status:", error);
+      // เรียก API ติดตามหมอดู
+      await axios.post(`${API_BASE_URL}/api/user/me/follow/${seerId}`, {}, {
+        withCredentials: true
+      });
       
-      // Handle specific error cases
+      // อัปเดตสถานะและบันทึกใน localStorage
+      setIsFollowing(true);
+      setFollowerCount(prev => parseInt(prev) + 1);
+      
+      // บันทึกสถานะการติดตามใน localStorage
+      const followStateKey = `follow_state_${seerId}`;
+      localStorage.setItem(followStateKey, 'true');
+      
+    } catch (error) {
+      console.error("Error following:", error);
+      
       if (error.response) {
         if (error.response.status === 401) {
-          alert("กรุณาเข้าสู่ระบบก่อนดำเนินการ");
-        } else if (error.response.status === 404) {
-          alert("ไม่พบข้อมูลหมอดู");
+          alert("กรุณาเข้าสู่ระบบก่อนดำเนินการติดตาม");
+          setIsLoggedIn(false);
+          handleLogin();
+        } else if (error.response.status === 409) {
+          // กรณีติดตามอยู่แล้ว แค่อัปเดต UI และ localStorage
+          setIsFollowing(true);
+          const followStateKey = `follow_state_${seerId}`;
+          localStorage.setItem(followStateKey, 'true');
         } else {
           alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
         }
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // ฟังก์ชันสำหรับการเลิกติดตาม
+  const handleUnfollow = async () => {
+    if (!seerId || !isLoggedIn) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // เรียก API เลิกติดตามหมอดู
+      await axios.delete(`${API_BASE_URL}/api/user/me/follow/${seerId}`, {
+        withCredentials: true
+      });
+      setIsFollowing(false);
+      setFollowerCount(prev => Math.max(0, parseInt(prev) - 1));
+    } catch (error) {
+      alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsLoading(false);
+      setShowConfirmation(false);
+    }
+  };
+
+  // ฟังก์ชันจัดการกดปุ่มติดตาม/เลิกติดตาม
+  const handleFollowToggle = () => {
+    if (isLoading) return;
+    
+    if (!isLoggedIn) {
+      handleLogin();
+      return;
+    }
+    
+    if (isFollowing) {
+      setShowConfirmation(true);
+    } else {
+      handleFollow();
     }
   };
 
@@ -89,11 +161,19 @@ const ProfileCard = ({
             <p className="text-[#615E83] text-sm font-medium">{category}</p>
           </div>
           <button 
-            className={`border border-black px-4 py-1 rounded-lg font-medium transition-colors duration-300 ${isFollowing ? 'bg-[#420F75] text-white' : 'bg-white text-black hover:bg-gray-100'} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`border border-black px-4 py-1 rounded-lg font-medium transition-colors duration-300 
+              ${isLoggedIn 
+                ? (isFollowing ? 'bg-[#420F75] text-white' : 'bg-white text-black hover:bg-gray-100') 
+                : 'bg-[#420F75] text-white'}
+              ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             onClick={handleFollowToggle}
             disabled={isLoading}
           >
-            {isLoading ? "กำลังดำเนินการ..." : (isFollowing ? "กำลังติดตาม" : "ติดตาม")}
+            {isLoading 
+              ? "กำลังดำเนินการ..." 
+              : (isLoggedIn 
+                  ? (isFollowing ? "กำลังติดตาม" : "ติดตาม")
+                  : "เข้าสู่ระบบเพื่อติดตาม")}
           </button>
         </div>
         <hr className="border-gray-300 my-2" />
@@ -113,10 +193,32 @@ const ProfileCard = ({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Unfollowing */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-auto">
+            <h3 className="text-lg font-bold mb-4">ยกเลิกการติดตามหมอดู</h3>
+            <p className="mb-6">คุณต้องการยกเลิกการติดตาม {name} ใช่หรือไม่?</p>
+            <div className="flex justify-end space-x-3">
+              <button 
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                onClick={() => setShowConfirmation(false)}
+              >
+                ยกเลิก
+              </button>
+              <button 
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                onClick={handleUnfollow}
+              >
+                ตกลง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-// Default parameters are now defined directly in the function signature above
 
 export default ProfileCard;

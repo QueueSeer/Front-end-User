@@ -4,6 +4,15 @@ import { useNavigate } from "react-router-dom";
 const AuctionCard = ({ auction }) => {
   const navigate = useNavigate();
 
+  // แปลงวันที่สร้างประมูลเป็นรูปแบบที่อ่านง่าย
+  const formattedCreatedDate = auction.dateCreated 
+    ? new Date(auction.dateCreated).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    : "ไม่ระบุวันที่";
+
   return (
     <div
       className="bg-white rounded-lg shadow-md max-w-sm overflow-hidden cursor-pointer"
@@ -36,7 +45,7 @@ const AuctionCard = ({ auction }) => {
             />
             <p className="text-sm font-medium ml-2">{auction.astrologer}</p>
           </div>
-          <p className="text-xs text-gray-500 text-right">วันที่ 10 ตุลาคม 2567</p>
+          <p className="text-xs text-gray-500 text-right">วันที่ {formattedCreatedDate}</p>
         </div>
       </div>
     </div>

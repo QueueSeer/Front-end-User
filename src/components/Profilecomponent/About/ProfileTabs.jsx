@@ -3,7 +3,8 @@ import AboutSection from "./AboutSection";
 import PackagesSection from "./PackagesSection";
 import ReviewsSection from "./ReviewsSection";
 
-const ProfileTabs = () => {
+// เพิ่ม seerId ในพารามิเตอร์
+const ProfileTabs = ({ seerId }) => {
   const [activeTab, setActiveTab] = useState("about");
 
   return (
@@ -16,7 +17,7 @@ const ProfileTabs = () => {
           }`}
           onClick={() => setActiveTab("about")}
         >
-          เกี่ยวกับเรา 
+          เกี่ยวกับเรา
         </button>
         <button
           className={`py-2 px-4 text-lg font-semibold ${
@@ -36,11 +37,11 @@ const ProfileTabs = () => {
         </button>
       </div>
 
-      {/* แสดงคอนเทนต์ของแท็บที่เลือก */}
+      {/* แสดงคอนเทนต์ของแท็บที่เลือก และส่ง seerId ไปด้วย */}
       <div className="mt-5 w-full">
-        {activeTab === "about" && <AboutSection />}
-        {activeTab === "packages" && <PackagesSection />}
-        {activeTab === "reviews" && <ReviewsSection />}
+        {activeTab === "about" && <AboutSection seerId={seerId} />}
+        {activeTab === "packages" && <PackagesSection seerId={seerId} />}
+        {activeTab === "reviews" && <ReviewsSection seerId={seerId} />}
       </div>
     </div>
   );
