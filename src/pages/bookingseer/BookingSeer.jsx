@@ -14,7 +14,6 @@ const BookingSeer = () => {
   const [packageInfo, setPackageInfo] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
-  const [numQuestions, setNumQuestions] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -51,7 +50,7 @@ const BookingSeer = () => {
     navigate("/bookingSeer_2", {
       state: {
         packageInfo,
-        selectedDate: selectedDate instanceof Date ? selectedDate.toISOString() : selectedDate,
+        selectedDate: selectedDate,
         selectedTime
       }
     });
@@ -74,6 +73,8 @@ const BookingSeer = () => {
 
         <div className="w-full">
           <FullCalendarPage 
+            seerId={packageInfo.seer_id}
+            packageId={packageInfo.id}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             selectedTime={selectedTime}

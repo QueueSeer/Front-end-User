@@ -4,12 +4,13 @@ import Navbar from "../../components/navbar";
 import Payment from "../../components/bookingcomponent/step2/Payment";
 import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
+import dayjs from "dayjs";
 import { useLocation } from "react-router-dom";
 
 const BookingSeer_2 = () => {
   const location = useLocation();
 
-  const [packageInfo, setPackageInfo] = useState(null);
+  const [packageInfo, setPackageInfo] = useState(location.state?.packageInfo);
   
   const [userInfo, setUserInfo] = useState({});
   const [userInfoLoading, setUserInfoLoading] = useState(true);
@@ -24,7 +25,8 @@ const BookingSeer_2 = () => {
     notifyByEmail: false,
   });
   
-  const [questions, setQuestions] = useState([]);
+  const numQuestions = location.state?.packageInfo.question_limit || 0;
+  const [questions, setQuestions] = useState(numQuestions < 1 || numQuestions > 6 ? [""] : Array(numQuestions).fill(""));
 
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
@@ -57,8 +59,35 @@ const BookingSeer_2 = () => {
     }));
   };
 
+  const isFormValid = () => {
+    if (!questions.every(q => q.trim() !== "")) {
+      return false;
+    } 
+    if (!paymentMethod){
+      return false;
+    }
+    return true
+  }
+
   const handlePayment = () => {
-    
+    // if (!isFormValid()) {
+    //   alert("กรุณากรอกข้อมูลและเลือกวิธีการชำระเงินให้ครบถ้วน");
+    //   return;
+    // }
+    // setIsPaymentLoading(true);
+    const [hour, minute] = selectedTime.split(":");
+    const startTime = new Date(selectedDate.$d);
+    const formatDate = dayjs(startTime).format("YYYY-MM-DD") + `T${hour.padStart(2,'0')}:${minute.padStart(2,'0')}:00.000Z`;
+
+    const appointmentBody = {
+      seer_id: packageInfo.seer_id,
+      packageId: packageInfo.id,
+      start_time: formatDate,
+      questions: questions
+    };
+
+    console.log(userInfo.coins)
+
   }
 
   useEffect(()=>{
@@ -79,24 +108,17 @@ const BookingSeer_2 = () => {
           firstName: res.first_name || "",
           lastName: res.last_name || "",
           email: res.email || "",
-          birthDate: res.birthdate ? formatDate(new Date(data.birthdate)) : "",
+          birthDate: res.birthdate ? formatDate(new Date(res.birthdate)) : "",
           birthTime: "",
           status: "",
           notifyByEmail: true
         });
+        setUserInfo(res)
       })
-      .then((res)=>setUserInfo(res))
       .finally(()=>setUserInfoLoading(false));
     }
     fetchUserData()
   }, []);
-
-  useEffect(()=>{
-    const packageInfoLocation = location.state?.packageInfo;
-    setPackageInfo(packageInfoLocation);
-    const numQuestions = packageInfoLocation.question_limit || 0;
-    setQuestions(numQuestions < 1 || numQuestions > 6 ? [""] : Array(numQuestions).fill(""))
-  },[]);
 
   return (
     <>
@@ -120,13 +142,9 @@ const BookingSeer_2 = () => {
           <div className="mt-6">
             <h3 className="text-lg font-semibold">คำถามสำหรับการดูดวง</h3>
             <QuestionForm
-              numQuestions={packageInfo?.question_limit ?? 4}
+              numQuestions={packageInfo.question_limit}
               questions={questions}
-              onChange={(index, value) => {
-                const tmp = questions;
-                tmp[index] = value;
-                setQuestions(tmp);
-              }}
+              setQuestions={setQuestions}
             />
           </div>
           

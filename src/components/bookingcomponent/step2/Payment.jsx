@@ -16,7 +16,6 @@ const Payment = ({
   onPayment,  // รับฟังก์ชันจาก BookingSeer2
   isLoading = false  // รับสถานะโหลดจาก BookingSeer2
 }) => {
-  
   // Format date safely
   const formatDate = (date) => {
     if (!date) return "ไม่ระบุวันที่";
@@ -38,11 +37,8 @@ const Payment = ({
   const formattedTime = selectedTime || "ไม่ระบุเวลา";
 
   const totalPrice = packageInfo?.price ?? 0;
-const isFree = totalPrice === 0;
+  const isFree = totalPrice === 0;
 
-
-
-  
   // ใช้คอยน์ตามที่ผู้ใช้มีจริง
   const discount = useCoins && paymentMethod === "promptpay" ? Math.min(userCoins, totalPrice) : 0;
   const finalPrice = Math.max(0, totalPrice - discount);
@@ -108,7 +104,7 @@ const isFree = totalPrice === 0;
         <hr className="my-2 border-gray-300" />
         <div className="flex items-center space-x-3 mt-2">
         <img 
-  src={packageInfo?.image === "/default-image.jpg" ? Images.picbill : packageInfo?.image} 
+  src={(packageInfo.image === "" || packageInfo.image === null) ? Images.pic : packageInfo.image}
   alt="Package" 
   className="w-20 h-20 rounded-md object-cover" 
 />

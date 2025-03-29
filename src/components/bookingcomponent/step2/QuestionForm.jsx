@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const QuestionForm = ({ numQuestions, questions, onChange }) => {
+const QuestionForm = ({ numQuestions, questions, setQuestions }) => {
   // 🟣 กรณีไม่จำกัดคำถาม (แสดงช่องเดียว)
   if (numQuestions < 1 || numQuestions > 6) {
     return (
@@ -12,7 +12,11 @@ const QuestionForm = ({ numQuestions, questions, onChange }) => {
           className="w-full p-3 border rounded-md focus:ring-2 focus:ring-[#6B5B95] focus:outline-none"
           rows="6"
           value={questions[0]}
-          onChange={(e) => onChange(0, e.target.value)}
+          onChange={(e) => {
+            const tmp = questions
+            tmp[0] = e.target.value
+            setQuestions(tmp)
+          }}
           placeholder="พิมพ์คำถามของคุณทั้งหมดในช่องนี้..."
         />
       </div>
@@ -31,7 +35,13 @@ const QuestionForm = ({ numQuestions, questions, onChange }) => {
             className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#6B5B95] focus:outline-none"
             rows="3"
             value={question}
-            onChange={(e) => onChange(index, e.target.value)}
+            onChange={(e) => {
+              const tmp = questions
+              tmp[index] = e.target.value
+              console.log(tmp)
+              console.log(e.target.value)
+              setQuestions(tmp) 
+            }}
             placeholder={`กรอกคำถามที่ ${index + 1}`}
           />
         </div>

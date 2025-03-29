@@ -1,67 +1,37 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+
 import dayjs from "dayjs";
 
-const SlotComponent = ({ selectedDate, setSelectedTime }) => { 
+const SlotComponent = ({seerCalendar, selectedDate, setSelectedTime }) => { 
   if (!selectedDate) return null; 
 
-  const [availableSlots, setAvailableSlots] = useState([]); // เวลาว่างจาก API
+  const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedTime, setLocalSelectedTime] = useState(null);
-  const [timePeriod, setTimePeriod] = useState("morning"); // ค่าเริ่มต้นเป็นช่วงเช้า
+  const [timePeriod, setTimePeriod] = useState("morning"); 
 
-  const location = useLocation();
-  const seerId = location.state?.seerId || 1; // ค่าเริ่มต้นเป็น 1
-  const packageId = location.state?.packageId || 1; // ค่าเริ่มต้นเป็น 1
-
-  // 🟢 โหลดเวลาที่ว่างจาก API
   useEffect(() => {
     if (!selectedDate || !selectedDate.isValid()) return;
-  
-    const startDate = selectedDate.format("YYYY-MM-DD");
-    const endDate = startDate;
-  
-    fetch(`https://backend.qseer.app/api/seer/${seerId}/package/fortune/${packageId}/time-slots?start_date=${startDate}&end_date=${endDate}`, {
-      method: "GET",
-      headers: {
-        "Accept": "application/json",
-      },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error("โหลดเวลาที่ว่างล้มเหลว");
-        return response.json();
-      })
-      .then((data) => {
-        console.log("เวลาที่ว่างจาก API:", data); // ✅ Debug
-  
-        // 🔹 แปลง `start_time` เป็น HH:mm อย่างถูกต้อง
-        const slots = data.map(slot => {
-          const formattedTime = dayjs(slot.start_time).format("HH:mm");
-          console.log("🔹 เวลาที่แปลงแล้ว:", formattedTime); // ✅ Debug
-          return formattedTime;
-        });
-  
-        setAvailableSlots(slots);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching time slots:", err);
-        setLoading(false);
-      });
-  }, [selectedDate, seerId, packageId]);
-  
-  
 
-  // 🟢 ฟังก์ชันเลือกเวลา
+    const slots = []
+    seerCalendar.forEach((data)=>{
+      if(dayjs(selectedDate).isSame(data.start_time, 'day')){
+        slots.push(dayjs(data.start_time).format("HH:mm"));
+      }
+    })
+    setAvailableSlots(slots);
+    setLoading(false);
+  }, []);
+  
+  
   const handleSelectTime = (time) => {
     setLocalSelectedTime(time);
-    setSelectedTime(time); // ✅ ส่งค่าไปให้ `FullCalendarPage`
+    setSelectedTime(time);
   };
 
-  // 🔹 แยกเวลาว่างเป็นช่วงเช้าและช่วงบ่าย
-  const morningSlots = availableSlots.filter(time => time >= "09:00" && time < "12:00");
-  const afternoonSlots = availableSlots.filter(time => time >= "13:00" && time < "16:00");
+  const morningSlots = availableSlots.filter(time => time >= "09:00" && time < "13:00");
+  const afternoonSlots = availableSlots.filter(time => !(time >= "09:00" && time < "13:00"));
 
   return (
     <div className="w-[650px] mt-5">
