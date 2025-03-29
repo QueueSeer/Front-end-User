@@ -9,6 +9,9 @@ const SeerCard = ({ seer }) => {
     const isTablet = useMediaQuery({ minWidth: 641, maxWidth: 1024 }); // สำหรับ iPad
     const navigate = useNavigate(); // ✅ ใช้ navigate
 
+    // ตรวจสอบว่า seer และ seer.rating มีค่าหรือไม่
+    const rating = seer?.rating !== undefined && seer?.rating !== null ? seer.rating : 0;
+    
     // ✅ ฟังก์ชันนำทางไปยังหน้า QseerSchedulePage
     const handleClick = () => {
         navigate("/qseerSchedulePage", { state: { seer } });
@@ -22,17 +25,21 @@ const SeerCard = ({ seer }) => {
             onClick={handleClick} // ✅ คลิกแล้วเปลี่ยนหน้า
         >
             <div className={`${isMobile ? "w-24 h-24" : isTablet ? "w-28 h-28" : "w-36 h-36"} rounded-full flex items-center justify-center overflow-hidden`}>
-                <img src={Images.profile} alt={seer.name} className="w-full h-full object-cover object-top" />
+                <img 
+                    src={seer?.image || Images.profile} 
+                    alt={seer?.name || "หมอดู"} 
+                    className="w-full h-full object-cover object-top" 
+                />
             </div>
             <p className={`${isMobile ? "text-sm" : isTablet ? "text-base" : "text-lg"} mt-2 font-semibold text-center text-purple-700`}>
-                {seer.name}
+                {seer?.name || "หมอดู"}
             </p>
-            <p className={`${isMobile ? "text-xs" : "text-sm"} text-gray-500`}>{seer.category}</p>
+            <p className={`${isMobile ? "text-xs" : "text-sm"} text-gray-500`}>{seer?.category || ""}</p>
             <div className="mt-2 flex items-center justify-center w-full gap-2 align-middle">
                 <span className={`${isMobile ? "text-xs" : "text-sm"} text-gray-700 font-semibold flex items-center`}>
-                    {seer.rating.toFixed(1)}
+                    {rating.toFixed(1)}
                 </span>
-                <SeerRating rating={seer.rating} />
+                <SeerRating rating={rating} />
             </div>
         </div>
     );

@@ -162,6 +162,7 @@ import UserProfile from "./icon/QueuCard/UserProfile.png";
 import next2 from "./icon/QueuCard/next2.png";
 import StarOutline from "./icon/QueuCard/StarOutline.png";
 import StarFilled from "./icon/QueuCard/StarFilled.png";
+import crystalBall from "./icon/Navbar/crystalBall.png";
 
 
 const images = {
@@ -342,6 +343,7 @@ PackageIcon,
 CheckIcon,
 HeartIcon,
 PencilIcon,
+crystalBall,
 };
 
 export default images;

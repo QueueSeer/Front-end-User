@@ -21,7 +21,7 @@ const PackageSection = () => {
     const fetchPackages = async () => {
         try {
             const params = new URLSearchParams();
-            params.append("limit", 5);
+            params.append("limit", 15); // เพิ่มจำนวน limit เพื่อให้มีข้อมูลมากขึ้น
             params.append("direction", "asc");
             const apiResponse = await fetch(`https://backend.qseer.app/api/seer/package/fortune/search?${params}`,{
                 method: "GET",

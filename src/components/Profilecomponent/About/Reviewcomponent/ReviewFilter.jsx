@@ -2,7 +2,7 @@ import React from "react";
 
 const ReviewFilter = ({ activeFilter, setActiveFilter }) => {
   const stars = [5, 4, 3, 2, 1];
-
+  
   return (
     <div className="mb-6">
       {/* Desktop View */}
@@ -18,7 +18,7 @@ const ReviewFilter = ({ activeFilter, setActiveFilter }) => {
           >
             ทั้งหมด
           </button>
-
+          
           {stars.map((star) => (
             <button
               key={star}
@@ -34,7 +34,7 @@ const ReviewFilter = ({ activeFilter, setActiveFilter }) => {
           ))}
         </div>
       </div>
-
+      
       {/* Mobile View */}
       <div className="flex sm:hidden flex-col gap-4">
         <div className="grid grid-cols-3 gap-2">
@@ -48,7 +48,7 @@ const ReviewFilter = ({ activeFilter, setActiveFilter }) => {
           >
             ทั้งหมด
           </button>
-
+          
           {stars.map((star) => (
             <button
               key={star}

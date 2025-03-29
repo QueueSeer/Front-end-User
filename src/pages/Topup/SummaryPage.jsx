@@ -1,35 +1,105 @@
 import React, { useState } from "react";
 import Images from "../../assets";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
+import Navbar from "../../components/navbar/index";
+
+const API_BASE_URL = 'https://backend.qseer.app';
 
 const SummaryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedCoins, selectedPrice, selectedPayment, currentCoins, from } = location.state || {}; // ✅ รับค่า from
+  const { selectedCoins, selectedPrice, selectedPayment, currentCoins, userName, from } = location.state || {};
 
   const [isLoading, setIsLoading] = useState(false);
-  const [updatedCoins, setUpdatedCoins] = useState(currentCoins); // เก็บค่าล่าสุดของ Coins
+  const [error, setError] = useState(null);
 
-  const handleConfirmPayment = () => {
-    setIsLoading(true);
+ // ฟังก์ชันสำหรับชำระเงิน (ไปยังหน้า QR)
+const handleConfirmPayment = async () => {
+  if (!selectedCoins || selectedCoins <= 0 || !selectedPrice) {
+    setError('กรุณาเลือกแพ็กเกจและจำนวนเงินให้ถูกต้อง');
+    return;
+  }
+
+  // เริ่มแสดงสถานะโหลด
+  setIsLoading(true);
+  setError(null);
+  
+  try {
+    // เรียก API เพื่อสร้าง QR Code สำหรับชำระเงิน
+    const response = await fetch(`${API_BASE_URL}/api/transaction/qr_promptpay?amount=${selectedPrice}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    let qrCodeData = null;
+    let apiSuccess = false;
+    
+    if (response.ok) {
+      // ได้รับ QR Code เป็น text (base64 หรือ URL)
+      qrCodeData = await response.text();
+      apiSuccess = true;
+    } else {
+      if (response.status === 401) {
+        setError("กรุณาเข้าสู่ระบบเพื่อทำรายการ");
+      } else if (response.status === 422) {
+        setError("จำนวนเงินไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+      } else {
+        try {
+          const errorData = await response.json();
+          setError(errorData.detail || "ไม่สามารถสร้าง QR Code ได้ โปรดลองอีกครั้ง");
+        } catch (e) {
+          setError("ไม่สามารถสร้าง QR Code ได้ โปรดลองอีกครั้ง");
+        }
+      }
+    }
+    
+    // รอ 3 วินาทีก่อนดำเนินการต่อ ไม่ว่า API จะสำเร็จหรือไม่ก็ตาม
+    setTimeout(() => {
+      // ปิดสถานะโหลด
+      setIsLoading(false);
+      
+      if (apiSuccess) {
+        // นำทางไปหน้า QR Summary หากการเรียก API สำเร็จ
+        navigate("/qr-summary", {
+          state: {
+            updatedCoins: currentCoins,
+            selectedCoins,
+            selectedPrice,
+            selectedPayment,
+            currentCoins,
+            userName,
+            from,
+            qrCodeData
+          }
+        });
+      }
+      // หาก API ไม่สำเร็จ ก็ไม่ต้องนำทางไปไหน จะแสดงข้อความแจ้งเตือน error แทน
+    }, 3000); // รอ 3 วินาที
+    
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการสร้าง QR Code:", error);
+    setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ โปรดลองอีกครั้ง");
+    
+    // ถ้าไม่สามารถเชื่อมต่อกับ API ได้ ก็ยังรอ 3 วินาทีเช่นกัน
     setTimeout(() => {
       setIsLoading(false);
-      const newUpdatedCoins = updatedCoins + selectedCoins; // อัปเดตค่าคอยน์
-  
+      
+      // ไปที่หน้า QR โดยไม่มี QR Code จาก API
       navigate("/qr-summary", {
         state: {
-          updatedCoins: newUpdatedCoins, 
+          updatedCoins: currentCoins,
           selectedCoins,
           selectedPrice,
           selectedPayment,
           currentCoins,
+          userName,
           from
+          // ไม่มี qrCodeData ทำให้หน้า QR ใช้รูปเริ่มต้น
         }
       });
-    }, 2000);
-  };
-  
+    }, 3000); // รอ 3 วินาที
+  }
+};
 
   return (
     <>
@@ -75,6 +145,13 @@ const SummaryPage = () => {
         </button>
       </div>
 
+      {/* แสดงข้อความแจ้งเตือนถ้ามี error */}
+      {error && (
+        <div className="max-w-lg w-full bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
       {/* Card Container */}
       <div className="max-w-lg w-full bg-white shadow-lg rounded-lg overflow-hidden mt-10">
         {/* Image Section */}
@@ -100,17 +177,17 @@ const SummaryPage = () => {
 
           <div className="flex justify-between items-center mt-2">
             <span className="text-gray-600 font-medium">ราคา</span>
-            <span className="font-bold text-gray-800">{selectedPrice.toFixed(2)} บาท</span>
+            <span className="font-bold text-gray-800">{selectedPrice?.toFixed(2) || 0} บาท</span>
           </div>
 
           <div className="flex justify-between items-center mt-2">
             <span className="text-gray-600 font-medium">ช่องทางการชำระเงิน</span>
-            <span className="font-bold text-gray-800">{selectedPayment}</span>
+            <span className="font-bold text-gray-800">{selectedPayment || "QR"}</span>
           </div>
 
           <div className="flex justify-between items-center mt-2">
             <span className="text-gray-600 font-medium">ชื่อผู้ใช้</span>
-            <span className="font-bold text-gray-800">Surangkanang</span>
+            <span className="font-bold text-gray-800">{userName || "Surangkanang"}</span>
           </div>
         </div>
 
