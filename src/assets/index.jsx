@@ -44,6 +44,9 @@ import Luckycolor from "./images/home/Luckycolor.png";
 import Luckycolor2 from "./images/home/Luckycolor2.png";
 import pic from "./images/home/pic.png";
 import profile from "./images/home/profile.png";
+import SeerRegister from "./images/home/SeerRegister.png";
+
+SeerRegister
 // ไอคอน home
 import time from "./icon/ProfilrIcon/time.png";
 import X from "./icon/ProfilrIcon/X.png";
@@ -344,6 +347,7 @@ CheckIcon,
 HeartIcon,
 PencilIcon,
 crystalBall,
+SeerRegister,
 };
 
 export default images;

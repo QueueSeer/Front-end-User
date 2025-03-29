@@ -1,11 +1,48 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Images from "../../assets";
-import ReviewPopup from "./ReviewPopup"; // Import Popup รีวิว
+import ReviewPopup from "./ReviewPopup";
 
-const QueueCard = ({ image, title, categories, fortuneTeller, date, time, status }) => {
+const QueueCard = ({ 
+  id, 
+  image, 
+  title, 
+  categories, 
+  fortuneTeller, 
+  date, 
+  time, 
+  status,
+  confirmation_code,
+  raw_data // ข้อมูลทั้งหมดจาก API รวมถึง questions
+}) => {
     const navigate = useNavigate();
     const [isReviewOpen, setIsReviewOpen] = useState(false);
+
+    // แก้ไขการนำทางไปยังหน้า QueueDetails เพื่อให้แน่ใจว่าส่งข้อมูลคำถามไปด้วย
+    const handleViewDetails = () => {
+        console.log("Navigating to queuedetails with data:", {
+            id,
+            raw_data: raw_data,
+            has_questions: raw_data && raw_data.questions && Array.isArray(raw_data.questions)
+        });
+        
+        navigate(`/queuedetails/${id}`, {
+            state: { 
+                appointmentData: raw_data,
+                // ส่งข้อมูลสำหรับแสดงผลเพิ่มเติม
+                displayData: {
+                    image,
+                    title,
+                    categories,
+                    fortuneTeller,
+                    date,
+                    time,
+                    status,
+                    confirmation_code
+                }
+            }
+        });
+    };
 
     return (
         <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-md p-5 mb-4 relative">
@@ -34,10 +71,17 @@ const QueueCard = ({ image, title, categories, fortuneTeller, date, time, status
                     </span>
                 </div>
 
+                {/* คำถาม (ถ้ามี) */}
+                {raw_data && raw_data.questions && Array.isArray(raw_data.questions) && raw_data.questions.length > 0 && (
+                    <p className="text-gray-500 text-sm mt-2">
+                        มีคำถาม {raw_data.questions.length} ข้อ
+                    </p>
+                )}
+
                 {/* More Details */}
                 <p
                     className="text-gray-500 text-sm mt-3 cursor-pointer flex items-center hover:text-purple-600"
-                    onClick={() => navigate("/queuedetails")}
+                    onClick={handleViewDetails}
                 >
                     รายละเอียด
                     <img src={Images.next2} alt="details" className="w-2 h-3 ml-2" />

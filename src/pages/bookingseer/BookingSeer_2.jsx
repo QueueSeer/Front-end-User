@@ -5,10 +5,11 @@ import Payment from "../../components/bookingcomponent/step2/Payment";
 import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
 import dayjs from "dayjs";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const BookingSeer_2 = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [packageInfo, setPackageInfo] = useState(location.state?.packageInfo);
   
@@ -26,7 +27,11 @@ const BookingSeer_2 = () => {
   });
   
   const numQuestions = location.state?.packageInfo.question_limit || 0;
-  const [questions, setQuestions] = useState(numQuestions < 1 || numQuestions > 6 ? [""] : Array(numQuestions).fill(""));
+  // ตรวจสอบจำนวนคำถามที่ถูกต้องและสร้าง array เริ่มต้น
+  const [questions, setQuestions] = useState(() => {
+    const validNumQuestions = (numQuestions > 0 && numQuestions <= 6) ? numQuestions : 1;
+    return Array(validNumQuestions).fill("");
+  });
 
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
@@ -40,7 +45,7 @@ const BookingSeer_2 = () => {
     if (!date || !(date instanceof Date)) return "";
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear()).slice(-2);
+    const year = String(date.getFullYear());
     return `${day}/${month}/${year}`;
   };
   
@@ -69,25 +74,108 @@ const BookingSeer_2 = () => {
     return true
   }
 
-  const handlePayment = () => {
-    // if (!isFormValid()) {
-    //   alert("กรุณากรอกข้อมูลและเลือกวิธีการชำระเงินให้ครบถ้วน");
-    //   return;
-    // }
-    // setIsPaymentLoading(true);
-    const [hour, minute] = selectedTime.split(":");
-    const startTime = new Date(selectedDate.$d);
-    const formatDate = dayjs(startTime).format("YYYY-MM-DD") + `T${hour.padStart(2,'0')}:${minute.padStart(2,'0')}:00.000Z`;
+  const handlePayment = async () => {
+    if (!isFormValid()) {
+      alert("กรุณากรอกข้อมูลและเลือกวิธีการชำระเงินให้ครบถ้วน");
+      return;
+    }
+    
+    try {
+      setIsPaymentLoading(true);
+      
+      // สร้าง format วันที่และเวลาตามที่ API ต้องการ
+      const [hour, minute] = selectedTime.split(":");
+      const startTime = new Date(selectedDate.$d);
+      
+      // แก้ไขเป็นรูปแบบ ISO string ที่มี timezone +07:00 (เวลาไทย)
+      const thaiYear = startTime.getFullYear();
+      const thaiMonth = String(startTime.getMonth() + 1).padStart(2, '0');
+      const thaiDay = String(startTime.getDate()).padStart(2, '0');
+      const formattedDate = `${thaiYear}-${thaiMonth}-${thaiDay}T${hour.padStart(2,'0')}:${minute.padStart(2,'0')}:00+07:00`;
 
-    const appointmentBody = {
-      seer_id: packageInfo.seer_id,
-      packageId: packageInfo.id,
-      start_time: formatDate,
-      questions: questions
-    };
+      // แสดงข้อมูลที่จะส่งในคอนโซลเพื่อตรวจสอบ
+      console.log("Selected Date Object:", selectedDate);
+      console.log("Date Object:", startTime);
+      console.log("Formatted Date:", formattedDate);
+      console.log("Package Info:", packageInfo);
+      
+      // สร้าง body สำหรับส่งไปยัง API
+      const appointmentBody = {
+        seer_id: Number(packageInfo.seer_id), // แปลงเป็นตัวเลข
+        package_id: Number(packageInfo.id), // แปลงเป็นตัวเลข
+        start_time: formattedDate,
+        questions: questions.filter(q => q.trim() !== "") // กรองเอาเฉพาะคำถามที่ไม่ว่างเปล่า
+      };
+      
+      console.log("Request body:", appointmentBody);
 
-    console.log(userInfo.coins)
+      // เรียกใช้ API เพื่อสร้างการจองคิว
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://backend.qseer.app/api/appointment/seer', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(appointmentBody),
+        credentials: 'include'
+      });
+      
+      console.log("Response status:", response.status);
+      
+      // ตรวจสอบรายละเอียดข้อผิดพลาด
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
 
+      // ตรวจสอบการตอบกลับจาก API
+      if (response.status === 201) {
+        alert(`การจองสำเร็จ! รหัสการจอง: ${responseData.code}`);
+        // หลังจากจองสำเร็จ นำผู้ใช้ไปยังหน้าที่เหมาะสม (เช่น หน้าประวัติการจอง)
+        // window.location.href = "/booking-history";
+      } else if (response.status === 400) {
+        // แสดงข้อความแจ้งเตือนตามประเภทข้อผิดพลาด
+        if (responseData.detail === "Time slot not available.") {
+          const confirmNewTime = window.confirm("ช่วงเวลาที่คุณเลือกไม่ว่างหรือถูกจองไปแล้ว ต้องการกลับไปเลือกเวลาใหม่หรือไม่?");
+          if (confirmNewTime) {
+            // นำทางกลับไปยังหน้าเลือกเวลา พร้อมข้อมูลแพ็กเกจ
+            navigate("/bookingSeer", {
+              state: {
+                packageInfo: packageInfo
+              }
+            });
+            return;
+          }
+        } else if (responseData.detail.includes("Exceeded question limit")) {
+          alert("จำนวนคำถามเกินกว่าที่กำหนด");
+        } else if (responseData.detail.includes("Insufficient coins")) {
+          alert("เหรียญไม่เพียงพอสำหรับการจอง");
+        } else {
+          alert(`เกิดข้อผิดพลาด: ${responseData.detail}`);
+        }
+      } else if (response.status === 401 || response.status === 403) {
+        alert("กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
+        // window.location.href = "/login";
+      } else if (response.status === 404) {
+        alert("ไม่พบหมอดูหรือแพ็คเกจที่เลือก");
+      } else if (response.status === 422) {
+        // ข้อผิดพลาดการตรวจสอบค่า
+        let errorMsg = "ข้อมูลไม่ถูกต้อง: ";
+        if (responseData.detail && Array.isArray(responseData.detail)) {
+          errorMsg += responseData.detail.map(err => err.msg).join(', ');
+        } else {
+          errorMsg += JSON.stringify(responseData);
+        }
+        alert(errorMsg);
+      } else {
+        alert("เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง");
+      }
+    } catch (error) {
+      console.error("Error during booking:", error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsPaymentLoading(false);
+    }
   }
 
   useEffect(()=>{
@@ -130,6 +218,7 @@ const BookingSeer_2 = () => {
         <div className="max-w-4xl mx-auto">
            <div className="mt-6">
             <h3 className="text-lg font-semibold mb-3">ข้อมูลผู้จอง</h3>
+            <p className="text-sm text-gray-500 mb-3">หมายเหตุ: ข้อมูลส่วนตัวนี้ของผู้จองสามารถแก้ไขได้ที่โปรไฟล์ของผู้ใช้งาน</p>
             <UserInfoForm
               formData={formData}
               setFormData={handleFormDataChange}
@@ -141,8 +230,9 @@ const BookingSeer_2 = () => {
 
           <div className="mt-6">
             <h3 className="text-lg font-semibold">คำถามสำหรับการดูดวง</h3>
+            <p className="text-sm text-gray-500 mb-3">กรุณากรอกคำถามที่ต้องการถามหมอดูให้ครบทุกข้อ</p>
             <QuestionForm
-              numQuestions={packageInfo.question_limit}
+              numQuestions={packageInfo?.question_limit || 0}
               questions={questions}
               setQuestions={setQuestions}
             />

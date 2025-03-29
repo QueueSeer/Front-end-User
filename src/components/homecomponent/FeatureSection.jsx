@@ -7,7 +7,7 @@ const FeatureSection = () => {
 
   const features = [
     { img: Images.AuctionQueue, path: "/auction" },
-    { img: Images.horoscope, path: "/horoscope" },
+    { img: Images.SeerRegister, path: "/horoscope" },
     { img: Images.Howto, path: "/landingPage" },
   ];
 

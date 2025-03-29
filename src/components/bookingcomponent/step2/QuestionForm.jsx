@@ -11,11 +11,12 @@ const QuestionForm = ({ numQuestions, questions, setQuestions }) => {
         <textarea
           className="w-full p-3 border rounded-md focus:ring-2 focus:ring-[#6B5B95] focus:outline-none"
           rows="6"
-          value={questions[0]}
+          value={questions[0] || ""}
           onChange={(e) => {
-            const tmp = questions
-            tmp[0] = e.target.value
-            setQuestions(tmp)
+            // สร้างอาร์เรย์ใหม่แทนที่จะแก้ไขอาร์เรย์เดิม
+            const newQuestions = [...questions];
+            newQuestions[0] = e.target.value;
+            setQuestions(newQuestions);
           }}
           placeholder="พิมพ์คำถามของคุณทั้งหมดในช่องนี้..."
         />
@@ -34,13 +35,12 @@ const QuestionForm = ({ numQuestions, questions, setQuestions }) => {
           <textarea
             className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#6B5B95] focus:outline-none"
             rows="3"
-            value={question}
+            value={question || ""}
             onChange={(e) => {
-              const tmp = questions
-              tmp[index] = e.target.value
-              console.log(tmp)
-              console.log(e.target.value)
-              setQuestions(tmp) 
+              // สร้างอาร์เรย์ใหม่เพื่อให้ React ตรวจจับการเปลี่ยนแปลงได้
+              const newQuestions = [...questions];
+              newQuestions[index] = e.target.value;
+              setQuestions(newQuestions);
             }}
             placeholder={`กรอกคำถามที่ ${index + 1}`}
           />

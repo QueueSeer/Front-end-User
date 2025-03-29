@@ -118,6 +118,18 @@ const DetailAuction = () => {
     );
   }
 
+  // ฟังก์ชันไปยังหน้าประมูล (BidAuction) พร้อมส่งข้อมูลที่จำเป็น
+  const navigateToBidAuction = () => {
+    navigate(`/bid/auction/${auction.id}`, {
+      state: {
+        auction_id: auction.id,
+        initialBid: auction.initialBid,
+        minIncrement: auction.minIncrement,
+        auctioneerName: auction.astrologer.name
+      }
+    });
+  };
+
   return (
     <>
       {/* ปุ่มเลื่อนขึ้นบนสุด */}
@@ -152,6 +164,16 @@ const DetailAuction = () => {
                 name={auction.astrologer.name}
                 category={auction.astrologer.subtitle}
               />
+            </div>
+            
+            {/* ปุ่มเข้าร่วมการประมูล */}
+            <div className="mt-8 flex justify-center">
+              <button 
+                onClick={navigateToBidAuction}
+                className="px-6 py-3 bg-[#77599A] text-white rounded-full hover:bg-[#5A189A] transition-colors shadow-lg"
+              >
+                เข้าร่วมการประมูล
+              </button>
             </div>
           </div>
         </div>

@@ -56,13 +56,13 @@ export default function App() {
           <Route path="/horoscope" element={<Horoscope />} />
           <Route path="/auction" element={<Auction />} />
           <Route path="/detailAuction/:id" element={<DetailAuction />} />
-          <Route path="/bidAuction" element={<BidAuction />} />
+          <Route path="/bidAuction/:auction_id" element={<BidAuction />} />
           <Route path="/top-up-coins" element={<TopUpCoins />} />
           <Route path="/summary" element={<SummaryPage />} />
           <Route path="/auction-details" element={<AuctionDetails />} />
           <Route path="/follower" element={<FollowerPage />} />
           <Route path="/queuehistory" element={<QueueHistory />} />
-          <Route path="/queuedetails" element={<Queuedetails />} />
+          <Route path="/queuedetails/:id" element={<Queuedetails />} />
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
           <Route path="/qr-summary" element={<QrSummary/>} />

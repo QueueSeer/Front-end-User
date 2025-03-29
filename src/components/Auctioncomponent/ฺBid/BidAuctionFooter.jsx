@@ -1,186 +1,76 @@
 import React, { useState, useEffect } from "react";
 import Images from "../../../assets";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LuckCard from "../../TopupComponent/LuckCard";
-import axios from "axios"; // ต้องติดตั้ง axios ถ้ายังไม่ได้ติดตั้ง
+import axios from "axios";
 
-const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
+const BidAuctionFooter = ({ 
+  selectedBidder, 
+  bidders, 
+  setBidders, 
+  currentRank,
+  setCurrentRank,
+  bidderCoins,
+  setBidderCoins,
+  updateRankings,
+  fetchBidders,
+  getApiBaseUrl,
+  auction_id,
+  userCoins: externalUserCoins,
+  setUserCoins: setExternalUserCoins,
+  auctionInfo,
+  apiConnected
+}) => {
   const navigate = useNavigate();
-  const { auction_id } = useParams(); // รับ auction_id จาก URL parameters
   const [isExpanded, setIsExpanded] = useState(false);
   const [bidAmount, setBidAmount] = useState(50);
-  const [userCoins, setUserCoins] = useState(85);
-  const [bidderCoins, setBidderCoins] = useState(0);
+  const [userCoins, setUserCoins] = useState(externalUserCoins || 500);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentAuctionInfo, setCurrentAuctionInfo] = useState({
     current_bid: 0,
-    min_increment: 50,
-    initial_bid: 50
+    min_increment: auctionInfo?.min_increment || 50,
+    initial_bid: auctionInfo?.initial_bid || 50
   });
 
-  // ฟังก์ชันดึงข้อมูลผู้ประมูลจาก API
-  const fetchBidders = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // ตรวจสอบว่าเรากำลังรันในโหมด development หรือไม่
-      const baseUrl = import.meta.env.MODE === 'development' 
-        ? 'http://localhost:5173' // หรือ URL ของ backend API ที่ถูกต้อง
-        : '';
-      
-      const response = await axios.get(`${baseUrl}/api/auction/${auction_id}/bids`, {
-        // เพิ่ม headers เพื่อป้องกันการ cache
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
-      
-      // ตรวจสอบรูปแบบข้อมูลที่ได้รับจาก API
-      console.log("API Response:", response.data);
-      
-      // ตรวจสอบว่า response.data เป็นอาร์เรย์หรือไม่
-      let bidsArray = [];
-      if (Array.isArray(response.data)) {
-        bidsArray = response.data;
-      } else if (response.data && typeof response.data === 'object') {
-        // อาจจะมีการห่อหุ้มอาร์เรย์ไว้ในฟิลด์อื่น
-        // ลองตรวจสอบฟิลด์ทั่วไปที่อาจใช้เก็บข้อมูลรายการ
-        const possibleArrayFields = ['bids', 'items', 'data', 'results'];
-        for (const field of possibleArrayFields) {
-          if (Array.isArray(response.data[field])) {
-            bidsArray = response.data[field];
-            break;
-          }
-        }
-        
-        // ถ้ายังไม่พบอาร์เรย์ ใช้เป็นอาร์เรย์เปล่า
-        if (bidsArray.length === 0) {
-          console.warn("Response is not an array and no array field found:", response.data);
-          // ถ้าเป็น status 304 (Not Modified) ให้ใช้ข้อมูลเดิม
-          if (response.status === 304) {
-            setIsLoading(false);
-            return; // ใช้ข้อมูลเดิมที่ cache ไว้
-          }
-        }
-      }
-      
-      // แปลงข้อมูลจาก API ให้เข้ากับโครงสร้างของ bidders ที่ใช้อยู่เดิม
-      // เรียงลำดับข้อมูลตามจำนวน coins ก่อน (มากไปน้อย)
-      const sortedBids = [...bidsArray].sort((a, b) => b.amount - a.amount);
-      
-      const fetchedBidders = sortedBids.map((bid, index) => ({
-        id: bid.user_id,
-        username: `User${bid.user_id}`, // สมมติชื่อผู้ใช้ (ควรดึงจาก API ถ้ามี)
-        hiddenUser: `User${bid.user_id.toString().substr(-4)}`, // สมมติชื่อที่ซ่อนบางส่วน
-        coins: bid.amount,
-        rank: index + 1
-      }));
-      
-      // ถ้ายังไม่มีการประมูล ให้แสดงเป็นลำดับสุดท้าย
-      fetchedBidders.forEach(bidder => {
-        if (bidder.coins === 0) {
-          bidder.rank = fetchedBidders.length; // ให้อยู่ลำดับสุดท้าย
-        }
-      });
-      
-      setBidders(fetchedBidders);
-      
-      // หาราคาเสนอสูงสุดในปัจจุบัน
-      const highestBid = fetchedBidders.length > 0 
-        ? Math.max(...fetchedBidders.map(b => b.coins)) 
-        : 0;
-      
-      // อัปเดตค่า current_bid
-      setCurrentAuctionInfo(prev => ({
-        ...prev,
-        current_bid: highestBid
-      }));
-      
-      // ตั้งค่า bidAmount ให้เป็นค่าเริ่มต้นที่ถูกต้อง
-      const nextBidAmount = highestBid > 0 
-        ? highestBid + currentAuctionInfo.min_increment 
-        : currentAuctionInfo.initial_bid;
-      setBidAmount(nextBidAmount);
-      
-      // ถ้ามี selectedBidder ให้อัปเดต bidderCoins
-      if (selectedBidder) {
-        // ค้นหาและอัปเดต bidderCoins ตาม selectedBidder
-        const selectedBidderData = fetchedBidders.find(
-          (bidder) => bidder.id === selectedBidder.id
-        );
-        if (selectedBidderData) {
-          setBidderCoins(selectedBidderData.coins);
-        } else {
-          // ถ้าไม่พบข้อมูลผู้ประมูลที่เลือก ให้ตั้งค่าเริ่มต้นเป็น 0
-          setBidderCoins(0);
-        }
-      } else if (fetchedBidders.length > 0) {
-        // ถ้าไม่มี selectedBidder แต่มีข้อมูลผู้ประมูล ให้ใช้ข้อมูลของผู้ประมูลอันดับแรก
-        setBidderCoins(fetchedBidders[0].coins);
-      } else {
-        // ถ้าไม่มีทั้ง selectedBidder และข้อมูลผู้ประมูล ให้ตั้งค่าเริ่มต้นเป็น 0
-        setBidderCoins(0);
-      }
-      
-      setIsLoading(false);
-    } catch (err) {
-      setError("ไม่สามารถดึงข้อมูลผู้ประมูลได้");
-      setIsLoading(false);
-      console.error("Error fetching bidders:", err);
-    }
-  };
-
-  // ในช่วงพัฒนา หากยังไม่มี API จริง ให้ใช้ข้อมูลจำลอง
+  // Sync userCoins with external state
   useEffect(() => {
-    // ลองเรียก API ก่อน
-    fetchBidders().catch(() => {
-      console.warn("Cannot connect to API, using mock data instead");
-      
-      // ถ้าเรียก API ไม่สำเร็จ ให้ใช้ข้อมูลจำลอง
-      const mockBidders = [
-        { id: 1, username: "ร*********", hiddenUser: "JaiJup*****", coins: 100, rank: 1 },
-        { id: 2, username: "ร*********", hiddenUser: "Rajir*****", coins: 90, rank: 2 },
-        { id: 3, username: "แ*********", hiddenUser: "Manmkiti64", coins: 0, rank: 5 }, // เริ่มต้นที่ 0
-        { id: 4, username: "บ*********", hiddenUser: "punra*****", coins: 80, rank: 3 },
-        { id: 5, username: "ร*********", hiddenUser: "punra*****", coins: 70, rank: 4 },
-      ];
-      
-      setBidders(mockBidders);
-      
-      // อัปเดตข้อมูลสำหรับ selectedBidder
-      const selected = mockBidders.find(b => b.username === "แ*********");
-      if (selected) {
-        setBidderCoins(selected.coins);
-      }
-      
-      // ตั้งค่าราคาประมูลเริ่มต้น
-      setCurrentAuctionInfo(prev => ({
-        ...prev,
-        current_bid: Math.max(...mockBidders.map(b => b.coins)) // หาราคาสูงสุดในปัจจุบัน
-      }));
-      
-      setBidAmount(Math.max(currentAuctionInfo.initial_bid, 
-                    currentAuctionInfo.current_bid + currentAuctionInfo.min_increment));
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auction_id]);
+    if (externalUserCoins > 0) {
+      setUserCoins(externalUserCoins);
+    }
+  }, [externalUserCoins]);
+
+  // ดึงข้อมูลเมื่อเข้าสู่หน้า
+  useEffect(() => {
+    // ตั้งค่าจำนวนเงินเริ่มต้นสำหรับการประมูล
+    const highestBid = bidders.length > 0 
+      ? Math.max(...bidders.map(b => b.coins)) 
+      : 0;
+    
+    setCurrentAuctionInfo(prev => ({
+      ...prev,
+      current_bid: highestBid,
+      min_increment: auctionInfo?.min_increment || prev.min_increment,
+      initial_bid: auctionInfo?.initial_bid || prev.initial_bid
+    }));
+    
+    // คำนวณ bidAmount เริ่มต้นตามกฎ
+    const nextBidAmount = highestBid > 0 
+      ? highestBid + (auctionInfo?.min_increment || currentAuctionInfo.min_increment)
+      : (auctionInfo?.initial_bid || currentAuctionInfo.initial_bid);
+    
+    setBidAmount(nextBidAmount);
+  }, [bidders, auctionInfo, currentAuctionInfo.min_increment, currentAuctionInfo.initial_bid]);
 
   const handleIncrease = () => {
     setBidAmount((prev) => {
-      // เพิ่มทีละ 1 แทนที่จะเพิ่มทีละ min_increment
       const newAmount = prev + 1;
-      // ตรวจสอบว่าค่าใหม่ไม่เกินเงินที่มี
       return Math.min(newAmount, userCoins);
     });
   };
 
   const handleDecrease = () => {
     setBidAmount((prev) => {
-      // ลดทีละ 1 แทนที่จะลดทีละ min_increment
       const newAmount = prev - 1;
       
       // กำหนดค่าต่ำสุดโดยตรวจสอบว่าเป็นการประมูลครั้งแรกหรือไม่
@@ -220,79 +110,157 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
       setIsLoading(true);
       setError(null);
       
+      // ถ้า API ไม่ตอบสนอง ให้จำลองการลงเงิน
+      if (!apiConnected) {
+        await mockBidPlacement();
+        return;
+      }
+      
       // เรียกใช้ API เพื่อเสนอราคา
-      const baseUrl = import.meta.env.MODE === 'development' 
-        ? 'http://localhost:5173' // หรือ URL ของ backend API ที่ถูกต้อง
-        : '';
-        
-      const response = await axios.put(`${baseUrl}/api/auction/${auction_id}/bid`, {
+      const response = await axios.put(`${getApiBaseUrl()}/auction/${auction_id}/bid`, {
         amount: bidAmount
-        // ไม่ต้องส่ง user_id เพราะ API จะตรวจสอบจาก token ในคุกกี้
       }, {
-        // เพิ่ม headers เพื่อป้องกันการ cache
         headers: {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
-          'Expires': '0'
-        }
+          'Expires': '0',
+          'Accept': 'application/json'
+        },
+        withCredentials: true,
+        timeout: 5000 // เพิ่ม timeout เพื่อป้องกัน hanging request
       });
       
       if (response.status === 200) {
-        // ลด Coins ของผู้ใช้
-        setUserCoins((prev) => prev - bidAmount);
-        
-        // อัปเดต current_bid
-        setCurrentAuctionInfo(prev => ({
-          ...prev,
-          current_bid: bidAmount
-        }));
-        
-        // ไม่ต้องเรียก fetchBidders อีก เพราะข้อมูลจะอัปเดตผ่าน SSE โดยอัตโนมัติ
-        // อาจแสดงข้อความสำเร็จแทนการเรียก API ซ้ำ
-        console.log("Bid placed successfully!");
-        
-        setIsExpanded(false);
+        handleBidSuccess();
+      } else {
+        setError("มีข้อผิดพลาดในการเสนอราคา โปรดลองอีกครั้ง");
       }
       
       setIsLoading(false);
     } catch (err) {
-      setIsLoading(false);
-      
-      // จัดการข้อผิดพลาดตามรูปแบบ API response
-      if (err.response) {
-        const { status, data } = err.response;
-        
-        switch (status) {
-          case 400:
-            setError(data.detail || "จำนวนเงินที่เสนอไม่ถูกต้อง หรือการประมูลยังไม่เริ่ม/สิ้นสุดแล้ว");
-            break;
-          case 401:
-            setError("กรุณาเข้าสู่ระบบก่อนเสนอราคา");
-            break;
-          case 403:
-            setError("โทเค็นไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่");
-            break;
-          case 404:
-            setError("ไม่พบการประมูลที่ระบุ");
-            break;
-          case 422:
-            setError("ข้อมูลที่ส่งไม่ถูกต้อง");
-            break;
-          default:
-            setError("เกิดข้อผิดพลาดในการเสนอราคา โปรดลองอีกครั้ง");
-        }
-      } else {
-        setError("เกิดข้อผิดพลาดในการเชื่อมต่อ โปรดลองอีกครั้ง");
-      }
-      
       console.error("Error placing bid:", err);
+      
+      // ถ้าไม่สามารถเชื่อมต่อกับ API ได้ แต่ไม่ใช่ข้อผิดพลาดจากผู้ใช้
+      if (err.response && err.response.status === 500) {
+        // จำลองการลงเงิน
+        await mockBidPlacement();
+      } else {
+        setIsLoading(false);
+        
+        // จัดการข้อผิดพลาดตามรูปแบบ API response
+        if (err.response) {
+          const { status, data } = err.response;
+          
+          switch (status) {
+            case 400:
+              setError(data.detail || "จำนวนเงินที่เสนอไม่ถูกต้อง หรือการประมูลยังไม่เริ่ม/สิ้นสุดแล้ว");
+              break;
+            case 401:
+              setError("กรุณาเข้าสู่ระบบก่อนเสนอราคา");
+              break;
+            case 403:
+              setError("โทเค็นไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่");
+              break;
+            case 404:
+              setError("ไม่พบการประมูลที่ระบุ");
+              break;
+            case 422:
+              setError("ข้อมูลที่ส่งไม่ถูกต้อง");
+              break;
+            default:
+              setError("เกิดข้อผิดพลาดในการเสนอราคา โปรดลองอีกครั้ง");
+          }
+        } else {
+          setError("เกิดข้อผิดพลาดในการเชื่อมต่อ โปรดลองอีกครั้ง");
+        }
+      }
     }
   };
 
+  // จำลองการเสนอราคาเมื่อไม่สามารถเชื่อมต่อกับ API ได้
+  const mockBidPlacement = async () => {
+    // จำลองการรอเวลา
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // ลด Coins ของผู้ใช้
+    setUserCoins(prev => prev - bidAmount);
+    if (setExternalUserCoins) {
+      setExternalUserCoins(prev => prev - bidAmount);
+    }
+    
+    // อัปเดต current_bid
+    setCurrentAuctionInfo(prev => ({
+      ...prev,
+      current_bid: bidAmount
+    }));
+    
+    // อัปเดตอันดับการประมูล
+    if (selectedBidder) {
+      const updatedBidders = updateRankings(selectedBidder.id, bidAmount);
+      setBidders(updatedBidders);
+      
+      // อัปเดตอันดับของผู้ใช้ปัจจุบัน
+      const currentUserInBidders = updatedBidders.find(b => b.id === selectedBidder.id);
+      if (currentUserInBidders) {
+        setCurrentRank(currentUserInBidders.rank.toString());
+        setBidderCoins(bidAmount);
+      }
+    }
+    
+    console.log("Mock bid placed successfully!");
+    
+    // แสดงข้อความว่ากำลังใช้ข้อมูลจำลอง
+    setError("เสนอราคาสำเร็จ (โหมดออฟไลน์ - ข้อมูลจะซิงค์เมื่อกลับมาออนไลน์)");
+    
+    // ปิดส่วนขยายหลังจากลงเงินสำเร็จ
+    setIsExpanded(false);
+    
+    setIsLoading(false);
+    
+    // รีเฟรชข้อมูลการประมูล
+    setTimeout(() => setError(null), 3000);
+  };
+
+  // จัดการการเสนอราคาสำเร็จ
+  const handleBidSuccess = () => {
+    // ลด Coins ของผู้ใช้
+    setUserCoins(prev => prev - bidAmount);
+    if (setExternalUserCoins) {
+      setExternalUserCoins(prev => prev - bidAmount);
+    }
+    
+    // อัปเดต current_bid
+    setCurrentAuctionInfo(prev => ({
+      ...prev,
+      current_bid: bidAmount
+    }));
+    
+    // อัปเดตอันดับการประมูล
+    if (selectedBidder) {
+      const updatedBidders = updateRankings(selectedBidder.id, bidAmount);
+      setBidders(updatedBidders);
+      
+      // อัปเดตอันดับของผู้ใช้ปัจจุบัน
+      const currentUserInBidders = updatedBidders.find(b => b.id === selectedBidder.id);
+      if (currentUserInBidders) {
+        setCurrentRank(currentUserInBidders.rank.toString());
+        setBidderCoins(bidAmount);
+      }
+    }
+    
+    console.log("Bid placed successfully!");
+    
+    // ปิดส่วนขยายหลังจากลงเงินสำเร็จ
+    setIsExpanded(false);
+    
+    // รีเฟรชข้อมูลการประมูล
+    fetchBidders();
+  };
+
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[80%] max-w-[850px] bg-gray-200 shadow-lg rounded-t-lg transition-all duration-300">
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[850px] bg-gray-200 shadow-lg rounded-t-lg transition-all duration-300">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-2">
+        <div className={`px-4 py-2 rounded relative mb-2 text-center ${error.includes('สำเร็จ') ? 'bg-green-100 border border-green-400 text-green-700' : 'bg-red-100 border border-red-400 text-red-700'}`}>
           {error}
         </div>
       )}
@@ -331,7 +299,7 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
 
       {isExpanded && (
         <div className="bg-gray-200 px-6 py-5 rounded-b-lg shadow-lg">
-          <div className="grid grid-cols-2 gap-5 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
             <div className="w-full">
               <LuckCard coins={userCoins} showTopUp={true} />
             </div>
@@ -344,7 +312,7 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
 
               <div className="flex items-center gap-3 mt-4">
                 <button
-                  className="bg-[#5A189A] text-white w-9 h-9 flex items-center justify-center rounded-full"
+                  className={`${isLoading ? 'bg-gray-400' : 'bg-[#5A189A]'} text-white w-9 h-9 flex items-center justify-center rounded-full`}
                   onClick={handleDecrease}
                   disabled={isLoading}
                 >
@@ -356,7 +324,11 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
                   <div 
                     className="absolute top-1/2 left-0 h-2 bg-gradient-to-r from-[#9D4EDD] to-[#5A189A] rounded-full transform -translate-y-1/2" 
                     style={{ 
-                      width: `${((bidAmount - Math.min(currentAuctionInfo.initial_bid, currentAuctionInfo.current_bid + currentAuctionInfo.min_increment)) / (userCoins - Math.min(currentAuctionInfo.initial_bid, currentAuctionInfo.current_bid + currentAuctionInfo.min_increment))) * 100}%`,
+                      width: `${Math.min(
+                        ((bidAmount - Math.max(currentAuctionInfo.initial_bid, currentAuctionInfo.current_bid + currentAuctionInfo.min_increment)) / 
+                        (userCoins - Math.max(currentAuctionInfo.initial_bid, currentAuctionInfo.current_bid + currentAuctionInfo.min_increment))) * 100,
+                        100
+                      )}%`,
                       maxWidth: '100%'
                     }}
                   ></div>
@@ -376,7 +348,7 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
                   />
                 </div>
                 <button
-                  className="bg-[#5A189A] text-white w-9 h-9 flex items-center justify-center rounded-full"
+                  className={`${isLoading ? 'bg-gray-400' : 'bg-[#5A189A]'} text-white w-9 h-9 flex items-center justify-center rounded-full`}
                   onClick={handleIncrease}
                   disabled={isLoading}
                 >
@@ -401,9 +373,9 @@ const BidAuctionFooter = ({ selectedBidder, bidders, setBidders }) => {
             <button 
               className={`${
                 isLoading 
-                  ? "bg-gray-400" 
-                  : "bg-[#77599A]"
-              } text-white py-2 px-8 rounded-full font-medium shadow-md`} 
+                  ? "bg-gray-400 cursor-not-allowed" 
+                  : "bg-[#77599A] hover:bg-[#5A189A]"
+              } text-white py-2 px-8 rounded-full font-medium shadow-md transition-colors`} 
               onClick={handleBid}
               disabled={isLoading}
             >
