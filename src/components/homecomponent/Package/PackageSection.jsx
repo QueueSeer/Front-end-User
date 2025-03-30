@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // เพิ่ม import useNavigate
 
 import PackageCard from "./PackageCard";
 import PackageHeader from "./PackageHeader";
+import { useNavigate } from "react-router-dom"; // เพิ่ม import useNavigate
 
 const PackageSection = () => {
     const navigate = useNavigate(); // สร้าง instance navigate
@@ -20,53 +20,21 @@ const PackageSection = () => {
 
     const fetchPackages = async () => {
         try {
-            // ข้อมูลจำลอง (mock data) สำหรับการพัฒนา
-            const mockApiResponse = {
-                packages: [
-                    {
-                        id: 1,
-                        name: "ความรักในปีนี้จะเป็นอย่างไร",
-                        category: "ดูดวงไพ่ยิปซี",
-                        seer_id: 101,
-                        seer_display_name: "หมอดูเพียงฟ้า พาขวัญ",
-                        seer_image: null,
-                        seer_rating: 4.0,
-                        seer_review_count: 935,
-                        price: "49.00",
-                        duration: 15,
-                        foretell_channel: "phone",
-                        reading_type: "ไพ่ยิปซี",
-                        status: "active",
-                        image: null,
-                        date_created: "2025-01-01T00:00:00Z"
-                    },
-                    // ... ข้อมูลอื่นๆ ...
-                ]
-            };
-            
-            try {
-                const params = new URLSearchParams();
-                params.append("limit", 15); // เพิ่มจำนวน limit เพื่อให้มีข้อมูลมากขึ้น
-                params.append("direction", "asc");
-                const apiResponse = await fetch(`https://backend.qseer.app/api/seer/package/fortune/search?${params}`,{
-                    method: "GET",
-                    headers: {
-                        "Content-type": "application/json"
-                    }
-                }).then((res) => res.json());
-                
-                if (apiResponse.packages && apiResponse.packages.length > 0) {
-                    setPackages(apiResponse.packages);
-                } else {
-                    // ถ้า API ไม่มีข้อมูล ใช้ข้อมูลจำลองแทน
-                    setPackages(mockApiResponse.packages);
+            const params = new URLSearchParams();
+            params.append("limit", 15); // เพิ่มจำนวน limit เพื่อให้มีข้อมูลมากขึ้น
+            params.append("direction", "asc");
+            const apiResponse = await fetch(`https://backend.qseer.app/api/seer/package/fortune/search?${params}`,{
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json"
                 }
-            } catch (apiError) {
-                console.error("API error:", apiError);
-                // ถ้าเรียก API ไม่สำเร็จ ใช้ข้อมูลจำลองแทน
-                setPackages(mockApiResponse.packages);
-            }
-            
+            })
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res)
+                return res
+            })
+            .then((res) => setPackages(res.packages))
             setLoading(false);
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการโหลดข้อมูลแพ็คเกจ:", error);
@@ -74,23 +42,7 @@ const PackageSection = () => {
             setLoading(false);
         }
     };
-
-    // แปลงข้อมูลจาก API ให้เข้ากับรูปแบบที่ PackageCard ต้องการ
-    const mapPackageToCardProps = (pkg) => ({
-        id: pkg.id,
-        title: pkg.name,
-        category: pkg.category,
-        seer: pkg.seer_display_name,
-        rating: pkg.seer_rating || 0,
-        reviews: pkg.seer_review_count,
-        price: parseFloat(pkg.price),
-        duration: pkg.duration,
-        icon: pkg.foretell_channel === "chat" ? "chat" : 
-              pkg.foretell_channel === "phone" ? "call" : "video",
-        image: pkg.image,
-        seerImage: pkg.seer_image
-    });
-
+ 
     // ปุ่มถัดไป (Next)
     const nextSlide = () => {
         if (currentIndex < packages.length - visiblePackages) {
@@ -110,7 +62,7 @@ const PackageSection = () => {
         // นำทางไปยังหน้าจองหมอดู พร้อมส่งข้อมูลแพ็คเกจไปด้วย
         navigate("/bookingSeer", { 
             state: { 
-                packageInfo: mapPackageToCardProps(pkg) 
+                packageInfo: pkg 
             } 
         });
     };
@@ -159,7 +111,7 @@ const PackageSection = () => {
                                 e.currentTarget.style.boxShadow = 'none';
                             }}
                         >
-                            <PackageCard packageInfo={mapPackageToCardProps(pkg)} />
+                            <PackageCard packageInfo={pkg} />
                         </div>
                     ))}
                 </div>

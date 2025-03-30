@@ -1,7 +1,7 @@
-import React from "react";
 import Images from "../../assets"; // รูป default
+import React from "react";
 
-const HeaderSection = ({ packageInfo, setNumQuestions }) => {
+const HeaderSection = ({ packageInfo }) => {
   const {
     name,
     price,
@@ -18,6 +18,10 @@ const HeaderSection = ({ packageInfo, setNumQuestions }) => {
     if (!text) return ["ไม่มีคำอธิบายแพ็กเกจ"];
     return text.split("\n").map((item) => item.trim()).filter(Boolean);
   };
+
+  const isQuestionLimit = () => {
+    return question_limit && (question_limit >= 1 && question_limit <= 6)
+  }
 
   const formattedDescription = formatDescriptionToList(description);
   const isFree = !price || price === 0;
@@ -37,7 +41,7 @@ const HeaderSection = ({ packageInfo, setNumQuestions }) => {
         {/* ภาพ */}
         <div className="w-1/3">
           <img
-            src={image === "/default-image.jpg" ? Images.tarotImages : image}
+            src={(image === "" || image === null) ? Images.pic : image}
             alt="ภาพแพ็กเกจ"
             className="w-full rounded-lg shadow-md object-cover h-60"
           />
@@ -46,7 +50,7 @@ const HeaderSection = ({ packageInfo, setNumQuestions }) => {
         {/* รายละเอียด */}
         <div className="w-2/3 space-y-4">
           <p className="text-gray-700 leading-7">
-            คุณสามารถถามได้ <strong>{question_limit ?? 0} คำถาม</strong> <br />
+            คุณสามารถถามได้<strong>{isQuestionLimit() ? " "+question_limit+" ":"ไม่จำกัดจำนวณ"}</strong>คำถาม<br />
             ระยะเวลาในการดูดวง: <strong>{duration / 60} นาที</strong> <br />
             ช่องทางการดูดวง: <strong>{foretell_channel}</strong> <br />
             ประเภทการทำนาย: <strong>{reading_type}</strong>

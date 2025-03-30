@@ -1,13 +1,19 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import images from "../../assets";
 
-const OngoingAuctions = ({ auctions }) => {
+const OngoingAuctions = ({ auctions = [] }) => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [displayAuctions, setDisplayAuctions] = useState(auctions);
+
+  // Update display auctions when auctions prop changes
+  useEffect(() => {
+    setDisplayAuctions(auctions);
+  }, [auctions]);
 
   // ✅ เริ่มลาก Scroll
   const handleMouseDown = (e) => {
@@ -29,24 +35,94 @@ const OngoingAuctions = ({ auctions }) => {
   };
 
   // ✅ ฟังก์ชันนำทางเมื่อกด "รายละเอียด"
-  const handleAuctionDetail = (auction) => {
-    if (auction.timeLeft !== "00:00:00:00") {
-      // ✅ การประมูลยังไม่จบ → ไปที่ `BidAuction` ปกติ
-      navigate("/bidAuction", { state: { auctionId: auction.id } });
+const handleAuctionDetail = (auction) => {
+  if (auction.timeLeft !== "00:00:00:00") {
+    // ✅ การประมูลยังไม่จบ → ไปที่ `BidAuction` ปกติ
+    navigate(`/bidAuction/${auction.id}`, { 
+      state: { auctionId: auction.id } 
+    });
+  } else {
+    // ✅ การประมูลจบ → เช็คว่าชนะหรือแพ้
+    if (auction.isWinner) {
+      // ✅ ชนะ → ไป `BidAuction` พร้อม Pop-up แสดงความยินดี
+      navigate(`/bidAuction/${auction.id}`, { 
+        state: { auctionId: auction.id, status: "winner" } 
+      });
     } else {
-      // ✅ การประมูลจบ → เช็คว่าชนะหรือแพ้
-      if (auction.isWinner) {
-        // ✅ ชนะ → ไป `BidAuction` พร้อม Pop-up แสดงความยินดี
-        navigate("/bidAuction", { state: { auctionId: auction.id, status: "winner" } });
-      } else {
-        // ✅ แพ้ → ไป `BidAuction` พร้อม Pop-up บอกอันดับ
-        navigate("/bidAuction", { state: { auctionId: auction.id, status: "loser" } });
-      }
+      // ✅ แพ้ → ไป `BidAuction` พร้อม Pop-up บอกอันดับ
+      navigate(`/bidAuction/${auction.id}`, { 
+        state: { auctionId: auction.id, status: "loser" } 
+      });
     }
-  };
+  }
+};
+
+  // ✅ อัปเดตเวลาถอยหลังทุกวินาที
+  useEffect(() => {
+    // ฟังก์ชันสำหรับอัปเดตเวลา (เฉพาะเวลาจำลอง - ไม่ใช่การคำนวณจริง)
+    const updateTimers = () => {
+      setDisplayAuctions(prevAuctions => {
+        return prevAuctions.map(auction => {
+          // ถ้าเวลาหมดแล้ว ไม่ต้องอัปเดต
+          if (auction.timeLeft === "00:00:00:00") {
+            return auction;
+          }
+          
+          // จำลองการลดเวลาลง (อันนี้เป็นตัวอย่างเท่านั้น)
+          // ในกรณีจริง ควรคำนวณจาก end_time - current_time
+          const [days, hours, minutes, seconds] = auction.timeLeft.split(':').map(Number);
+          let newSeconds = seconds - 1;
+          let newMinutes = minutes;
+          let newHours = hours;
+          let newDays = days;
+          
+          if (newSeconds < 0) {
+            newSeconds = 59;
+            newMinutes -= 1;
+          }
+          
+          if (newMinutes < 0) {
+            newMinutes = 59;
+            newHours -= 1;
+          }
+          
+          if (newHours < 0) {
+            newHours = 23;
+            newDays -= 1;
+          }
+          
+          // ถ้าเวลาหมด
+          if (newDays < 0) {
+            return {
+              ...auction,
+              timeLeft: "00:00:00:00"
+            };
+          }
+          
+          const newTimeLeft = `${String(newDays).padStart(2, '0')}:${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}:${String(newSeconds).padStart(2, '0')}`;
+          
+          return {
+            ...auction,
+            timeLeft: newTimeLeft
+          };
+        });
+      });
+    };
+    
+    // ตั้ง interval เพื่ออัปเดตเวลาทุกวินาที
+    const timerInterval = setInterval(updateTimers, 1000);
+    
+    // ล้าง interval เมื่อ component unmount
+    return () => clearInterval(timerInterval);
+  }, []);
+
+  // ✅ ถ้าไม่มีการประมูล ไม่ต้องแสดงอะไร
+  if (displayAuctions.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="p-12">
+    <div className="p-6 md:p-12">
       <div className="flex items-center mb-4">
         <span className="w-2 h-6 bg-purple-700 mr-2"></span>
         <h2 className="text-2xl font-bold text-gray-900">กำลังเข้าร่วม</h2>
@@ -70,7 +146,7 @@ const OngoingAuctions = ({ auctions }) => {
         </style>
 
         <div className="flex gap-6">
-          {auctions.map((auction) => (
+          {displayAuctions.map((auction) => (
             <div
               key={auction.id}
               className="bg-gradient-to-b from-purple-300 to-purple-800 p-6 rounded-lg shadow-lg relative text-white min-w-[320px] w-[33%] flex-shrink-0"
@@ -98,7 +174,11 @@ const OngoingAuctions = ({ auctions }) => {
 
               <div className="flex justify-between items-center mt-4">
                 <div className="flex items-center">
-                  <img src={images.profileSmall} alt="seer" className="w-8 h-8 rounded-full mr-2" />
+                  <img 
+                    src={auction.seerImage || images.profileSmall} 
+                    alt="seer" 
+                    className="w-8 h-8 rounded-full mr-2" 
+                  />
                   <p className="text-sm">{auction.seerName}</p>
                 </div>
                 <button

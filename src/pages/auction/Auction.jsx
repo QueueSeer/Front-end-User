@@ -20,6 +20,9 @@ const Auction = () => {
   const [trendingAuctions, setTrendingAuctions] = useState([]);
   const [upcomingAuctions, setUpcomingAuctions] = useState([]);
   
+  // สถานะสำหรับเก็บข้อมูลหมอดู
+  const [seerCache, setSeerCache] = useState({});
+  
   // สถานะสำหรับการโหลดและข้อผิดพลาด
   const [loading, setLoading] = useState({
     ongoing: false,
@@ -38,6 +41,36 @@ const Auction = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  // ฟังก์ชันสำหรับดึงข้อมูลหมอดู
+  const fetchSeerData = async (seerId) => {
+    // ตรวจสอบว่ามีข้อมูลในแคชหรือไม่
+    if (seerCache[seerId]) {
+      return seerCache[seerId];
+    }
+    
+    try {
+      const API_BASE_URL = 'https://backend.qseer.app';
+      const response = await fetch(`${API_BASE_URL}/api/seer/${seerId}`);
+      
+      if (!response.ok) {
+        throw new Error(`ไม่สามารถดึงข้อมูลหมอดูได้: ${response.status}`);
+      }
+      
+      const seerData = await response.json();
+      
+      // เก็บข้อมูลหมอดูในแคช
+      setSeerCache(prev => ({
+        ...prev,
+        [seerId]: seerData
+      }));
+      
+      return seerData;
+    } catch (error) {
+      console.error(`เกิดข้อผิดพลาดในการดึงข้อมูลหมอดู (ID: ${seerId}):`, error);
+      return null;
+    }
+  };
+  
   // ฟังก์ชันสำหรับเรียกข้อมูลประมูลจาก API
   const fetchAuctions = async (type, page, params = {}) => {
     // ตั้งค่าสถานะการโหลดสำหรับส่วนนั้นๆ
@@ -99,8 +132,6 @@ const Auction = () => {
       const API_BASE_URL = 'https://backend.qseer.app';
       const url = `${API_BASE_URL}/api/auction/search?${queryParams.toString()}`;
       
-      console.log(`กำลังเรียกข้อมูลประมูลประเภท ${type} จาก: ${url}`);
-      
       // ทำการเรียก API
       const response = await fetch(url);
       
@@ -109,40 +140,57 @@ const Auction = () => {
       }
       
       let data = await response.json();
-      console.log(`ได้รับข้อมูลประมูลประเภท ${type}:`, data);
       
       // ตรวจสอบและแก้ไขโครงสร้างข้อมูล
-      // บางครั้ง API อาจส่งคืนข้อมูลที่ไม่ใช่อาร์เรย์ แต่ส่งมาเป็นออบเจ็กต์ที่มี "items" เป็นอาร์เรย์
       if (!Array.isArray(data)) {
         if (data && data.items && Array.isArray(data.items)) {
           data = data.items;
         } else if (data && data.data && Array.isArray(data.data)) {
           data = data.data;
         } else if (data && typeof data === 'object') {
-          // อาจเป็นออบเจ็กต์เดี่ยว แปลงเป็นอาร์เรย์
           data = [data];
         } else {
-          console.warn(`ข้อมูลที่ได้รับไม่ใช่อาร์เรย์และไม่สามารถแปลงได้:`, data);
           data = [];
         }
       }
       
-      // แปลงข้อมูล API เป็นรูปแบบที่ AuctionCard ต้องการ
-      const transformedData = transformApiData(data);
+      // แปลงข้อมูล API และดึงข้อมูลหมอดู
+      const processedData = await Promise.all(
+        data.map(async (auction) => {
+          let seerData = null;
+          
+          // ดึงข้อมูลหมอดูถ้ามี seer.id
+          if (auction.seer && auction.seer.id) {
+            seerData = await fetchSeerData(auction.seer.id);
+          }
+          
+          return {
+            id: auction.id || Math.random().toString(),
+            image: auction.image || Images.auctionImages,
+            title: auction.name || "ไม่มีชื่อรายการ",
+            description: auction.short_description || "ไม่มีคำอธิบาย",
+            startDate: auction.start_time ? new Date(auction.start_time).toLocaleString('th-TH') : "ไม่ระบุ",
+            endDate: auction.end_time ? new Date(auction.end_time).toLocaleString('th-TH') : "ไม่ระบุ",
+            profileImage: seerData?.image || Images.profileSmall,
+            astrologer: auction.seer?.display_name || "ไม่ระบุชื่อหมอดู",
+            dateCreated: auction.date_created || null, // เพิ่มข้อมูลวันที่สร้าง
+          };
+        })
+      );
       
       // อัปเดตข้อมูลตามประเภท
       switch (type) {
         case 'ongoing':
-          setOngoingAuctions(transformedData);
+          setOngoingAuctions(processedData);
           break;
         case 'trending':
-          setTrendingAuctions(transformedData);
+          setTrendingAuctions(processedData);
           break;
         case 'upcoming':
-          setUpcomingAuctions(transformedData);
+          setUpcomingAuctions(processedData);
           break;
         case 'search':
-          setSearchResults(transformedData);
+          setSearchResults(processedData);
           setShowSearchResults(true);
           break;
         default:
@@ -154,25 +202,6 @@ const Auction = () => {
     } finally {
       setLoading(prev => ({ ...prev, [type]: false }));
     }
-  };
-
-  // แปลงข้อมูล API เป็นรูปแบบที่ AuctionCard ต้องการ
-  const transformApiData = (apiData) => {
-    if (!Array.isArray(apiData)) {
-      console.error("ข้อมูลที่ได้รับไม่ใช่อาร์เรย์:", apiData);
-      return [];
-    }
-    
-    return apiData.map(auction => ({
-      id: auction.id || Math.random().toString(), // ใช้ค่าสุ่มถ้าไม่มี ID
-      image: auction.image || Images.auctionImages, // ใช้รูปเริ่มต้นถ้าไม่มีรูป
-      title: auction.name || "ไม่มีชื่อรายการ",
-      description: auction.short_description || "ไม่มีคำอธิบาย",
-      startDate: auction.start_time ? new Date(auction.start_time).toLocaleString('th-TH') : "ไม่ระบุ",
-      endDate: auction.end_time ? new Date(auction.end_time).toLocaleString('th-TH') : "ไม่ระบุ",
-      profileImage: Images.profileSmall, // ใช้รูปโปรไฟล์เริ่มต้น
-      astrologer: auction.seer?.display_name || "ไม่ระบุชื่อหมอดู",
-    }));
   };
 
   // จัดการการส่งคำค้นหา
@@ -197,22 +226,21 @@ const Auction = () => {
     // เรียกข้อมูลประมูลที่กำลังดำเนินอยู่
     fetchAuctions('ongoing', page1, {
       order_by: "end_time",
-      direction: "asc", // เรียงจากใกล้จบก่อน
-      limit: 10 // เพิ่มจำนวนรายการที่เรียกเพื่อให้มีโอกาสได้ข้อมูลมากขึ้น
+      direction: "asc",
+      limit: 10
     });
     
     // เรียกข้อมูลประมูลที่กำลังมาแรง
     fetchAuctions('trending', page2, {
-      order_by: "id", // เรียงตาม ID ล่าสุดก่อน
+      order_by: "id",
       direction: "desc",
       limit: 10
     });
     
     // เรียกข้อมูลประมูลที่กำลังจะถึง
-    const now = new Date().toISOString();
     fetchAuctions('upcoming', page3, {
       order_by: "start_time",
-      direction: "asc", // เรียงจากใกล้เริ่มก่อน
+      direction: "asc",
       limit: 10
     });
   }, []);
@@ -240,7 +268,7 @@ const Auction = () => {
     });
   }, [page3]);
   
-  // แสดงข้อมูลจริงแบบไม่ใช้ข้อมูลทดสอบ
+  // แสดงข้อมูลตามประเภท
   const getAuctionData = (section) => {
     switch (section) {
       case 'ongoing':
@@ -249,7 +277,6 @@ const Auction = () => {
         return trendingAuctions; 
       case 'upcoming':
         return upcomingAuctions;
-      
       default:
         return [];
     }
@@ -317,7 +344,6 @@ const Auction = () => {
         ) : ongoingAuctions.length === 0 ? (
           <div className="w-full max-w-6xl text-center my-8">
             <p className="text-gray-500">ไม่พบรายการประมูลที่กำลังดำเนินอยู่</p>
-            
           </div>
         ) : (
           <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
@@ -343,7 +369,6 @@ const Auction = () => {
         ) : trendingAuctions.length === 0 ? (
           <div className="w-full max-w-6xl text-center my-8">
             <p className="text-gray-500">ไม่พบรายการประมูลที่กำลังมาแรง</p>
-           
           </div>
         ) : (
           <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
@@ -369,7 +394,6 @@ const Auction = () => {
         ) : upcomingAuctions.length === 0 ? (
           <div className="w-full max-w-6xl text-center my-8">
             <p className="text-gray-500">ไม่พบรายการประมูลที่กำลังจะถึง</p>
-            
           </div>
         ) : (
           <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">

@@ -1,93 +1,61 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import dayjs from "dayjs";
-import "dayjs/locale/th";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { useEffect, useState } from "react";
+
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import SlotComponent from "./SlotComponent";
-import NextButton from "./NextButton";
+import dayjs from "dayjs";
 
 dayjs.locale("th");
 
-const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSelectedTime }) => { 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const packageInfo = location.state?.packageInfo;
-  
+const FullCalendarPage = ({ seerId, packageId, selectedDate, setSelectedDate, selectedTime, setSelectedTime }) => {
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const [calendarData, setCalendarData] = useState([]);
-
   const [showDropdown, setShowDropdown] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [availableDay, setAvailableDay] = useState(new Set([]));
+  const [loading, setLoading] = useState(false);
+  const [seerCalendar, setSeerCalendar] = useState([]);
 
-  // 🟢 โหลดข้อมูลปฏิทินจาก API
-  useEffect(() => {
-    const fetchSeerCalendar = async () => {
-      try {
-        const response = await fetch("https://backend.qseer.app/api/seer/1/calendar", {
-          method: "GET",
-          headers: {
-            "Accept": "application/json",
-          },
-        });
-  
-        if (!response.ok) throw new Error("โหลดตารางเวลาหมอดูล้มเหลว");
-  
-        const data = await response.json();
-  
-        // 🔹 แปลงข้อมูล `schedules` ให้เป็นวันที่ของเดือนปัจจุบัน
-        const schedules = data.schedules.map((schedule) => {
-          const today = dayjs().startOf("week"); // วันอาทิตย์ของสัปดาห์นี้
-          return {
-            date: today.add(schedule.day, "day").format("YYYY-MM-DD"),
-            startTime: schedule.start_time,
-            endTime: schedule.end_time,
-            status: "available",
-          };
-        });
-  
-        // 🔹 จัดรูปแบบวันหยุด (day_offs)
-        const dayOffs = data.day_offs.map((dayOff) => ({
-          date: dayOff,
-          status: "full",
-        }));
-  
-        setCalendarData([...schedules, ...dayOffs]); // รวมวันทำงานกับวันหยุด
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching seer calendar:", err);
-        setLoading(false);
-      }
-    };
-  
-    fetchSeerCalendar();
-  }, []);
-  
-
-  // ตรวจสอบว่าวันไหนเต็ม/ว่าง
-  const getStatus = (date) => {
-    const formattedDate = date.format("YYYY-MM-DD");
-    const dayOfWeek = date.day(); // ได้ค่า 0-6 (อาทิตย์ - เสาร์)
-  
-    const availableDay = calendarData.find((item) => item.date === formattedDate || item.day === dayOfWeek);
-    return availableDay ? availableDay.status : "full"; // ถ้าไม่มีวันนั้นถือว่าเต็ม
-  };
-  
-
-  // เปลี่ยนเดือนที่แสดง
-  const handleDateChange = (date) => {
-    setCurrentDate(date.startOf("month"));
-    setShowDropdown(false);
-  };
-
-  // เลือกวัน
   const handleSelectDate = (date) => {
-    if (!dayjs().isAfter(date, "day") && getStatus(date) === "available") {
-      setSelectedDate(dayjs(date).startOf("day")); // ✅ ใช้ startOf("day") ป้องกันปัญหาเวลา
-    }
+    setSelectedDate(dayjs(date).startOf("day"));
   };
+
+  const setSeerCalendarAndAvailableDay = (data) => {
+    setSeerCalendar(data);
+    const availableDaySet = new Set();
+    data.forEach((t)=>{
+      const day = dayjs(t.start_time).get('D');
+      availableDaySet.add(day);
+    });
+    setAvailableDay(availableDaySet);
+  }
+  
+  const fetchSeerCalendar = async(date) => {
+    const endDate = dayjs(date).endOf("month");
+    const startDate = endDate.isSame(dayjs(), 'month') ? dayjs() : date;
+    if (endDate.isBefore(dayjs(), 'month')) {
+      setLoading(false)
+      setSeerCalendarAndAvailableDay([])
+      return
+    } 
+    
+    const params = new URLSearchParams();
+    params.append("start_date", startDate.format('YYYY-MM-DD'));
+    params.append("end_date", endDate.format('YYYY-MM-DD'));
+    
+    await fetch(`https://backend.qseer.app/api/seer/${seerId}/package/fortune/${packageId}/time-slots?${params}`,{
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+      },
+    })
+    .then((res)=>res.json())
+    .then((res)=>setSeerCalendarAndAvailableDay(res))
+    .finally(()=>setLoading(false));
+  }
+
+  useEffect(()=>{
+    fetchSeerCalendar(dayjs());
+  },[]);
   
   return (
     <div className="flex flex-col items-center mb-6">
@@ -107,7 +75,12 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
                 <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
                   <DateCalendar 
                     value={currentDate} 
-                    onChange={handleDateChange} 
+                    onChange={async(date)=>{
+                      setCurrentDate(date.startOf("month"));
+                      setShowDropdown(false);
+                      setLoading(true);
+                      await fetchSeerCalendar(date.startOf('month'));
+                    }} 
                     views={["year", "month"]} 
                     openTo="month" 
                   />
@@ -116,7 +89,6 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
             </div>
           </div>
 
-          {/* คำอธิบายสถานะ */}
           <div className="absolute top-4 right-4 flex flex-col space-y-2 text-sm text-gray-700">
             <div className="flex items-center">
               <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
@@ -127,8 +99,7 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
               <span>เต็ม</span>
             </div>
           </div>
-
-          {/* Days Header - เพิ่มหัวข้อวันในสัปดาห์ */}
+          
           <div className="grid grid-cols-7 text-center mb-2">
             {["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."].map((day, index) => (
               <div key={index} className="text-[#8677A7] text-sm font-medium flex items-center justify-center h-10 w-14">
@@ -136,8 +107,7 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
               </div>
             ))}
           </div>
-
-          {/* ตารางวัน */}
+          
           {loading ? (
             <p className="text-center text-gray-500">กำลังโหลดข้อมูลปฏิทิน...</p>
           ) : (
@@ -148,10 +118,8 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
               {Array.from({ length: currentDate.daysInMonth() }, (_, index) => {
                 const day = index + 1;
                 const date = currentDate.date(day);
-                const status = getStatus(date);
-                const isPast = dayjs().isAfter(date, "day");
-                const isSelected = selectedDate && selectedDate.isSame(date, "day"); // ✅ ป้องกัน error
-                const isAvailable = !isPast && status === "available";
+                const isSelected = selectedDate && selectedDate.isSame(date, "day");
+                const isAvailable = availableDay.has(day);
 
                 return (
                   <div key={day} className="relative flex flex-col items-center justify-center w-14 h-14">
@@ -161,13 +129,9 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
                       </span>
                     )}
                     <span
-                      className={`relative w-10 h-10 flex items-center justify-center rounded-full transition ${
-                        isPast 
-                          ? "text-gray-500" 
-                          : status === "available" 
-                            ? "text-gray-800" 
-                            : "text-gray-500"
-                      } ${isAvailable ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-10 h-10 flex items-center justify-center rounded-full transition 
+                      ${isAvailable ? "text-gray-800" : "text-gray-500" } 
+                      ${isAvailable ? "cursor-pointer" : "cursor-default"}`}
                       onClick={() => isAvailable && handleSelectDate(date)}
                     >
                       {day}
@@ -179,7 +143,7 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
                 );
               })}
             </div>
-          )}
+          )} 
         </div>
       </LocalizationProvider>
 
@@ -187,17 +151,9 @@ const FullCalendarPage = ({ selectedDate, setSelectedDate, selectedTime, setSele
         <>
           <div className="mt-6">
             <SlotComponent 
+              seerCalendar={seerCalendar}
               selectedDate={selectedDate} 
-              setSelectedTime={setSelectedTime}  // ✅ ส่งไปให้ SlotComponent
-            />
-          </div>
-
-          {/* ปุ่ม NextButton */}
-          <div className="fixed bottom-4 right-4">
-            <NextButton
-              onClick={() => navigate("/bookingSeer2", { state: { packageInfo, selectedDate, selectedTime } })} // ✅ เพิ่ม selectedTime
-              disabled={!selectedDate || !selectedTime} // ✅ ป้องกันการกดถ้าไม่ได้เลือกเวลา
-              className="w-auto"
+              setSelectedTime={setSelectedTime} 
             />
           </div>
         </>

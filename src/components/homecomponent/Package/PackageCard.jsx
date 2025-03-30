@@ -1,27 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
+
 import Images from "../../../assets";
 import SeerRating from "../SeerPopular/SeerRating";
 import { useNavigate } from "react-router-dom";
 
 const PackageCard = ({ packageInfo }) => {
     const navigate = useNavigate();
-
-    const adaptedPackage = packageInfo.hasOwnProperty('title') 
-        ? {
-            id: packageInfo.id,
-            name: packageInfo.title,
-            category: packageInfo.category,
-            reading_type: packageInfo.category,
-            seer_display_name: packageInfo.seer,
-            seer_rating: packageInfo.rating,
-            seer_review_count: packageInfo.reviews,
-            price: packageInfo.price.toString(),
-            duration: packageInfo.duration,
-            foretell_channel: packageInfo.icon === "call" ? "phone" : packageInfo.icon,
-            image: packageInfo.image,
-            seer_image: packageInfo.seerImage
-        }
-        : packageInfo; // ใช้ข้อมูล API ตามที่ส่งมา
+    const adaptedPackage = packageInfo; // ใช้ข้อมูล API ตามที่ส่งมา
 
     // แปลง foretell_channel เป็นไอคอน
     const getIcon = (channel) => {
@@ -32,6 +17,10 @@ const PackageCard = ({ packageInfo }) => {
             default: return Images.call;
         }
     };
+
+    useEffect(()=>{
+        console.log(packageInfo)
+    },[]);
 
     // ฟังก์ชันนำทางไปยังหน้า BookingSeer
     const handleBooking = () => {
@@ -76,14 +65,20 @@ const PackageCard = ({ packageInfo }) => {
                         {adaptedPackage.seer_display_name}
                     </span>
                 </div>
-
-                <div className="flex items-center mt-1">
-                    <span className="text-sm text-gray-700 font-semibold mr-1">
-                        {parseFloat(adaptedPackage.seer_rating).toFixed(1)}
-                    </span>
-                    <SeerRating rating={parseFloat(adaptedPackage.seer_rating)} />
-                    <span className="text-sm text-gray-500 ml-1">{adaptedPackage.seer_review_count} reviews</span>
-                </div>
+                { 
+                    adaptedPackage.seer_rating && adaptedPackage.seer_rating > 0 ?
+                    <div className="flex items-center mt-1">
+                        <span className="text-sm text-gray-700 font-semibold mr-1">
+                            {parseFloat(adaptedPackage.seer_rating).toFixed(1)}
+                        </span> 
+                        <SeerRating rating={parseFloat(adaptedPackage.seer_rating)} />
+                        <span className="text-sm text-gray-500 ml-1">{adaptedPackage.seer_review_count} reviews</span>
+                    </div>
+                    : 
+                    <div>
+                        ยังไม่มีการรีวิว
+                    </div>
+                }
 
                 {/* ส่วนด้านล่างที่มี margin-top:auto เพื่อผลักไปด้านล่างเสมอ */}
                 <div className="mt-auto">

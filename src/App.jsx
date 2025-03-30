@@ -1,39 +1,39 @@
+import "./index.css";
+
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+
+import Auction from "./pages/auction/Auction";
+import AuctionDetails from "./pages/auction/AuctionDetails";
 import { AuthProvider } from "./pages/Login/contexts/AuthContext";
-import BookingSteps from "./components/bookingcomponent/BookingSteps";
 import BackButton from "./components/bookingcomponent/BackButton";
-import Login from "./pages/Login/Login";
-import Register from "./pages/Login/Register";
-import Fillter from "./pages/Login/Fillter";
-import ForgotPassword from "./pages/Login/ForgotPassword";
-import ResetPassword from "./pages/Login/ResetPassword";
-import LandingPage from "./pages/landing/LandingPage";
-import Homepage from "./pages/home/homepage";
-import QseerSchedulePage from "./pages/ProfileSeer/QseerSchedulePage";
+import BidAuction from "./pages/auction/BidAuction";
 import BookingSeer from "./pages/bookingseer/BookingSeer";
 import BookingSeer2 from "./pages/bookingseer/BookingSeer2";
 import BookingSeer3 from "./pages/bookingseer/BookingSeer3";
 import BookingSeer4 from "./pages/bookingseer/BookingSeer4";
-import Horoscope from "./pages/horoscope/Horoscope";
-import Auction from "./pages/auction/Auction";
+import BookingSteps from "./components/bookingcomponent/BookingSteps";
 import DetailAuction from "./pages/auction/DetailAuction";
-import BidAuction from "./pages/auction/BidAuction";
-import TopUpCoins from "./pages/Topup/TopUpCoins";
-import SummaryPage from "./pages/Topup/SummaryPage";
-import QrSummary from "./pages/Topup/QrSummary";
-import AuctionDetails from "./pages/auction/AuctionDetails";
+import EmailVerification from "./pages/Login/EmailVerification";
+import Fillter from "./pages/Login/Fillter";
 import FollowerPage from "./pages/followerpage/FollowerPage";
-import QueueHistory from "./pages/Menu/Queue/QueueHistory";
-import Queuedetails from "./pages/Menu/Queue/Queuedetails";
+import ForgotPassword from "./pages/Login/ForgotPassword";
+import Homepage from "./pages/home/homepage";
+import Horoscope from "./pages/horoscope/Horoscope";
+import LandingPage from "./pages/landing/LandingPage";
+import Login from "./pages/Login/Login";
 import PaymentHistoryPage from "./pages/Menu/PaymentHistoryPage";
 import ProfileMe from "./pages/Profile/Profile";
-import EmailVerification from "./pages/Login/EmailVerification";
+import QrSummary from "./pages/Topup/QrSummary";
+import QseerSchedulePage from "./pages/ProfileSeer/QseerSchedulePage";
+import QueueHistory from "./pages/Menu/Queue/QueueHistory";
+import Queuedetails from "./pages/Menu/Queue/Queuedetails";
+import Register from "./pages/Login/Register";
+import ResetPassword from "./pages/Login/ResetPassword";
 import SearchBookingPage from './pages/SearchBooking/SearchBookingPage';
 import SearchBookingSeer from './pages/SearchBooking/SearchBookingSeer';
-
-
-import "./index.css";
+import SummaryPage from "./pages/Topup/SummaryPage";
+import TopUpCoins from "./pages/Topup/TopUpCoins";
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -42,7 +42,7 @@ export default function App() {
     <AuthProvider> {/* ครอบ Router ด้วย AuthProvider */}
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Queuedetails />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
@@ -55,13 +55,13 @@ export default function App() {
           <Route path="/horoscope" element={<Horoscope />} />
           <Route path="/auction" element={<Auction />} />
           <Route path="/detailAuction/:id" element={<DetailAuction />} />
-          <Route path="/bidAuction" element={<BidAuction />} />
+          <Route path="/bidAuction/:auction_id" element={<BidAuction />} />
           <Route path="/top-up-coins" element={<TopUpCoins />} />
           <Route path="/summary" element={<SummaryPage />} />
           <Route path="/auction-details" element={<AuctionDetails />} />
           <Route path="/follower" element={<FollowerPage />} />
           <Route path="/queuehistory" element={<QueueHistory />} />
-          <Route path="/queuedetails" element={<Queuedetails />} />
+          <Route path="/queuedetails/:id" element={<Queuedetails />} />
           <Route path="/paymentHistoryPage" element={<PaymentHistoryPage/>} />
           <Route path="/profileme" element={<ProfileMe />} />
           <Route path="/qr-summary" element={<QrSummary/>} />

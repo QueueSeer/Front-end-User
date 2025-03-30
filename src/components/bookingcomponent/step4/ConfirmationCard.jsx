@@ -1,36 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+
 import Images from "../../../assets";
 
-const ConfirmationCard = ({ bookingData = {} }) => {
+const ConfirmationCard = ({ bookingData = {}, user_fullname }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   
   // สำหรับการ debug
   useEffect(() => {
-    console.log("ConfirmationCard received data:", bookingData);
+    console.log("ConfirmationCard received data:", bookingData,user_fullname);
   }, [bookingData]);
 
   // สร้างรหัสการจองแบบสุ่ม (ในกรณีที่ไม่มีข้อมูล bookingId)
-  const bookingCode = bookingData.bookingId?.slice(-5) || "4QCFR";
+  const bookingCode = bookingData.code;
 
   // จัดรูปแบบวันที่และเวลา
   const formatDatetime = () => {
-    if (!bookingData.selectedDate) return "25/02/68 10:45 น.";
+    if (!bookingData.start_time) return "25/02/68 10:45 น.";
     
-    try {
-      const date = new Date(bookingData.selectedDate);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = String(date.getFullYear() + 543).slice(-2); // แปลงเป็นปี พ.ศ. และเอา 2 ตัวท้าย
-      
-      // ใช้เวลาที่ได้รับมา หรือค่าเริ่มต้น
-      const time = bookingData.selectedTime || "10:45";
-      
-      return `${day}/${month}/${year} ${time} น.`;
-    } catch (error) {
-      console.error("Error formatting date", error);
-      return "25/02/68 10:45 น."; // ค่าเริ่มต้นกรณีเกิดข้อผิดพลาด
-    }
+    const date = new Date(bookingData.start_time);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear() + 543).slice(-2); // แปลงเป็นปี พ.ศ. และเอา 2 ตัวท้าย
+    
+    const time = bookingData.start_time.split('T')[1].split(':');
+    
+    
+    return `${day}/${month}/${year} ${time[0]}:${time[1]} น.`;
   };
 
   // ฟังก์ชันคัดลอกโค้ด
@@ -86,21 +82,21 @@ const ConfirmationCard = ({ bookingData = {} }) => {
       <div className="text-sm text-gray-700 text-left px-6">
         <div className="grid grid-cols-2 gap-y-3">
           <p className="font-medium">ชื่อหมอดู</p>
-          <p>{bookingData.fortuneTeller || "เพียงฟ้า พาขวัญ"}</p>
+          <p>{bookingData.seer_display_name}</p>
 
           <p className="font-medium">แพ็กเกจ</p>
-          <p>{bookingData.packageInfo?.name || "ความรักปีนี้เป็นอย่างไร"}</p> 
+          <p>{bookingData.package_name}</p> 
 
           <p className="font-medium">ชื่อผู้จอง</p>
-          <p>{bookingData.userInfo?.fullName || "น.ส. สุรางคนางค์ เกตุยั่งยืนวงศ์"}</p>
+          <p>{user_fullname}</p>
 
           <p className="font-medium">วันเวลาที่จอง</p>
           <p>{formatDatetime()}</p>
 
           <p className="font-medium">ช่องทางการติดต่อหมอดู</p>
-          <p className="text-[#65558F] underline cursor-pointer">
-            {bookingData.packageInfo?.contactChannel || "thrthtrhtrytjy"}
-          </p>
+          <form action={bookingData.seer_socials_link} target="_blank">
+            <button className="text-[#65558F] underline cursor-pointer" type="submit">{bookingData.seer_socials_name}</button>
+          </form>
 
           <p className="font-medium">รับการแจ้งเตือน</p>
           <p>{getNotification()}</p>
@@ -111,7 +107,7 @@ const ConfirmationCard = ({ bookingData = {} }) => {
 
       {/* ยอดรวม */}
       <p className="text-lg font-bold">
-        ยอดรวม: <span className="text-black">{bookingData.finalPrice || 49.00} บาท</span>
+        ยอดรวม: <span className="text-black">{bookingData.total} บาท</span>
       </p>
 
       {/* ปุ่มบันทึกภาพ */}

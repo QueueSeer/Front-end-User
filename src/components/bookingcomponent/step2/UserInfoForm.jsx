@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requiredData = [] }) => {
   const [errors, setErrors] = useState({});
@@ -267,7 +267,6 @@ const UserInfoForm = ({ formData, setFormData, loading, onValidationChange, requ
     return requiredData.includes(fieldMapping[fieldName]);
   };
   
-  console.log("User data loaded:", formData);
 
   // แสดง loading skeleton ระหว่างโหลดข้อมูล
   if (loading) {

@@ -1,11 +1,88 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Images from "../../assets";
-import ReviewPopup from "./ReviewPopup"; // Import Popup รีวิว
+import ReviewPopup from "./ReviewPopup";
+import axios from "axios";
 
-const QueueCard = ({ image, title, categories, fortuneTeller, date, time, status }) => {
+const QueueCard = ({ 
+  id, 
+  image, 
+  title, 
+  categories, 
+  fortuneTeller, 
+  date, 
+  time, 
+  status,
+  confirmation_code,
+  raw_data, // ข้อมูลทั้งหมดจาก API รวมถึง questions
+  onReviewStatusChange // callback เมื่อสถานะการรีวิวเปลี่ยน
+}) => {
     const navigate = useNavigate();
     const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [hasReviewed, setHasReviewed] = useState(raw_data?.has_reviewed || false); // เริ่มต้นจากข้อมูลที่มีอยู่แล้ว
+
+    // ตรวจสอบสถานะการรีวิวเมื่อโหลดคอมโพเนนต์
+    useEffect(() => {
+        // ตรวจสอบจาก localStorage ก่อน
+        const reviewStateKey = `review_state_${id}`;
+        const savedReviewState = localStorage.getItem(reviewStateKey);
+        
+        if (savedReviewState === 'true') {
+            setHasReviewed(true);
+            if (onReviewStatusChange) {
+                onReviewStatusChange(id, true);
+            }
+        } else if (raw_data?.has_reviewed) {
+            setHasReviewed(true);
+            localStorage.setItem(reviewStateKey, 'true');
+            if (onReviewStatusChange) {
+                onReviewStatusChange(id, true);
+            }
+        }
+    }, [id, raw_data, onReviewStatusChange]);
+
+    // แก้ไขการนำทางไปยังหน้า QueueDetails เพื่อให้แน่ใจว่าส่งข้อมูลคำถามไปด้วย
+    const handleViewDetails = () => {
+        navigate(`/queuedetails/${id}`, {
+            state: { 
+                appointmentData: raw_data,
+                // ส่งข้อมูลสำหรับแสดงผลเพิ่มเติม
+                displayData: {
+                    image,
+                    title,
+                    categories,
+                    fortuneTeller,
+                    date,
+                    time,
+                    status,
+                    confirmation_code,
+                    hasReviewed: hasReviewed
+                }
+            }
+        });
+    };
+
+    // เปิด popup รีวิว
+    const handleOpenReview = () => {
+        setIsReviewOpen(true);
+    };
+
+    // ปิด popup รีวิว
+    const handleCloseReview = (success = false) => {
+        setIsReviewOpen(false);
+        
+        // ถ้ารีวิวสำเร็จหรือพบว่าเคยรีวิวแล้ว ให้อัพเดทสถานะ
+        if (success) {
+            setHasReviewed(true);
+            // บันทึกสถานะการรีวิวใน localStorage
+            localStorage.setItem(`review_state_${id}`, 'true');
+            
+            // แจ้งให้คอมโพเนนต์แม่รู้ว่ามีการรีวิวแล้ว
+            if (onReviewStatusChange) {
+                onReviewStatusChange(id, true);
+            }
+        }
+    };
 
     return (
         <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-md p-5 mb-4 relative">
@@ -34,10 +111,17 @@ const QueueCard = ({ image, title, categories, fortuneTeller, date, time, status
                     </span>
                 </div>
 
+                {/* คำถาม (ถ้ามี) */}
+                {raw_data && raw_data.questions && Array.isArray(raw_data.questions) && raw_data.questions.length > 0 && (
+                    <p className="text-gray-500 text-sm mt-2">
+                        มีคำถาม {raw_data.questions.length} ข้อ
+                    </p>
+                )}
+
                 {/* More Details */}
                 <p
                     className="text-gray-500 text-sm mt-3 cursor-pointer flex items-center hover:text-purple-600"
-                    onClick={() => navigate("/queuedetails")}
+                    onClick={handleViewDetails}
                 >
                     รายละเอียด
                     <img src={Images.next2} alt="details" className="w-2 h-3 ml-2" />
@@ -58,13 +142,20 @@ const QueueCard = ({ image, title, categories, fortuneTeller, date, time, status
                     {status}
                 </button>
 
-                {/* รีวิวหมอดู (เป็นข้อความ ไม่ใช่ปุ่ม) */}
-                {status === "เข้ารับบริการสำเร็จ" && (
+                {/* รีวิวหมอดู (แสดงตามสถานะ) */}
+                {status === "เข้ารับบริการสำเร็จ" && !hasReviewed && (
                     <p
                         className="text-purple-800 text-sm mt-1 underline cursor-pointer hover:text-purple-600"
-                        onClick={() => setIsReviewOpen(true)}
+                        onClick={handleOpenReview}
                     >
                         รีวิวหมอดู
+                    </p>
+                )}
+                
+                {/* แสดงข้อความเมื่อรีวิวแล้ว */}
+                {status === "เข้ารับบริการสำเร็จ" && hasReviewed && (
+                    <p className="text-gray-400 text-sm mt-1">
+                        ได้รีวิวแล้ว
                     </p>
                 )}
             </div>
@@ -72,8 +163,9 @@ const QueueCard = ({ image, title, categories, fortuneTeller, date, time, status
             {/* Popup รีวิว */}
             <ReviewPopup
                 isOpen={isReviewOpen}
-                onClose={() => setIsReviewOpen(false)}
+                onClose={handleCloseReview}
                 fortuneTeller={fortuneTeller}
+                appointmentId={id}
             />
         </div>
     );

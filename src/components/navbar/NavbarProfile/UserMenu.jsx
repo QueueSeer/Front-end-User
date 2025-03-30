@@ -9,6 +9,7 @@ import Images from "../../../assets";
 const UserMenu = ({ userData: propUserData }) => {
   const [userData, setUserData] = useState(propUserData || null); // รับข้อมูลจาก prop หรือเริ่มต้นเป็น null
   const [loading, setLoading] = useState(!propUserData); // ถ้ามี propUserData แล้วไม่ต้อง loading
+  
 
   useEffect(() => {
     // ถ้ามี propUserData แล้ว ไม่ต้องเรียก API ใหม่
@@ -55,8 +56,8 @@ const UserMenu = ({ userData: propUserData }) => {
     return <div className="p-4 text-center">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</div>;
   }
 
-  // จำนวนโทเคนที่ผู้ใช้มี (สมมติว่ามีในข้อมูล userData หรือใช้ค่าเริ่มต้นเป็น 200)
-  const tokenAmount = userData?.token_amount || 200;
+  
+const tokenAmount = userData?.coins || 0;
 
   return (
     <div

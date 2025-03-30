@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+
 import Images from "../../../assets";
 
-
 const SeerRating = ({ rating }) => {
+    
     return (
         <div className="flex items-center mb-1">
             {[...Array(5)].map((_, i) => (

@@ -44,6 +44,9 @@ import Luckycolor from "./images/home/Luckycolor.png";
 import Luckycolor2 from "./images/home/Luckycolor2.png";
 import pic from "./images/home/pic.png";
 import profile from "./images/home/profile.png";
+import SeerRegister from "./images/home/SeerRegister.png";
+
+SeerRegister
 // ไอคอน home
 import time from "./icon/ProfilrIcon/time.png";
 import X from "./icon/ProfilrIcon/X.png";
@@ -162,6 +165,7 @@ import UserProfile from "./icon/QueuCard/UserProfile.png";
 import next2 from "./icon/QueuCard/next2.png";
 import StarOutline from "./icon/QueuCard/StarOutline.png";
 import StarFilled from "./icon/QueuCard/StarFilled.png";
+import crystalBall from "./icon/Navbar/crystalBall.png";
 
 
 const images = {
@@ -342,6 +346,8 @@ PackageIcon,
 CheckIcon,
 HeartIcon,
 PencilIcon,
+crystalBall,
+SeerRegister,
 };
 
 export default images;

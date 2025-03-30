@@ -7,9 +7,17 @@ const FeatureSection = () => {
 
   const features = [
     { img: Images.AuctionQueue, path: "/auction" },
-    { img: Images.horoscope, path: "/horoscope" },
+    { img: Images.SeerRegister, path: "https://seer.qseer.app/", external: true },
     { img: Images.Howto, path: "/landingPage" },
   ];
+
+  const handleClick = (feature) => {
+    if (feature.external) {
+      window.open(feature.path, "_blank"); // เปิดลิงก์ภายนอกในแท็บใหม่
+    } else {
+      navigate(feature.path); // ลิงก์ภายใน
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
@@ -19,7 +27,7 @@ const FeatureSection = () => {
             src={feature.img}
             alt={`feature-${index}`}
             className="w-full h-auto rounded-lg shadow-lg max-h-60 object-cover cursor-pointer hover:opacity-80 transition"
-            onClick={() => navigate(feature.path)} // นำทางไปหน้าที่กำหนด
+            onClick={() => handleClick(feature)}
           />
         </div>
       ))}
