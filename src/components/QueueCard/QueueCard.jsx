@@ -24,26 +24,58 @@ const QueueCard = ({
     const [checkingReviewStatus, setCheckingReviewStatus] = useState(true); // สถานะการตรวจสอบ
     const [imageError, setImageError] = useState(false);
 
-    // ตรวจสอบสถานะการรีวิวเมื่อโหลดคอมโพเนนต์
-    useEffect(() => {
-        const checkReviewStatus = async () => {
+  // ตรวจสอบสถานะการรีวิวเมื่อโหลดคอมโพเนนต์
+useEffect(() => {
+    const checkReviewStatus = async () => {
+        try {
+            setCheckingReviewStatus(true);
+            
+            // ตรวจสอบจาก localStorage ก่อนเสมอ
+            const reviewStateKey = `review_state_${id}`;
+            const savedReviewState = localStorage.getItem(reviewStateKey);
+            
+            if (savedReviewState === 'true') {
+                setHasReviewed(true);
+                if (onReviewStatusChange) {
+                    onReviewStatusChange(id, true);
+                }
+                if (onMoveToBottom) {
+                    onMoveToBottom(id);
+                }
+                return; // ออกจากฟังก์ชันทันทีถ้าพบใน localStorage
+            } else if (savedReviewState === 'false') {
+                // ถ้าเคยตรวจสอบแล้วว่าไม่มี ก็ไม่ต้องเรียก API อีก
+                setHasReviewed(false);
+                return;
+            } else if (raw_data?.has_reviewed) {
+                // ถ้ามีข้อมูล has_reviewed จาก API
+                setHasReviewed(true);
+                localStorage.setItem(reviewStateKey, 'true');
+                if (onReviewStatusChange) {
+                    onReviewStatusChange(id, true);
+                }
+                if (onMoveToBottom) {
+                    onMoveToBottom(id);
+                }
+                return; // ออกจากฟังก์ชันทันทีถ้าพบใน raw_data
+            }
+            
+            // ตรวจสอบกับ API พร้อมกำหนด timeout 3 วินาที
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('API timeout')), 3000);
+            });
+            
             try {
-                setCheckingReviewStatus(true);
+                // ใช้ Promise.race เพื่อแข่งกันระหว่าง API และ timeout
+                const response = await Promise.race([
+                    axios.get(`https://backend.qseer.app/api/appointment/${id}/review`, {
+                        withCredentials: true
+                    }),
+                    timeoutPromise
+                ]);
                 
-                // ตรวจสอบจาก localStorage ก่อน
-                const reviewStateKey = `review_state_${id}`;
-                const savedReviewState = localStorage.getItem(reviewStateKey);
-                
-                if (savedReviewState === 'true') {
-                    setHasReviewed(true);
-                    if (onReviewStatusChange) {
-                        onReviewStatusChange(id, true);
-                    }
-                    if (onMoveToBottom) {
-                        onMoveToBottom(id);
-                    }
-                } else if (raw_data?.has_reviewed) {
-                    // ถ้ามีข้อมูล has_reviewed จาก API
+                // ถ้ามีข้อมูลรีวิวแล้ว
+                if (response.data && response.data.id) {
                     setHasReviewed(true);
                     localStorage.setItem(reviewStateKey, 'true');
                     if (onReviewStatusChange) {
@@ -52,38 +84,29 @@ const QueueCard = ({
                     if (onMoveToBottom) {
                         onMoveToBottom(id);
                     }
-                } else {
-                    // ตรวจสอบกับ API ว่าเคยรีวิวหรือไม่
-                    try {
-                        const response = await axios.get(`https://backend.qseer.app/api/appointment/${id}/review`, {
-                            withCredentials: true
-                        });
-                        
-                        // ถ้ามีข้อมูลรีวิวแล้ว
-                        if (response.data && response.data.id) {
-                            setHasReviewed(true);
-                            localStorage.setItem(reviewStateKey, 'true');
-                            if (onReviewStatusChange) {
-                                onReviewStatusChange(id, true);
-                            }
-                            if (onMoveToBottom) {
-                                onMoveToBottom(id);
-                            }
-                        }
-                    } catch (error) {
-                        // ถ้าไม่พบข้อมูลรีวิว แสดงว่ายังไม่ได้รีวิว (404)
-                        if (error.response && error.response.status === 404) {
-                            setHasReviewed(false);
-                            localStorage.setItem(reviewStateKey, 'false');
-                        } else {
-                            console.error("Error checking review status:", error);
-                        }
-                    }
                 }
-            } finally {
-                setCheckingReviewStatus(false);
+            } catch (error) {
+                // ถ้าเกิด timeout หรือข้อผิดพลาดอื่นๆ
+                if (error.message === 'API timeout') {
+                    console.log(`API timeout for appointment ${id}, assuming not reviewed`);
+                    setHasReviewed(false);
+                    localStorage.setItem(reviewStateKey, 'false');
+                }
+                // ถ้าไม่พบข้อมูลรีวิว แสดงว่ายังไม่ได้รีวิว (404)
+                else if (error.response && error.response.status === 404) {
+                    setHasReviewed(false);
+                    localStorage.setItem(reviewStateKey, 'false');
+                } else {
+                    console.error("Error checking review status:", error);
+                    // สันนิษฐานว่ายังไม่ได้รีวิว หากเกิดข้อผิดพลาด
+                    setHasReviewed(false);
+                }
             }
-        };
+        } finally {
+            setCheckingReviewStatus(false);
+        }
+    };
+
 
         if (status === "เข้ารับบริการสำเร็จ") {
             checkReviewStatus();
