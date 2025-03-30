@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Images from "../../assets";
 
-const LogoutModal = ({ isOpen, onClose, onLogout }) => {
+const LogoutModal = ({ isOpen, onClose, onLogout, isLoggingOut }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"; // ปิดการ scroll
@@ -33,13 +33,22 @@ const LogoutModal = ({ isOpen, onClose, onLogout }) => {
         <div className="flex flex-col gap-3">
           <button
             onClick={onLogout}
-            className="px-4 py-3 bg-secondary2 text-white rounded-full font-semibold w-full hover:bg-secondary"
+            className="px-4 py-3 bg-secondary2 text-white rounded-full font-semibold w-full hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={isLoggingOut}
           >
-            ออกจากระบบ
+            {isLoggingOut ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span>กำลังออกจากระบบ...</span>
+              </div>
+            ) : (
+              "ออกจากระบบ"
+            )}
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-3 border border-gray-300 text-gray-700 rounded-full font-semibold w-full hover:bg-gray-100"
+            className="px-4 py-3 border border-gray-300 text-gray-700 rounded-full font-semibold w-full hover:bg-gray-100 disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={isLoggingOut}
           >
             ยกเลิก
           </button>
@@ -47,6 +56,11 @@ const LogoutModal = ({ isOpen, onClose, onLogout }) => {
       </div>
     </div>
   );
+};
+
+// กำหนดค่าเริ่มต้นเพื่อไม่ให้เกิด error เมื่อไม่ได้ส่ง prop
+LogoutModal.defaultProps = {
+  isLoggingOut: false
 };
 
 export default LogoutModal;

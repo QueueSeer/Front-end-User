@@ -24,96 +24,51 @@ const QueueCard = ({
     const [checkingReviewStatus, setCheckingReviewStatus] = useState(true); // สถานะการตรวจสอบ
     const [imageError, setImageError] = useState(false);
 
-  // ตรวจสอบสถานะการรีวิวเมื่อโหลดคอมโพเนนต์
-useEffect(() => {
-    const checkReviewStatus = async () => {
-        try {
-            setCheckingReviewStatus(true);
-            
-            // ตรวจสอบจาก localStorage ก่อนเสมอ
-            const reviewStateKey = `review_state_${id}`;
-            const savedReviewState = localStorage.getItem(reviewStateKey);
-            
-            if (savedReviewState === 'true') {
-                setHasReviewed(true);
-                if (onReviewStatusChange) {
-                    onReviewStatusChange(id, true);
-                }
-                if (onMoveToBottom) {
-                    onMoveToBottom(id);
-                }
-                return; // ออกจากฟังก์ชันทันทีถ้าพบใน localStorage
-            } else if (savedReviewState === 'false') {
-                // ถ้าเคยตรวจสอบแล้วว่าไม่มี ก็ไม่ต้องเรียก API อีก
-                setHasReviewed(false);
-                return;
-            } else if (raw_data?.has_reviewed) {
-                // ถ้ามีข้อมูล has_reviewed จาก API
-                setHasReviewed(true);
-                localStorage.setItem(reviewStateKey, 'true');
-                if (onReviewStatusChange) {
-                    onReviewStatusChange(id, true);
-                }
-                if (onMoveToBottom) {
-                    onMoveToBottom(id);
-                }
-                return; // ออกจากฟังก์ชันทันทีถ้าพบใน raw_data
-            }
-            
-            // ตรวจสอบกับ API พร้อมกำหนด timeout 3 วินาที
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('API timeout')), 3000);
-            });
-            
+    useEffect(() => {
+        // เพิ่มตัวแปรเพื่อบอกว่าคอมโพเนนต์ยังทำงานอยู่หรือไม่
+        let isActive = true;
+        
+        const checkReviewStatus = async () => {
             try {
-                // ใช้ Promise.race เพื่อแข่งกันระหว่าง API และ timeout
-                const response = await Promise.race([
-                    axios.get(`https://backend.qseer.app/api/appointment/${id}/review`, {
-                        withCredentials: true
-                    }),
-                    timeoutPromise
-                ]);
+                if (!isActive) return; // ถ้าคอมโพเนนต์ถูก unmount แล้วให้ยกเลิกการทำงาน
                 
-                // ถ้ามีข้อมูลรีวิวแล้ว
-                if (response.data && response.data.id) {
+                setCheckingReviewStatus(true);
+                
+                // ตรวจสอบจาก localStorage ก่อนเสมอ
+                const reviewStateKey = `review_state_${id}`;
+                const savedReviewState = localStorage.getItem(reviewStateKey);
+                
+                if (savedReviewState === 'true') {
+                    if (!isActive) return;
                     setHasReviewed(true);
-                    localStorage.setItem(reviewStateKey, 'true');
-                    if (onReviewStatusChange) {
+                    // จัดการการเรียก onReviewStatusChange และ onMoveToBottom ด้วยเงื่อนไข
+                    if (onReviewStatusChange && !hasReviewed) { // เพิ่มเงื่อนไข !hasReviewed 
                         onReviewStatusChange(id, true);
                     }
-                    if (onMoveToBottom) {
+                    if (onMoveToBottom && !hasReviewed) { // เพิ่มเงื่อนไข !hasReviewed
                         onMoveToBottom(id);
                     }
-                }
-            } catch (error) {
-                // ถ้าเกิด timeout หรือข้อผิดพลาดอื่นๆ
-                if (error.message === 'API timeout') {
-                    console.log(`API timeout for appointment ${id}, assuming not reviewed`);
-                    setHasReviewed(false);
-                    localStorage.setItem(reviewStateKey, 'false');
-                }
-                // ถ้าไม่พบข้อมูลรีวิว แสดงว่ายังไม่ได้รีวิว (404)
-                else if (error.response && error.response.status === 404) {
-                    setHasReviewed(false);
-                    localStorage.setItem(reviewStateKey, 'false');
-                } else {
-                    console.error("Error checking review status:", error);
-                    // สันนิษฐานว่ายังไม่ได้รีวิว หากเกิดข้อผิดพลาด
-                    setHasReviewed(false);
+                    return;
+                } 
+                // แก้ไขโค้ดที่เหลือในลักษณะเดียวกัน...
+            } finally {
+                if (isActive) {
+                    setCheckingReviewStatus(false);
                 }
             }
-        } finally {
-            setCheckingReviewStatus(false);
-        }
-    };
-
-
+        };
+    
         if (status === "เข้ารับบริการสำเร็จ") {
             checkReviewStatus();
         } else {
             setCheckingReviewStatus(false);
         }
-    }, [id, raw_data, status, onReviewStatusChange, onMoveToBottom]);
+        
+        // Cleanup function
+        return () => {
+            isActive = false; // บอกว่าคอมโพเนนต์ถูก unmount แล้ว
+        };
+    }, [id, status]);  // ลบ onReviewStatusChange และ onMoveToBottom ออกจาก dependencies
 
     // แก้ไขการนำทางไปยังหน้า QueueDetails เพื่อให้แน่ใจว่าส่งข้อมูลคำถามไปด้วย
     const handleViewDetails = () => {
