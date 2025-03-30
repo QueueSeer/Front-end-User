@@ -21,7 +21,7 @@ const LogoutModal = ({ isOpen, onClose, onLogout }) => {
       <div className="bg-white px-8 py-6 rounded-xl shadow-lg w-[450px] h-[400px] flex flex-col justify-between">
         {/* ส่วนหัว */}
         <div className="text-center">
-          <img src={Images.logout} alt="Logout Icon" className="w-24 h-auto mx-auto" />
+          <img src={Images.Logout} alt="Logout Icon" className="w-24 h-auto mx-auto" />
           <h2 className="text-[26px] font-semibold text-gray-900 pt-3">
             คุณต้องการออกจากระบบหรือไม่?
           </h2>

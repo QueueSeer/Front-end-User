@@ -1,71 +1,50 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import Images from "../../assets";
 
 const PaymentTable = ({ payments }) => {
-  const navigate = useNavigate();
-
-  // ฟังก์ชันสำหรับการนำทางไปยังหน้ารายละเอียด
-  const handleNavigateToDetails = (payment) => {
-    // สร้าง URL พร้อมพารามิเตอร์ตามประเภทกิจกรรม
-    let targetUrl = "/queuedetails";
-    
-    if (payment.activityId) {
-      if (payment.activityType === "appointment") {
-        targetUrl = `/appointment/${payment.activityId}`;
-      } else if (payment.activityType === "question") {
-        targetUrl = `/question/${payment.activityId}`;
-      } else if (payment.activityType === "auction") {
-        targetUrl = `/auction/${payment.activityId}`;
-      }
+  // ฟังก์ชันกำหนดสีและสไตล์ของช่องสถานะ
+  const getStatusStyle = (status) => {
+    if (status.includes("รอเข้ารับบริการ") || status.includes("กำลังดำเนินการ")) {
+      return "border border-purple-600 text-purple-600";
+    } else if (status.includes("เกินเวลาที่กำหนด") || status.includes("ยกเลิก")) {
+      return "bg-red-700 text-white";
+    } else if (status.includes("สำเร็จ")) {
+      return "bg-green-700 text-white";
+    } else {
+      return "bg-gray-500 text-white";
     }
-    
-    navigate(targetUrl);
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 overflow-x-auto">
       {/* Table */}
-      <table className="w-full text-left border-collapse text-sm">
+      <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="text-gray-700 text-base">
-            <th className="px-4 py-4">วันที่ซื้อ</th>
-            <th className="px-4 py-4">ชื่อแพ็กเกจ</th>
-            <th className="px-4 py-4">สถานะ</th>
-            <th className="px-4 py-4">หมอดู</th>
-            <th className="px-4 py-4">จำนวนคอยน์</th>
-            <th className="px-4 py-4 text-left">รายละเอียด</th>
+          <tr className="text-gray-700 text-base border-b border-gray-200">
+            <th className="p-3 text-center">วันที่ซื้อ</th>
+            <th className="p-3 text-center">ชื่อแพ็กเกจ</th>
+            <th className="p-3 text-center">สถานะ</th>
+            <th className="p-3 text-center">จำนวนคอยน์</th>
           </tr>
         </thead>
         <tbody>
           {payments.map((payment, index) => (
-            <tr key={index} className="border-b border-gray-200">
-              <td className="px-4 py-5">{payment.purchaseDate}</td>
-              <td className="px-4 py-5">{payment.packageName}</td>
-              <td className="px-4 py-5">
+            <tr 
+              key={index} 
+              className={`border-b border-gray-200 ${
+                index % 2 === 0 ? "bg-gray-50" : "bg-white"
+              }`}
+            >
+              <td className="p-4 text-center">{payment.purchaseDate}</td>
+              <td className="p-4 text-center">{payment.packageName}</td>
+              <td className="p-4 text-center">
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    payment.status === "รอเข้ารับบริการ"
-                      ? "border border-purple-600 text-purple-600"
-                      : payment.status === "เกินเวลาที่กำหนด"
-                      ? "bg-red-700 text-white"
-                      : "bg-gray-500 text-white"
-                  }`}
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(payment.status)}`}
                 >
                   {payment.status}
                 </span>
               </td>
-              <td className="px-4 py-3.5">{payment.fortuneTeller}</td>
-              <td className="px-4 py-3.5 text-center">{payment.coinAmount.toLocaleString()}</td>
-              <td className="px-4 py-3.5 text-left cursor-pointer text-purple-700 hover:text-purple-600">
-                <div 
-                  className="flex items-center gap-2" 
-                  onClick={() => handleNavigateToDetails(payment)}
-                >
-                  <span>รายละเอียด</span>
-                  <img src={Images.next2} alt="details" className="w-2 h-3" />
-                </div>
-              </td>
+              <td className="p-4 text-center font-medium">{payment.coinAmount.toLocaleString()}</td>
             </tr>
           ))}
         </tbody>

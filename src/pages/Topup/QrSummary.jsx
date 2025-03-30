@@ -8,7 +8,15 @@ const API_BASE_URL = 'https://backend.qseer.app';
 const QrSummary = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedCoins, selectedPrice, currentCoins, userName, from, qrCodeData } = location.state || {};
+  const { 
+    selectedCoins, 
+    selectedPrice, 
+    currentCoins, 
+    userName, 
+    from, 
+    qrCodeData,
+    auction_id // รับค่า auction_id จาก location.state
+  } = location.state || {};
 
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -101,7 +109,13 @@ const QrSummary = () => {
         setTimeout(() => {
           // เส้นทางการนำทางกลับขึ้นอยู่กับต้นทางที่มา
           if (from === "BidAuctionFooter") {
-            navigate("/bidAuction", { state: { updatedCoins: newCoins } });
+            // ส่ง auction_id และ updatedCoins กลับไปที่หน้า BidAuction
+            navigate(`/bidAuction/${auction_id}`, { 
+              state: { 
+                updatedCoins: newCoins,
+                auction_id: auction_id
+              } 
+            });
           } else {
             navigate("/top-up-coins", { state: { updatedCoins: newCoins } });
           }
@@ -132,9 +146,10 @@ const QrSummary = () => {
       setIsLoading(false);
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ โปรดลองอีกครั้ง");
       
-      // ถ้าต้องการให้ทำงานแบบเดิมเมื่อไม่สามารถเชื่อมต่อ API ได้
+      // ถ้าต้องการให้ทำงานแบบเดิมเมื่อไม่สามารถเชื่อมต่อ API ได้ (แบบ fallback)
       setTimeout(() => {
-        const newUpdatedCoins = updatedCoins + selectedCoins;
+        const newUpdatedCoins = currentCoins + selectedCoins;
+        setUpdatedCoins(newUpdatedCoins);
         
         // แสดง popup เติมเงินสำเร็จ
         setSuccessPopup(true);
@@ -142,7 +157,13 @@ const QrSummary = () => {
         // รอ 2 วินาทีแล้วนำทางไปหน้าถัดไป
         setTimeout(() => {
           if (from === "BidAuctionFooter") {
-            navigate("/bidAuction", { state: { updatedCoins: newUpdatedCoins } });
+            // ส่ง auction_id และ updatedCoins กลับไปที่หน้า BidAuction
+            navigate(`/bidAuction/${auction_id}`, { 
+              state: { 
+                updatedCoins: newUpdatedCoins,
+                auction_id: auction_id
+              } 
+            });
           } else {
             navigate("/top-up-coins", { state: { updatedCoins: newUpdatedCoins } });
           }
@@ -157,6 +178,17 @@ const QrSummary = () => {
     // ในสภาพแวดล้อมจริง อาจทำการ trigger การดาวน์โหลดภาพ QR Code ที่นี่
   };
 
+  // ฟังก์ชันกลับไปหน้าก่อนหน้า
+  const handleGoBack = () => {
+    if (from === "BidAuctionFooter" && auction_id) {
+      navigate(`/bidAuction/${auction_id}`, {
+        state: { auction_id: auction_id }
+      });
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <>
       {/* Navbar ตรึงด้านบน */}
@@ -165,6 +197,19 @@ const QrSummary = () => {
       </div>
 
       <div className="flex flex-col items-center p-6 mt-16">
+        {/* ปุ่มย้อนกลับ */}
+        <div className="self-start mb-4">
+          <button
+            className="flex items-center text-gray-700 px-4 py-2 rounded-full border"
+            onClick={handleGoBack}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            ย้อนกลับ
+          </button>
+        </div>
+        
         {/* แสดงข้อความแจ้งเตือนถ้ามี error */}
         {error && (
           <div className="w-full max-w-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
