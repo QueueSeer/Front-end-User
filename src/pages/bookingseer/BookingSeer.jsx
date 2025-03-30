@@ -47,7 +47,7 @@ const BookingSeer = () => {
   }, []);
 
   const handleNextButtonClick = () => {
-    navigate("/bookingSeer_2", {
+    navigate("/bookingSeer2", {
       state: {
         packageInfo,
         selectedDate: selectedDate,
