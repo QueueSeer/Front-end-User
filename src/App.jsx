@@ -50,7 +50,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/landingPage" element={<LandingPage />} />
           <Route path="/homepage" element={<Homepage />} />
-          <Route path="/qseerSchedulePage" element={<QseerSchedulePage />} />
+          <Route path="/qseerSchedulePage/:seerId" element={<QseerSchedulePage />} />
           <Route path="/BookingSeer" element={<BookingSeer />} />
           <Route path="/horoscope" element={<Horoscope />} />
           <Route path="/auction" element={<Auction />} />

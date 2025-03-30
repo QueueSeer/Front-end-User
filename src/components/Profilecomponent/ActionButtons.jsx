@@ -1,5 +1,5 @@
-import React from "react";
 import Images from "../../assets";
+import React from "react";
 
 const ActionButtons = () => {
   return (
@@ -12,9 +12,10 @@ const ActionButtons = () => {
             <img src={Images.time} alt="time icon" className="w-4 h-4 mr-2" /> เปิด: 25 กุมภาพันธ์ 2568, 09:30 น.
           </p>
         </div>
-        <button className="w-32 px-4 py-2 rounded-lg text-white bg-[#8677A7]">
+        <div>ยังไม่เปิดทำการ</div>
+        {/* <button className="w-32 px-4 py-2 rounded-lg text-white bg-[#8677A7]">
           เริ่มดูดวง
-        </button>
+        </button> */}
       </div>
       {/* ประมูล */}
       <div className="bg-white shadow-md rounded-xl p-4 flex justify-between items-center border border-gray-200">
@@ -24,9 +25,10 @@ const ActionButtons = () => {
             <img src={Images.time} alt="time icon" className="w-4 h-4 mr-2" /> เปิด: 25 กุมภาพันธ์ 2568, 13:30 น.
           </p>
         </div>
-        <button className="w-32 px-4 py-2 rounded-lg text-white bg-[#8677A7]">
+        <div>ยังไม่เปิดทำการ</div>
+        {/* <button className="w-32 px-4 py-2 rounded-lg text-white bg-[#8677A7]">
           เริ่มประมูล
-        </button>
+        </button> */}
       </div>
     </div>
   );

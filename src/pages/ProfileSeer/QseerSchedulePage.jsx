@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import FullCalendarPage from "../../components/Profilecomponent/FullCalendarPage";
-import ProfileCard from "../../components/Profilecomponent/ProfileCard";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
 import ActionButtons from "../../components/Profilecomponent/ActionButtons";
-import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
+import FullCalendarPage from "../../components/Profilecomponent/FullCalendarPage";
 import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
+import ProfileCard from "../../components/Profilecomponent/ProfileCard";
+import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
 import axios from "axios"; // เพิ่ม import axios
 
 const API_BASE_URL = "https://backend.qseer.app"; // กำหนด Base URL
 
 const QseerSchedulePage = () => {
+  const { seerId } = useParams();
+
   const location = useLocation();
   const navigate = useNavigate();
   const [seerData, setSeerData] = useState(null);
@@ -28,15 +31,13 @@ const QseerSchedulePage = () => {
 
   // ดึงข้อมูลจำนวนผู้ติดตามและรีวิวจาก API
   useEffect(() => {
-    if (!seerFromState?.id) return;
-
     // ดึงข้อมูลจำนวนผู้ติดตาม
     const fetchFollowersCount = async () => {
       try {
-        console.log("Fetching followers count for seer ID:", seerFromState.id);
+        console.log("Fetching followers count for seer ID:", seerId);
         
         // ใช้ endpoint total_followers ที่ถูกต้อง
-        const response = await axios.get(`${API_BASE_URL}/api/seer/${seerFromState.id}/total_followers`, {
+        const response = await axios.get(`${API_BASE_URL}/api/seer/${seerId}/total_followers`, {
           withCredentials: true,
           headers: {
             'Accept': 'application/json'
@@ -61,8 +62,8 @@ const QseerSchedulePage = () => {
     // ดึงข้อมูลจำนวนรีวิว
     const fetchReviewCount = async () => {
       try {
-        console.log("Fetching review count for seer ID:", seerFromState.id);
-        const response = await axios.get(`${API_BASE_URL}/api/review/seer/${seerFromState.id}`);
+        console.log("Fetching review count for seer ID:", seerId);
+        const response = await axios.get(`${API_BASE_URL}/api/review/seer/${seerId}`);
         console.log("Review API response:", response.data);
         
         if (response.data && Array.isArray(response.data)) {
@@ -104,7 +105,7 @@ const QseerSchedulePage = () => {
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/seer/${seerFromState.id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/seer/${seerId}`, {
           method: "GET",
           headers: {
             "Content-type": "application/json"
@@ -128,7 +129,7 @@ const QseerSchedulePage = () => {
         
         // กรณีเกิดข้อผิดพลาด ใช้ข้อมูลจาก state เป็นค่าเริ่มต้น
         setSeerData({
-          id: seerFromState.id,
+          id: seerId,
           image: seerFromState.image || "",
           display_name: seerFromState.name || "ไม่พบข้อมูลหมอดู",
           primary_skill: seerFromState.category || "ไม่ระบุ",

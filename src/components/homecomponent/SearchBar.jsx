@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+
 import Images from "../../assets";
+import { useNavigate } from "react-router-dom";
 
 // รับ props seersData และ packagesData จาก Homepage
 const SearchBar = ({ seersData = [], packagesData = [] }) => {
@@ -76,7 +77,7 @@ const SearchBar = ({ seersData = [], packagesData = [] }) => {
   // จัดการคลิกที่หมอดู - ปรับให้สอดคล้องกับแอปพลิเคชัน
   const handleSeerClick = (seer) => {
     setShowResults(false);
-    navigate("/qseerSchedulePage", { state: { seer } });
+    navigate(`/qseerSchedulePage/${seer.id}`, { state: { seer } });
   };
 
   // จัดการคลิกที่แพ็คเกจ
