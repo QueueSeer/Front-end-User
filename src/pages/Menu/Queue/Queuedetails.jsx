@@ -284,7 +284,7 @@ function formatQuestions(questions) {
   </p>
   {isCanceled && (
     <p className="mt-2 text-red-500">
-      คุณจะได้รับคอยน์คืนเต็มจำนวน {(appointmentData.total || 0)} คอยน์ จากระบบภายในระยะเวลา 7 วัน
+      คุณจะได้รับคอยน์คืนเต็มจำนวน  จากระบบภายในระยะเวลา 7 วัน
     </p>
   )}
 </div>
