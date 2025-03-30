@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // เพิ่ม useLocation
+import { useLocation, useNavigate } from "react-router-dom"; // เพิ่ม useLocation
+
 import ConfirmationCard from "../../components/bookingcomponent/step4/ConfirmationCard";
 import HowToUseCode from "../../components/bookingcomponent/step4/HowToUseCode";
 import Navbar from "../../components/navbar";
@@ -9,7 +10,7 @@ const BookingSeer4 = () => {
   const location = useLocation(); // เพิ่มเพื่อรับข้อมูลจาก navigation
   
   // รับข้อมูลการจองจาก location.state
-  const bookingData = location.state || {};
+  const bookingData = location.state?.bookingData || {};
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -30,7 +31,7 @@ const BookingSeer4 = () => {
 
       <div className="flex flex-col items-center p-6 pt-16 min-h-screen">
         {/* ส่งข้อมูลการจองไปยัง ConfirmationCard */}
-        <ConfirmationCard bookingData={bookingData} />
+        <ConfirmationCard bookingData={bookingData} user_fullname={location.state?.user_fullname}  />
 
         <HowToUseCode />
 

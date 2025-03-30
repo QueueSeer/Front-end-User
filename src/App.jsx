@@ -12,7 +12,6 @@ import BookingSeer from "./pages/bookingseer/BookingSeer";
 import BookingSeer2 from "./pages/bookingseer/BookingSeer2";
 import BookingSeer3 from "./pages/bookingseer/BookingSeer3";
 import BookingSeer4 from "./pages/bookingseer/BookingSeer4";
-import BookingSeer_2 from "./pages/bookingseer/BookingSeer_2";
 import BookingSteps from "./components/bookingcomponent/BookingSteps";
 import DetailAuction from "./pages/auction/DetailAuction";
 import EmailVerification from "./pages/Login/EmailVerification";
@@ -77,16 +76,6 @@ export default function App() {
                 <BackButton />
                 <BookingSteps />
                 <BookingSeer2 />
-              </>
-            }
-          />
-          <Route
-            path="/bookingSeer_2"
-            element={
-              <>
-                <BackButton />
-                <BookingSteps />
-                <BookingSeer_2 />
               </>
             }
           />
