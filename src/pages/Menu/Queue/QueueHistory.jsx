@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // เพิ่ม import useNavigate
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/Sidebar";
 import QueueCard from "../../../components/QueueCard/QueueCard";
 import Images from "../../../assets";
@@ -8,7 +8,7 @@ import Layout from "./Layout";
 import axios from "axios";
 
 const QueueHistoryPage = () => {
-  const navigate = useNavigate(); // เพิ่ม navigate เพื่อใช้ในการนำทาง
+  const navigate = useNavigate();
   // State สำหรับ Tab ที่เลือก
   const [activeTab, setActiveTab] = useState("รอเข้ารับบริการ");
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +17,8 @@ const QueueHistoryPage = () => {
     เข้ารับบริการสำเร็จ: [],
     บริการที่ยกเลิก: [],
   });
+  // ข้อมูลรีวิวสถานะ
+  const [reviewedAppointments, setReviewedAppointments] = useState(new Set());
 
   // สร้างฟังก์ชันสำหรับแปลงสถานะจาก API เป็นสถานะไทย
   const mapStatusToTab = (status) => {
@@ -79,7 +81,8 @@ const QueueHistoryPage = () => {
 
   // เพิ่มฟังก์ชันสำหรับการนำทางไปหน้า QueueDetails
   const navigateToDetails = (apmt_id) => {
-    navigate(`/queuedetails/${apmt_id}`);  // แก้จาก queue-details เป็น queuedetails
+    // ใช้ apmt_id ในการนำทางไปยังหน้า QueueDetails
+    navigate(`/queuedetails/${apmt_id}`);
   };
 
   // ดึงข้อมูลการนัดหมายจาก API
@@ -115,7 +118,7 @@ const QueueHistoryPage = () => {
         
         // แปลงข้อมูลจาก API เป็นรูปแบบที่ QueueCard ต้องการ
         const formattedAppointments = combinedData.map(appointment => ({
-          id: appointment.id, // นี่คือ apmt_id ที่เราต้องการ
+          id: appointment.id,
           image: "/images/tarot.jpg", // ถ้า API ไม่มีรูปให้ใช้รูปเริ่มต้น
           title: appointment.package?.name || "ไม่ระบุรายการ",
           categories: appointment.package?.category || "ไม่ระบุประเภท",
@@ -151,7 +154,7 @@ const QueueHistoryPage = () => {
         
         // แปลงข้อมูลจาก API เป็นรูปแบบที่ QueueCard ต้องการ
         const formattedAppointments = data.map(appointment => ({
-          id: appointment.id, // นี่คือ apmt_id ที่เราต้องการ
+          id: appointment.id,
           image: "/images/tarot.jpg", // ถ้า API ไม่มีรูปให้ใช้รูปเริ่มต้น
           title: appointment.package?.name || "ไม่ระบุรายการ",
           categories: appointment.package?.category || "ไม่ระบุประเภท",
@@ -164,11 +167,29 @@ const QueueHistoryPage = () => {
           raw_data: appointment
         }));
         
-        // อัพเดทข้อมูลตาม tab ที่เลือก
-        setAppointments(prev => ({
-          ...prev,
-          [tab]: formattedAppointments
-        }));
+        if (tab === "เข้ารับบริการสำเร็จ") {
+          // จัดเรียงข้อมูลสำหรับแท็บ "เข้ารับบริการสำเร็จ" โดยให้รายการที่รีวิวแล้วอยู่ด้านล่าง
+          const sortedAppointments = formattedAppointments.sort((a, b) => {
+            const aReviewed = reviewedAppointments.has(a.id) || a.raw_data?.has_reviewed;
+            const bReviewed = reviewedAppointments.has(b.id) || b.raw_data?.has_reviewed;
+            
+            if (aReviewed && !bReviewed) return 1; // a ไปอยู่ล่าง
+            if (!aReviewed && bReviewed) return -1; // b ไปอยู่ล่าง
+            return 0; // เรียงตามเดิม
+          });
+          
+          // อัพเดทข้อมูลตาม tab ที่เลือก
+          setAppointments(prev => ({
+            ...prev,
+            [tab]: sortedAppointments
+          }));
+        } else {
+          // อัพเดทข้อมูลตาม tab ที่เลือก
+          setAppointments(prev => ({
+            ...prev,
+            [tab]: formattedAppointments
+          }));
+        }
       }
     } catch (error) {
       console.error(`Error fetching appointments for ${tab}:`, error);
@@ -185,10 +206,63 @@ const QueueHistoryPage = () => {
 
   // ดึงข้อมูลครั้งแรกเมื่อโหลดหน้า
   useEffect(() => {
+    // ดึงข้อมูลสถานะรีวิวจาก localStorage
+    const loadReviewedStatus = () => {
+      const reviewedSet = new Set();
+      // ตรวจสอบ localStorage ทั้งหมดที่เกี่ยวกับสถานะการรีวิว
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('review_state_')) {
+          const value = localStorage.getItem(key);
+          if (value === 'true') {
+            const appointmentId = key.replace('review_state_', '');
+            reviewedSet.add(parseInt(appointmentId));
+          }
+        }
+      }
+      setReviewedAppointments(reviewedSet);
+    };
+    
+    loadReviewedStatus();
     fetchAppointments("รอเข้ารับบริการ");
     fetchAppointments("เข้ารับบริการสำเร็จ");
     fetchAppointments("บริการที่ยกเลิก");
   }, []);
+
+  // จัดการการเปลี่ยนแปลงสถานะการรีวิว
+  const handleReviewStatusChange = (appointmentId, isReviewed) => {
+    setReviewedAppointments(prev => {
+      const newSet = new Set(prev);
+      if (isReviewed) {
+        newSet.add(appointmentId);
+      } else {
+        newSet.delete(appointmentId);
+      }
+      return newSet;
+    });
+  };
+
+  // จัดการการย้ายรายการที่รีวิวแล้วไปด้านล่าง
+  const handleMoveToBottom = (appointmentId) => {
+    if (activeTab === "เข้ารับบริการสำเร็จ") {
+      setAppointments(prev => {
+        const tab = "เข้ารับบริการสำเร็จ";
+        const appointments = [...prev[tab]];
+        
+        // ย้ายรายการที่มี id ตรงกับ appointmentId ไปตำแหน่งสุดท้าย
+        const index = appointments.findIndex(app => app.id === appointmentId);
+        if (index !== -1) {
+          const [appointment] = appointments.splice(index, 1);
+          appointments.push(appointment);
+        }
+        
+        return {
+          ...prev,
+          [tab]: appointments
+        };
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -225,10 +299,15 @@ const QueueHistoryPage = () => {
         </div>
       )}
 
-      {/* Queue List - แต่ละรายการสามารถคลิกเพื่อดูรายละเอียด */}
+      {/* Queue List */}
       {!isLoading && appointments[activeTab].map((item, index) => (
-        <div key={index} className="mb-4 cursor-pointer" onClick={() => navigateToDetails(item.id)}>
-          <QueueCard {...item} status={activeTab} />
+        <div key={index} onClick={() => navigateToDetails(item.id)}>
+          <QueueCard 
+            {...item} 
+            status={activeTab} 
+            onReviewStatusChange={handleReviewStatusChange}
+            onMoveToBottom={handleMoveToBottom}
+          />
         </div>
       ))}
     </Layout>

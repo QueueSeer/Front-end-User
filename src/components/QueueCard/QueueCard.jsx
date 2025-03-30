@@ -15,31 +15,82 @@ const QueueCard = ({
   status,
   confirmation_code,
   raw_data, // ข้อมูลทั้งหมดจาก API รวมถึง questions
-  onReviewStatusChange // callback เมื่อสถานะการรีวิวเปลี่ยน
+  onReviewStatusChange, // callback เมื่อสถานะการรีวิวเปลี่ยน
+  onMoveToBottom // callback สำหรับย้ายการ์ดที่รีวิวแล้วไปด้านล่าง
 }) => {
     const navigate = useNavigate();
     const [isReviewOpen, setIsReviewOpen] = useState(false);
-    const [hasReviewed, setHasReviewed] = useState(raw_data?.has_reviewed || false); // เริ่มต้นจากข้อมูลที่มีอยู่แล้ว
+    const [hasReviewed, setHasReviewed] = useState(false);
+    const [checkingReviewStatus, setCheckingReviewStatus] = useState(true); // สถานะการตรวจสอบ
+    const [imageError, setImageError] = useState(false);
 
     // ตรวจสอบสถานะการรีวิวเมื่อโหลดคอมโพเนนต์
     useEffect(() => {
-        // ตรวจสอบจาก localStorage ก่อน
-        const reviewStateKey = `review_state_${id}`;
-        const savedReviewState = localStorage.getItem(reviewStateKey);
-        
-        if (savedReviewState === 'true') {
-            setHasReviewed(true);
-            if (onReviewStatusChange) {
-                onReviewStatusChange(id, true);
+        const checkReviewStatus = async () => {
+            try {
+                setCheckingReviewStatus(true);
+                
+                // ตรวจสอบจาก localStorage ก่อน
+                const reviewStateKey = `review_state_${id}`;
+                const savedReviewState = localStorage.getItem(reviewStateKey);
+                
+                if (savedReviewState === 'true') {
+                    setHasReviewed(true);
+                    if (onReviewStatusChange) {
+                        onReviewStatusChange(id, true);
+                    }
+                    if (onMoveToBottom) {
+                        onMoveToBottom(id);
+                    }
+                } else if (raw_data?.has_reviewed) {
+                    // ถ้ามีข้อมูล has_reviewed จาก API
+                    setHasReviewed(true);
+                    localStorage.setItem(reviewStateKey, 'true');
+                    if (onReviewStatusChange) {
+                        onReviewStatusChange(id, true);
+                    }
+                    if (onMoveToBottom) {
+                        onMoveToBottom(id);
+                    }
+                } else {
+                    // ตรวจสอบกับ API ว่าเคยรีวิวหรือไม่
+                    try {
+                        const response = await axios.get(`https://backend.qseer.app/api/appointment/${id}/review`, {
+                            withCredentials: true
+                        });
+                        
+                        // ถ้ามีข้อมูลรีวิวแล้ว
+                        if (response.data && response.data.id) {
+                            setHasReviewed(true);
+                            localStorage.setItem(reviewStateKey, 'true');
+                            if (onReviewStatusChange) {
+                                onReviewStatusChange(id, true);
+                            }
+                            if (onMoveToBottom) {
+                                onMoveToBottom(id);
+                            }
+                        }
+                    } catch (error) {
+                        // ถ้าไม่พบข้อมูลรีวิว แสดงว่ายังไม่ได้รีวิว (404)
+                        if (error.response && error.response.status === 404) {
+                            setHasReviewed(false);
+                            localStorage.setItem(reviewStateKey, 'false');
+                        } else {
+                            console.error("Error checking review status:", error);
+                        }
+                    }
+                }
+            } finally {
+                setCheckingReviewStatus(false);
             }
-        } else if (raw_data?.has_reviewed) {
-            setHasReviewed(true);
-            localStorage.setItem(reviewStateKey, 'true');
-            if (onReviewStatusChange) {
-                onReviewStatusChange(id, true);
-            }
+        };
+
+        if (status === "เข้ารับบริการสำเร็จ") {
+            checkReviewStatus();
+        } else {
+            setCheckingReviewStatus(false);
         }
-    }, [id, raw_data, onReviewStatusChange]);
+    }, [id, raw_data, status, onReviewStatusChange, onMoveToBottom]);
 
     // แก้ไขการนำทางไปยังหน้า QueueDetails เพื่อให้แน่ใจว่าส่งข้อมูลคำถามไปด้วย
     const handleViewDetails = () => {
@@ -71,7 +122,7 @@ const QueueCard = ({
     const handleCloseReview = (success = false) => {
         setIsReviewOpen(false);
         
-        // ถ้ารีวิวสำเร็จหรือพบว่าเคยรีวิวแล้ว ให้อัพเดทสถานะ
+        // ถ้ารีวิวสำเร็จ ให้อัพเดทสถานะและย้ายไปล่างสุด
         if (success) {
             setHasReviewed(true);
             // บันทึกสถานะการรีวิวใน localStorage
@@ -81,33 +132,62 @@ const QueueCard = ({
             if (onReviewStatusChange) {
                 onReviewStatusChange(id, true);
             }
+            
+            // ย้ายการ์ดไปล่างสุด
+            if (onMoveToBottom) {
+                onMoveToBottom(id);
+            }
         }
+    };
+
+    // จัดการรูปภาพที่โหลดไม่สำเร็จ
+    const handleImageError = () => {
+        setImageError(true);
+    };
+
+    // เลือกรูปภาพที่จะแสดง
+    const getImageToDisplay = () => {
+        if (imageError || !image) {
+            // หากมีปัญหากับรูปภาพหรือไม่มีรูปภาพ ใช้รูปจาก assets
+            return Images.tarotqueue;
+        }
+        // ตรวจสอบว่า image เป็น URL เต็มหรือไม่
+        if (image.startsWith('http')) {
+            return image;
+        }
+        // ถ้าเป็นเพียงเส้นทาง ให้ใช้รูปจาก assets
+        return Images.tarotqueue;
     };
 
     return (
         <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-md p-5 mb-4 relative">
             {/* Image */}
-            <img src={Images.tarotqueue} alt="tarotqueue" className="w-32 h-32 rounded-lg object-cover" />
+            <img 
+                src={getImageToDisplay()} 
+                alt={title || "รายการดูดวง"}
+                className="w-32 h-32 rounded-lg object-cover" 
+                onError={handleImageError}
+            />
 
             {/* Details */}
             <div className="ml-6 flex-1">
                 {/* Title */}
-                <h2 className="text-lg font-bold text-purple-800">{title}</h2>
-                <p className="text-gray-500 text-sm">{categories}</p>
+                <h2 className="text-lg font-bold text-purple-800">{title || "ไม่ระบุรายการ"}</h2>
+                <p className="text-gray-500 text-sm">{categories || "ไม่ระบุประเภท"}</p>
 
                 {/* Info Section */}
                 <div className="text-gray-600 text-sm flex flex-col mt-2 space-y-1">
                     <span className="flex items-center">
                         <img src={Images.UserProfile} alt="fortune teller" className="w-4 h-4 mr-2" />
-                        {fortuneTeller}
+                        {fortuneTeller || "ไม่ระบุหมอดู"}
                     </span>
                     <span className="flex items-center">
                         <img src={Images.CalendarMinimalistic} alt="date" className="w-4 h-4 mr-2" />
-                        {date}
+                        {date || "ไม่ระบุวันที่"}
                     </span>
                     <span className="flex items-center">
                         <img src={Images.timer} alt="time" className="w-4 h-4 mr-2" />
-                        {time}
+                        {time || "ไม่ระบุเวลา"}
                     </span>
                 </div>
 
@@ -142,8 +222,13 @@ const QueueCard = ({
                     {status}
                 </button>
 
-                {/* รีวิวหมอดู (แสดงตามสถานะ) */}
-                {status === "เข้ารับบริการสำเร็จ" && !hasReviewed && (
+                {/* แสดงตัวโหลดในขณะตรวจสอบสถานะรีวิว */}
+                {status === "เข้ารับบริการสำเร็จ" && checkingReviewStatus && (
+                    <div className="mt-2 w-4 h-4 border-2 border-t-transparent border-purple-600 rounded-full animate-spin"></div>
+                )}
+
+                {/* รีวิวหมอดู (แสดงเฉพาะเมื่อยังไม่ได้รีวิว) */}
+                {status === "เข้ารับบริการสำเร็จ" && !checkingReviewStatus && !hasReviewed && (
                     <p
                         className="text-purple-800 text-sm mt-1 underline cursor-pointer hover:text-purple-600"
                         onClick={handleOpenReview}
@@ -153,7 +238,7 @@ const QueueCard = ({
                 )}
                 
                 {/* แสดงข้อความเมื่อรีวิวแล้ว */}
-                {status === "เข้ารับบริการสำเร็จ" && hasReviewed && (
+                {status === "เข้ารับบริการสำเร็จ" && !checkingReviewStatus && hasReviewed && (
                     <p className="text-gray-400 text-sm mt-1">
                         ได้รีวิวแล้ว
                     </p>
