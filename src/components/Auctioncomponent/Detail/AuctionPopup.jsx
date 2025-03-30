@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Images from "../../../assets"; 
 
-const AuctionPopup = ({ auction, onClose }) => {
+const AuctionPopup = ({ auction, onClose, userCoins: propUserCoins, hasJoinedAuction }) => {
   const navigate = useNavigate();
-  const [userCoins, setUserCoins] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [userCoins, setUserCoins] = useState(propUserCoins || 0);
+  const [isLoading, setIsLoading] = useState(!propUserCoins);
   const [auctionStatus, setAuctionStatus] = useState("loading"); // "not_started", "active", "ended"
 
   // ตรวจสอบสถานะของประมูล
@@ -33,8 +33,15 @@ const AuctionPopup = ({ auction, onClose }) => {
     return () => clearInterval(interval);
   }, [auction]);
 
-  // ดึงข้อมูลจำนวน coins ของผู้ใช้จาก API ที่ถูกต้อง
+  // ดึงข้อมูลจำนวน coins ของผู้ใช้จาก API (ถ้าไม่ได้รับจาก props)
   useEffect(() => {
+    // ถ้ามี userCoins จาก props แล้ว ไม่ต้องดึงจาก API อีก
+    if (propUserCoins !== undefined) {
+      setUserCoins(propUserCoins);
+      setIsLoading(false);
+      return;
+    }
+
     const fetchUserCoins = async () => {
       setIsLoading(true);
       try {
@@ -62,20 +69,22 @@ const AuctionPopup = ({ auction, onClose }) => {
     };
     
     fetchUserCoins();
-  }, []);
+  }, [propUserCoins]);
 
-  // ตรวจสอบว่ามี coins พอหรือไม่
-  const hasEnoughCoins = userCoins >= (auction?.initialBid || 50);
+  // ตรวจสอบว่ามี coins พอหรือไม่ หรือเคยเข้าร่วมประมูลแล้ว
+  const hasEnoughCoins = hasJoinedAuction || userCoins >= (auction?.initialBid || 50);
   
   // ตรวจสอบว่าสามารถเข้าร่วมประมูลได้หรือไม่
-  const canJoinAuction = auctionStatus === "active" && hasEnoughCoins && !isLoading;
+  const canJoinAuction = (auctionStatus === "active" && hasEnoughCoins && !isLoading) || hasJoinedAuction;
 
   // กำหนดขั้นตอนการประมูล โดยใช้ข้อมูลจาก auction ที่ได้รับ
   const steps = [
     { 
       id: "01", 
       title: `เริ่มต้น ${auction?.initialBid || 50} coins`, 
-      desc: `จะเข้าร่วมการประมูลได้ ต้องมีโชค Coins เริ่มต้นที่ ${auction?.initialBid || 50} coins กรณีที่มีโชค Coins ไม่ถึง เติมได้ที่ โชคCoins` 
+      desc: hasJoinedAuction 
+        ? `คุณเคยเข้าร่วมประมูลนี้แล้ว สามารถเข้าหน้าประมูลได้ทันที`
+        : `จะเข้าร่วมการประมูลได้ ต้องมีโชค Coins เริ่มต้นที่ ${auction?.initialBid || 50} coins กรณีที่มีโชค Coins ไม่ถึง เติมได้ที่ โชคCoins` 
     },
     { 
       id: "02", 
@@ -85,7 +94,9 @@ const AuctionPopup = ({ auction, onClose }) => {
     { 
       id: "03", 
       title: "เข้าร่วมการประมูล", 
-      desc: "เมื่อพร้อมแล้วคุณสามารถเข้าร่วมการประมูลและวางเงิน ประมูลตามขั้นตอนที่ระบบกำหนด" 
+      desc: hasJoinedAuction 
+        ? "คุณสามารถเข้าร่วมประมูลต่อได้ทันทีโดยไม่ต้องวางเงินเพิ่ม" 
+        : "เมื่อพร้อมแล้วคุณสามารถเข้าร่วมการประมูลและวางเงิน ประมูลตามขั้นตอนที่ระบบกำหนด" 
     },
     { 
       id: "04", 
@@ -96,17 +107,22 @@ const AuctionPopup = ({ auction, onClose }) => {
 
   // ฟังก์ชันจัดการเมื่อกดยอมรับเงื่อนไข
   const handleAcceptConditions = () => {
-    if (!canJoinAuction) return;
+    if (!canJoinAuction && !hasJoinedAuction) return;
     
     // นำทางไปยังหน้า bidAuction พร้อมส่งข้อมูลประมูล
-    navigate(`/bidAuction/${auction?.id}`, { 
-      state: { auction } 
+    navigate(`/bidAuction/${auction?.id}`, {
+      state: { 
+        auction_id: auction.id,
+        initialBid: auction.initialBid,
+        minIncrement: auction.minIncrement,
+        auctioneerName: auction.astrologer.name
+      } 
     });
   };
 
   // ฟังก์ชันนำทางไปหน้าเติมเงิน
   const handleTopUpCoins = () => {
-    if (auctionStatus === "active" && !hasEnoughCoins) {
+    if (auctionStatus === "active" && !hasEnoughCoins && !hasJoinedAuction) {
       // นำทางไปยังหน้าเติมเงินพร้อมข้อมูลว่ามาจากหน้าประมูล
       navigate(`/top-up-coins`, { 
         state: { from: "BidAuctionFooter" } 
@@ -131,6 +147,13 @@ const AuctionPopup = ({ auction, onClose }) => {
           การประมูลดูดวง คือระบบที่เปิดให้ลูกค้าสามารถเข้าร่วมประมูลเพื่อจองคิวปรึกษาหมอดู
           โดยมีขั้นตอนการประมูลดังนี้
         </p>
+
+        {/* แสดงสถานะถ้าเคยเข้าร่วมประมูลแล้ว */}
+        {hasJoinedAuction && (
+          <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded mt-4 text-sm">
+            คุณเคยเข้าร่วมประมูลแล้ว สามารถเข้าสู่หน้าประมูลได้ทันที
+          </div>
+        )}
 
         {/* โชคของคุณ */}
         <div className="bg-[#8677A7] text-white p-5 rounded-lg mt-4 text-center">
@@ -172,7 +195,7 @@ const AuctionPopup = ({ auction, onClose }) => {
         </div>
 
         {/* ข้อความแจ้งเตือน */}
-        {!isLoading && (
+        {!isLoading && !hasJoinedAuction && (
           <>
             {auctionStatus === "not_started" && (
               <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mt-4 text-sm">
@@ -206,13 +229,13 @@ const AuctionPopup = ({ auction, onClose }) => {
           <button
             className={`${
               canJoinAuction
-                ? "bg-[#8677A7] hover:bg-[#77599A]" 
+                ? hasJoinedAuction ? "bg-green-600 hover:bg-green-700" : "bg-[#8677A7] hover:bg-[#77599A]"
                 : "bg-gray-400 cursor-not-allowed"
             } text-white py-3 px-6 rounded-full w-1/2 text-base font-medium transition`}
             onClick={handleAcceptConditions}
             disabled={!canJoinAuction}
           >
-            ยอมรับเงื่อนไข
+            {hasJoinedAuction ? "ไปหน้าประมูล" : "ยอมรับเงื่อนไข"}
           </button>
 
           {/* เมื่อกดปุ่ม "ย้อนดูรายละเอียด" กลับไปหน้า Auction */}

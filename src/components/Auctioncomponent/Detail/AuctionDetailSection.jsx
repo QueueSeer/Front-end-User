@@ -1,12 +1,87 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Images from "../../../assets";
 import AuctionPopup from "./AuctionPopup";
+import axios from "axios";
 
 const AuctionDetailSection = ({ auction }) => {
+  const navigate = useNavigate();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [userHasJoinedAuction, setUserHasJoinedAuction] = useState(false);
+  const [userCoins, setUserCoins] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  // API Base URL
+  const API_BASE_URL = 'https://backend.qseer.app';
 
   // ตรวจสอบว่ามีข้อมูลหรือไม่
   if (!auction) return null;
+
+  // ดึงข้อมูลผู้ใช้ปัจจุบันและตรวจสอบว่าเคยเข้าร่วมประมูลหรือไม่
+  useEffect(() => {
+    if (!auction || !auction.id) return;
+    
+    const checkUserStatus = async () => {
+      setLoading(true);
+      try {
+        // ดึงข้อมูลผู้ใช้ปัจจุบัน
+        const userResponse = await axios.get(`${API_BASE_URL}/api/user/me`, {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Accept': 'application/json'
+          },
+          withCredentials: true
+        });
+        
+        if (userResponse.data && userResponse.data.id) {
+          // เก็บจำนวน coins ของผู้ใช้
+          setUserCoins(userResponse.data.coins || 0);
+          
+          // ดึงข้อมูลผู้ประมูลทั้งหมด
+          const bidsResponse = await axios.get(`${API_BASE_URL}/api/auction/${auction.id}/bids`, {
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Accept': 'application/json'
+            },
+            withCredentials: true
+          });
+          
+          // ตรวจสอบว่าข้อมูลอยู่ในรูปแบบอาร์เรย์หรือไม่
+          let bidsArray = [];
+          if (Array.isArray(bidsResponse.data)) {
+            bidsArray = bidsResponse.data;
+          } else if (bidsResponse.data && typeof bidsResponse.data === 'object') {
+            // อาจจะมีการห่อหุ้มอาร์เรย์ไว้ในฟิลด์อื่น
+            const possibleArrayFields = ['bids', 'items', 'data', 'results'];
+            for (const field of possibleArrayFields) {
+              if (Array.isArray(bidsResponse.data[field])) {
+                bidsArray = bidsResponse.data[field];
+                break;
+              }
+            }
+          }
+          
+          // ค้นหาว่าผู้ใช้ปัจจุบันมีข้อมูลในรายการ bids หรือไม่
+          const userBid = bidsArray.find(bid => bid.user_id === userResponse.data.id);
+          
+          // ถ้าพบและมีการลงเงิน (amount > 0) แสดงว่าเคยเข้าร่วมประมูลแล้ว
+          if (userBid && userBid.amount > 0) {
+            setUserHasJoinedAuction(true);
+            console.log("User has already joined this auction");
+          } else {
+            setUserHasJoinedAuction(false);
+            console.log("User has not joined this auction yet");
+          }
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkUserStatus();
+  }, [auction]);
 
   // จัดรูปแบบข้อมูลเวลา
   const formatDateDisplay = (dateString) => {
@@ -47,8 +122,27 @@ const AuctionDetailSection = ({ auction }) => {
       return dateString; // ส่งคืนค่าเดิมถ้าเกิดข้อผิดพลาด
     }
   };
+  
   // หมวดหมู่ดูดวง (สามารถดึงจาก API ถ้ามี หรือกำหนดเอง)
   const categories = ["ความรัก", "การงาน", "การเงิน", "สุขภาพ", "ภาพรวม"];
+
+  // ฟังก์ชันเมื่อกดปุ่มเข้าร่วมประมูล หรือ ไปหน้าประมูล
+  const handleAuctionAction = () => {
+    // ถ้าเคยเข้าร่วมประมูลแล้ว ไปที่หน้าประมูลได้เลย
+    if (userHasJoinedAuction) {
+      navigate(`/bidAuction/${auction.id}`, {
+        state: {
+          auction_id: auction.id,
+          initialBid: auction.initialBid,
+          minIncrement: auction.minIncrement,
+          auctioneerName: auction.astrologer?.name
+        }
+      });
+    } else {
+      // ถ้ายังไม่เคยเข้าร่วม ให้เปิด popup
+      setIsPopupOpen(true);
+    }
+  };
 
   return (
     <div className="mt-4 text-gray-800 grid grid-cols-3 gap-6">
@@ -144,22 +238,50 @@ const AuctionDetailSection = ({ auction }) => {
         <h3 className="text-md font-bold mt-2">{auction.title}</h3>
         <p className="text-sm text-gray-600 line-clamp-3">{auction.shortDescription}</p>
 
-        {/* ราคาเริ่มต้น */}
-        <p className="text-sm font-medium mt-2">
-          ราคาเริ่มต้น: <span className="text-purple-700 font-bold">{auction.initialBid} Coins</span>
-        </p>
+       
+        
+        {/* แสดงสถานะการเข้าร่วมประมูล */}
+        {userHasJoinedAuction && (
+          <div className="mt-2 text-xs text-green-600">
+            คุณเคยเข้าร่วมประมูลนี้แล้ว สามารถเข้าสู่หน้าประมูลได้ทันที
+          </div>
+        )}
 
-        {/* ปุ่มเข้าร่วมประมูล */}
+        {/* ปุ่มเข้าร่วมประมูล หรือ ไปหน้าประมูล */}
         <button
-          className="mt-4 bg-[#8677A7] text-white py-1.5 px-6 rounded-full w-full text-sm font-medium shadow-md hover:bg-[#77599A] transition"
-          onClick={() => setIsPopupOpen(true)}
+          className={`mt-4 ${
+            userHasJoinedAuction 
+              ? 'bg-green-600 hover:bg-green-700' 
+              : 'bg-[#8677A7] hover:bg-[#77599A]'
+          } text-white py-1.5 px-6 rounded-full w-full text-sm font-medium shadow-md transition`}
+          onClick={handleAuctionAction}
+          disabled={loading}
         >
-          เข้าร่วมประมูล
+          {loading 
+            ? 'กำลังตรวจสอบ...' 
+            : userHasJoinedAuction 
+              ? 'ไปหน้าประมูล' 
+              : 'เข้าร่วมประมูล'
+          }
         </button>
+
+        {/* แสดงข้อความเตือนถ้า coins ไม่พอ และยังไม่เคยเข้าร่วม */}
+        {!userHasJoinedAuction && userCoins < auction.initialBid && !loading && (
+          <p className="text-xs text-red-600 mt-1 text-center">
+            *Coins ไม่เพียงพอ คุณมี {userCoins} Coins จากขั้นต่ำ {auction.initialBid} Coins
+          </p>
+        )}
       </div>
 
-      {/* แสดง Popup เมื่อ isPopupOpen เป็น true */}
-      {isPopupOpen && <AuctionPopup auction={auction} onClose={() => setIsPopupOpen(false)} />}
+      {/* แสดง Popup เมื่อกด "เข้าร่วมประมูล" และยังไม่เคยเข้าร่วม */}
+      {isPopupOpen && (
+        <AuctionPopup 
+          auction={auction} 
+          onClose={() => setIsPopupOpen(false)}
+          userCoins={userCoins}
+          hasJoinedAuction={userHasJoinedAuction}
+        />
+      )}
     </div>
   );
 };

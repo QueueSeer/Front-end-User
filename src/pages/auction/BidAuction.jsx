@@ -290,9 +290,9 @@ const BidAuction = () => {
     }
   };
 
-  // ฟังก์ชันอัปเดตเวลาที่เหลือ
   const updateTimeLeft = (endTimeStr) => {
     const endTime = new Date(endTimeStr).getTime();
+    let hasCheckedWinner = false; // ตัวแปรเพื่อติดตามว่าได้ตรวจสอบผู้ชนะแล้วหรือยัง
     
     // อัปเดตเวลาทุกวินาที
     const timer = setInterval(() => {
@@ -300,13 +300,33 @@ const BidAuction = () => {
       const distance = endTime - now;
       
       if (distance <= 0) {
+        // เมื่อเวลาหมด
         clearInterval(timer);
         setTimeLeft([
-          { label: "วัน", value: "0" },
-          { label: "ชั่วโมง", value: "0" },
-          { label: "นาที", value: "0" },
-          { label: "วินาที", value: "0" }
+          { label: "วัน", value: "00" },
+          { label: "ชั่วโมง", value: "00" },
+          { label: "นาที", value: "00" },
+          { label: "วินาที", value: "00" }
         ]);
+        
+        // ตรวจสอบผู้ชนะเพียงครั้งเดียว
+        if (!hasCheckedWinner) {
+          hasCheckedWinner = true;
+          
+          // ดึงข้อมูลผู้ประมูลล่าสุด
+          fetchBidders().then(() => {
+            // ตรวจสอบว่าผู้ใช้ปัจจุบันชนะหรือไม่
+            const userBidder = bidders.find(b => b.id === currentUser.id);
+            if (userBidder && userBidder.rank === 1) {
+              // ผู้ใช้ชนะการประมูล
+              setShowWinnerPopup(true);
+            } else if (userBidder) {
+              // ผู้ใช้แพ้การประมูล
+              setShowLoserPopup(true);
+            }
+          });
+        }
+        
         return;
       }
       
@@ -315,17 +335,62 @@ const BidAuction = () => {
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
       
+      // ใช้ padStart เพื่อให้เป็น 2 หลักเสมอ
       setTimeLeft([
-        { label: "วัน", value: days.toString() },
-        { label: "ชั่วโมง", value: hours.toString() },
-        { label: "นาที", value: minutes.toString() },
-        { label: "วินาที", value: seconds.toString() }
+        { label: "วัน", value: days.toString().padStart(2, '0') },
+        { label: "ชั่วโมง", value: hours.toString().padStart(2, '0') },
+        { label: "นาที", value: minutes.toString().padStart(2, '0') },
+        { label: "วินาที", value: seconds.toString().padStart(2, '0') }
       ]);
     }, 1000);
     
-    // ล้าง timer เมื่อ component unmount
     return () => clearInterval(timer);
   };
+
+// เพิ่มฟังก์ชัน concludeAuction สำหรับเรียกใช้ API conclude
+const concludeAuction = async () => {
+  if (!auctionId) {
+    console.error("Missing auction_id, cannot conclude auction");
+    return;
+  }
+
+  try {
+    console.log("Concluding auction:", auctionId);
+    
+    // เรียกใช้ API conclude
+    const response = await axios.post(`${API_BASE_URL}/auction/conclude`, {
+      auction_ID: parseInt(auctionId), // แปลงเป็นตัวเลข
+      time_date: new Date().toISOString(), // เวลาปัจจุบัน
+      security_key: "YOUR_SECURITY_KEY" // ถ้าจำเป็นต้องใช้
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    
+    console.log("Conclude API response:", response.data);
+    
+    // หลังจากเรียกใช้ API สำเร็จ ให้ดึงข้อมูลประมูลอีกครั้งเพื่อตรวจสอบสถานะ
+    fetchAuctionInfo();
+    fetchBidders();
+    
+    // ตรวจสอบว่าผู้ใช้ปัจจุบันชนะหรือไม่
+    const userBidder = bidders.find(b => b.id === currentUser.id);
+    if (userBidder && userBidder.rank === 1) {
+      // ผู้ใช้ชนะการประมูล
+      setShowWinnerPopup(true);
+    } else if (userBidder) {
+      // ผู้ใช้แพ้การประมูล
+      setShowLoserPopup(true);
+    }
+    
+  } catch (err) {
+    console.error("Error concluding auction:", err);
+    // ไม่ต้องแสดง error ให้ผู้ใช้เห็น เพราะเป็นการเรียกใช้ภายใน
+  }
+};
 
   // ใช้ Server-Sent Events (SSE) เพื่อรับข้อมูลแบบ real-time
   useEffect(() => {
