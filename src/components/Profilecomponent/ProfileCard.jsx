@@ -11,14 +11,33 @@ const ProfileCard = ({
   category = "ศาสตร์ไพ่ยิปซี", 
   experience = "10+", 
   followers = "0", 
-  rating = "0", 
+  rating = "0",
+  reviewCount = "0", // รับจำนวนรีวิวจาก props
   seerId = null 
 }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(parseInt(followers) || 0);
+  const [reviewsCount, setReviewsCount] = useState(parseInt(reviewCount) || 0); // ใช้ค่าจาก props เป็นค่าเริ่มต้น
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // อัปเดต state เมื่อ props มีการเปลี่ยนแปลง
+  useEffect(() => {
+    // ตรวจสอบจำนวนผู้ติดตามที่บันทึกใน localStorage
+    const followersCountKey = `followers_count_${seerId}`;
+    const savedFollowersCount = localStorage.getItem(followersCountKey);
+    
+    if (savedFollowersCount) {
+      // ถ้ามีค่าที่บันทึกไว้ ใช้ค่านั้นแทน
+      setFollowerCount(parseInt(savedFollowersCount));
+    } else {
+      // ถ้าไม่มี ใช้ค่าจาก props
+      setFollowerCount(parseInt(followers) || 0);
+    }
+    
+    setReviewsCount(parseInt(reviewCount) || 0);
+  }, [followers, reviewCount, seerId]);
 
   // ตรวจสอบสถานะล็อกอินและอัปเดตสถานะการติดตามจาก local storage
   useEffect(() => {
@@ -73,23 +92,47 @@ const ProfileCard = ({
     setIsLoading(true);
     
     try {
+      // เพิ่ม console.log เพื่อตรวจสอบ
+      console.log("Attempting to follow seer ID:", seerId);
+      
       // เรียก API ติดตามหมอดู
-      await axios.post(`${API_BASE_URL}/api/user/me/follow/${seerId}`, {}, {
-        withCredentials: true
+      const response = await axios.post(`${API_BASE_URL}/api/user/me/follow/${seerId}`, {}, {
+        withCredentials: true,
+        // เพิ่ม headers เพื่อให้แน่ใจว่าส่งคำขอถูกต้อง
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
       
+      // ตรวจสอบการตอบกลับจาก API
+      console.log("Follow API response:", response);
+      
       // อัปเดตสถานะและบันทึกใน localStorage
+      setFollowerCount(prev => {
+        const newCount = parseInt(prev) + 1;
+        // บันทึกจำนวนผู้ติดตามใน localStorage
+        const followersCountKey = `followers_count_${seerId}`;
+        localStorage.setItem(followersCountKey, newCount.toString());
+        return newCount;
+      });
+      
       setIsFollowing(true);
-      setFollowerCount(prev => parseInt(prev) + 1);
       
       // บันทึกสถานะการติดตามใน localStorage
       const followStateKey = `follow_state_${seerId}`;
       localStorage.setItem(followStateKey, 'true');
       
+      // เพิ่มการแจ้งเตือนสำเร็จ
+      console.log("Successfully followed seer");
+      
     } catch (error) {
       console.error("Error following:", error);
       
       if (error.response) {
+        console.log("Error response status:", error.response.status);
+        console.log("Error response data:", error.response.data);
+        
         if (error.response.status === 401) {
           alert("กรุณาเข้าสู่ระบบก่อนดำเนินการติดตาม");
           setIsLoggedIn(false);
@@ -115,13 +158,42 @@ const ProfileCard = ({
     setIsLoading(true);
     
     try {
+      console.log("Attempting to unfollow seer ID:", seerId);
+      
       // เรียก API เลิกติดตามหมอดู
-      await axios.delete(`${API_BASE_URL}/api/user/me/follow/${seerId}`, {
-        withCredentials: true
+      const response = await axios.delete(`${API_BASE_URL}/api/user/me/follow/${seerId}`, {
+        withCredentials: true,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
+      
+      console.log("Unfollow API response:", response);
+      
       setIsFollowing(false);
-      setFollowerCount(prev => Math.max(0, parseInt(prev) - 1));
+      
+      // อัปเดตจำนวนผู้ติดตามและบันทึกใน localStorage
+      setFollowerCount(prev => {
+        const newCount = Math.max(0, parseInt(prev) - 1);
+        // บันทึกจำนวนผู้ติดตามใน localStorage
+        const followersCountKey = `followers_count_${seerId}`;
+        localStorage.setItem(followersCountKey, newCount.toString());
+        return newCount;
+      });
+      
+      // ลบสถานะการติดตามใน localStorage
+      const followStateKey = `follow_state_${seerId}`;
+      localStorage.removeItem(followStateKey);
+      
+      console.log("Successfully unfollowed seer");
     } catch (error) {
+      console.error("Error unfollowing:", error);
+      
+      if (error.response) {
+        console.log("Error response status:", error.response.status);
+        console.log("Error response data:", error.response.data);
+      }
+      
       alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);
@@ -188,7 +260,7 @@ const ProfileCard = ({
             <span className="text-[#8677A7] text-sm font-medium">ผู้ติดตาม</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-black text-lg font-semibold">{rating}</span>
+            <span className="text-black text-lg font-semibold">{reviewsCount}</span>
             <span className="text-[#8677A7] text-sm font-medium">รีวิว</span>
           </div>
         </div>

@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import Images from "../../../assets";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +21,8 @@ const BidAuctionFooter = ({
   userCoins: externalUserCoins,
   setUserCoins: setExternalUserCoins,
   auctionInfo,
-  apiConnected
+  apiConnected,
+  currentUser // เพิ่ม prop นี้
 }) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -33,6 +36,27 @@ const BidAuctionFooter = ({
     initial_bid: auctionInfo?.initial_bid || 50
   });
 
+  // ฟังก์ชันดึงข้อมูลผู้ใช้ - ย้ายมาไว้ด้านบน
+  const getUserInfo = () => {
+    // ถ้ามี currentUser ให้ใช้ currentUser ก่อน
+    if (currentUser && currentUser.id) {
+      return {
+        id: currentUser.id,
+        username: currentUser.username || "ผู้ประมูล",
+        hiddenUser: currentUser.hidden_username || "User****",
+        rank: currentRank || "-"
+      };
+    }
+    
+    // ถ้าไม่มี currentUser ให้ใช้ selectedBidder แทน
+    return {
+      id: selectedBidder?.id || 3,
+      username: selectedBidder?.username || "ผู้ประมูล",
+      hiddenUser: selectedBidder?.hiddenUser || "User****",
+      rank: selectedBidder && selectedBidder.coins > 0 ? selectedBidder.rank : "-"
+    };
+  };
+  const userInfo = getUserInfo();
   // Sync userCoins with external state
   useEffect(() => {
     if (externalUserCoins > 0) {
@@ -194,18 +218,16 @@ const BidAuctionFooter = ({
       current_bid: bidAmount
     }));
     
-    // อัปเดตอันดับการประมูล
-    if (selectedBidder) {
-      const updatedBidders = updateRankings(selectedBidder.id, bidAmount);
-      setBidders(updatedBidders);
-      
-      // อัปเดตอันดับของผู้ใช้ปัจจุบัน
-      const currentUserInBidders = updatedBidders.find(b => b.id === selectedBidder.id);
-      if (currentUserInBidders) {
-        setCurrentRank(currentUserInBidders.rank.toString());
-        setBidderCoins(bidAmount);
-      }
-    }
+     // อัปเดตอันดับการประมูล - ใช้ ID จาก userInfo
+     const updatedBidders = updateRankings(userInfo.id, bidAmount);
+     setBidders(updatedBidders);
+     
+     // อัปเดตอันดับของผู้ใช้ปัจจุบัน
+     const currentUserInBidders = updatedBidders.find(b => b.id === userInfo.id);
+     if (currentUserInBidders) {
+       setCurrentRank(currentUserInBidders.rank.toString());
+       setBidderCoins(bidAmount);
+     }
     
     console.log("Mock bid placed successfully!");
     
@@ -221,7 +243,6 @@ const BidAuctionFooter = ({
     setTimeout(() => setError(null), 3000);
   };
 
-  // จัดการการเสนอราคาสำเร็จ
   const handleBidSuccess = () => {
     // ลด Coins ของผู้ใช้
     setUserCoins(prev => prev - bidAmount);
@@ -235,18 +256,17 @@ const BidAuctionFooter = ({
       current_bid: bidAmount
     }));
     
-    // อัปเดตอันดับการประมูล
-    if (selectedBidder) {
-      const updatedBidders = updateRankings(selectedBidder.id, bidAmount);
-      setBidders(updatedBidders);
-      
-      // อัปเดตอันดับของผู้ใช้ปัจจุบัน
-      const currentUserInBidders = updatedBidders.find(b => b.id === selectedBidder.id);
-      if (currentUserInBidders) {
-        setCurrentRank(currentUserInBidders.rank.toString());
-        setBidderCoins(bidAmount);
-      }
-    }
+     // อัปเดตอันดับการประมูล - ใช้ ID จาก userInfo
+     const updatedBidders = updateRankings(userInfo.id, bidAmount);
+     setBidders(updatedBidders);
+     
+     // อัปเดตอันดับของผู้ใช้ปัจจุบัน
+     const currentUserInBidders = updatedBidders.find(b => b.id === userInfo.id);
+     if (currentUserInBidders) {
+       setCurrentRank(currentUserInBidders.rank.toString());
+       setBidderCoins(bidAmount);
+     }
+   
     
     console.log("Bid placed successfully!");
     
@@ -273,19 +293,20 @@ const BidAuctionFooter = ({
         <img src={isExpanded ? Images.down : Images.ArrowUp} alt="Toggle" className="w-4 h-4" />
       </button>
 
+      {/* ส่วนแสดงข้อมูลผู้ใช้ - ปรับปรุงให้ใช้ userInfo */}
       <div className="flex justify-between items-center px-8 py-4 mx-6 bg-[#77599A] rounded-lg text-white relative shadow-md">
         <div className="flex items-center gap-5">
           <div className="relative w-8 h-8 flex items-center justify-center">
             <img src={Images.CrownTwo} alt="Rank" className="w-full h-full" />
             <span className="absolute text-sm font-bold text-white">
-              {selectedBidder && selectedBidder.coins > 0 ? selectedBidder.rank : "-"}
+              {userInfo.rank}
             </span>
           </div>
 
           <img src={Images.profilemam} alt="Profile" className="w-10 h-10 rounded-full border-2 border-white" />
           <div>
-            <p className="text-sm font-semibold">{selectedBidder?.username || "ผู้ประมูล"}</p>
-            <p className="text-xs text-gray-300">{selectedBidder?.hiddenUser || "User****"}</p>
+            <p className="text-sm font-semibold">{userInfo.username}</p>
+            <p className="text-xs text-gray-300">{userInfo.hiddenUser}</p>
           </div>
         </div>
 
@@ -310,6 +331,7 @@ const BidAuctionFooter = ({
                 <p>{userCoins} Coins มากที่สุด</p>
               </div>
 
+              {/* ส่วนสไลเดอร์เลื่อนเงิน - เพิ่มประสิทธิภาพการแสดงผล */}
               <div className="flex items-center gap-3 mt-4">
                 <button
                   className={`${isLoading ? 'bg-gray-400' : 'bg-[#5A189A]'} text-white w-9 h-9 flex items-center justify-center rounded-full`}
@@ -319,8 +341,10 @@ const BidAuctionFooter = ({
                   −
                 </button>
                 <div className="relative w-full">
-                  {/* แถบสีแสดงจำนวนเงินที่เสนอ (อยู่ด้านล่าง input) */}
+                  {/* แถบสีพื้นหลัง */}
                   <div className="absolute top-1/2 left-0 h-2 bg-[#E4E4E6] w-full rounded-full transform -translate-y-1/2"></div>
+                  
+                  {/* แถบสีแสดงความคืบหน้า */}
                   <div 
                     className="absolute top-1/2 left-0 h-2 bg-gradient-to-r from-[#9D4EDD] to-[#5A189A] rounded-full transform -translate-y-1/2" 
                     style={{ 
@@ -333,7 +357,7 @@ const BidAuctionFooter = ({
                     }}
                   ></div>
                   
-                  {/* Slider อยู่ด้านบนสุด */}
+                  {/* Slider แบบอินเตอร์แอคทีฟ */}
                   <input
                     type="range"
                     min={currentAuctionInfo.current_bid > 0 
@@ -343,7 +367,7 @@ const BidAuctionFooter = ({
                     step={1} 
                     value={bidAmount}
                     onChange={(e) => setBidAmount(Number(e.target.value))}
-                    className="w-full z-10 relative appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-[#5A189A] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full"
+                    className="w-full z-10 relative appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-[#5A189A] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full cursor-pointer"
                     disabled={isLoading}
                   />
                 </div>
@@ -357,6 +381,13 @@ const BidAuctionFooter = ({
               </div>
 
               <p className="text-2xl font-bold text-center mt-3">{bidAmount} Coins</p>
+              
+              {/* เพิ่มข้อมูลเงินที่เพิ่มขึ้นจากราคาปัจจุบัน */}
+              {currentAuctionInfo.current_bid > 0 && (
+                <p className="text-sm text-gray-500 text-center mt-1">
+                  (+{bidAmount - currentAuctionInfo.current_bid} coins จากราคาปัจจุบัน)
+                </p>
+              )}
             </div>
           </div>
 

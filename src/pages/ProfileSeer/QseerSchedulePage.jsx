@@ -5,6 +5,9 @@ import ProfileCard from "../../components/Profilecomponent/ProfileCard";
 import ActionButtons from "../../components/Profilecomponent/ActionButtons";
 import ProfileTabs from "../../components/Profilecomponent/About/ProfileTabs";
 import Navbar from "../../components/navbar/index"; // เรียกใช้ path ที่ถูกต้อง
+import axios from "axios"; // เพิ่ม import axios
+
+const API_BASE_URL = "https://backend.qseer.app"; // กำหนด Base URL
 
 const QseerSchedulePage = () => {
   const location = useLocation();
@@ -12,6 +15,8 @@ const QseerSchedulePage = () => {
   const [seerData, setSeerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [followersCount, setFollowersCount] = useState(0); // เพิ่ม state สำหรับเก็บจำนวนผู้ติดตาม
+  const [reviewCount, setReviewCount] = useState(0); // เพิ่ม state สำหรับเก็บจำนวนรีวิว
 
   // รับข้อมูลหมอดูเบื้องต้นจาก state ของ location (ส่งมาจากหน้าก่อนหน้า)
   const seerFromState = location.state?.seer;
@@ -20,6 +25,62 @@ const QseerSchedulePage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // ดึงข้อมูลจำนวนผู้ติดตามและรีวิวจาก API
+  useEffect(() => {
+    if (!seerFromState?.id) return;
+
+    // ดึงข้อมูลจำนวนผู้ติดตาม
+    const fetchFollowersCount = async () => {
+      try {
+        console.log("Fetching followers count for seer ID:", seerFromState.id);
+        
+        // ใช้ endpoint total_followers ที่ถูกต้อง
+        const response = await axios.get(`${API_BASE_URL}/api/seer/${seerFromState.id}/total_followers`, {
+          withCredentials: true,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log("Followers API response:", response.data);
+        
+        // endpoint นี้ส่งค่า count กลับมาโดยตรง
+        if (response.data && response.data.count !== undefined) {
+          console.log("Followers count:", response.data.count);
+          setFollowersCount(response.data.count);
+        } else {
+          console.log("Followers count property not found in response");
+        }
+      } catch (error) {
+        console.error("Error fetching followers count:", error);
+        console.log("Error details:", error.response?.data || error.message);
+      }
+    };
+
+    // ดึงข้อมูลจำนวนรีวิว
+    const fetchReviewCount = async () => {
+      try {
+        console.log("Fetching review count for seer ID:", seerFromState.id);
+        const response = await axios.get(`${API_BASE_URL}/api/review/seer/${seerFromState.id}`);
+        console.log("Review API response:", response.data);
+        
+        if (response.data && Array.isArray(response.data)) {
+          console.log("Review count (array length):", response.data.length);
+          setReviewCount(response.data.length);
+        } else if (response.data && response.data.total !== undefined) {
+          console.log("Review count (total field):", response.data.total);
+          setReviewCount(response.data.total);
+        }
+      } catch (error) {
+        console.error("Error fetching review count:", error);
+        console.log("Error details:", error.response?.data || error.message);
+      }
+    };
+
+    fetchFollowersCount();
+    fetchReviewCount();
+  }, [seerFromState?.id]);
 
   // ดึงข้อมูลหมอดูจาก API
   useEffect(() => {
@@ -33,7 +94,6 @@ const QseerSchedulePage = () => {
           primary_skill: "ไม่ระบุ",
           experience: "ไม่ระบุ",
           rating: 0,
-          review_count: 0,
           description: "",
           socials_name: "",
           socials_link: ""
@@ -44,7 +104,7 @@ const QseerSchedulePage = () => {
 
       try {
         setLoading(true);
-        const response = await fetch(`https://backend.qseer.app/api/seer/${seerFromState.id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/seer/${seerFromState.id}`, {
           method: "GET",
           headers: {
             "Content-type": "application/json"
@@ -74,7 +134,6 @@ const QseerSchedulePage = () => {
           primary_skill: seerFromState.category || "ไม่ระบุ",
           experience: seerFromState.experience || "ไม่ระบุ",
           rating: seerFromState.rating || 0,
-          review_count: seerFromState.reviewCount || 0,
           description: "",
           socials_name: "",
           socials_link: ""
@@ -104,13 +163,20 @@ const QseerSchedulePage = () => {
       }
     }
     
+    // แสดงข้อมูลที่กำลังส่งไปให้ ProfileCard
+    console.log("Sending props to ProfileCard:", {
+      followers: followersCount,
+      reviewCount: reviewCount
+    });
+    
     return {
       profileImageUrl: seer.image || "",
       name: seer.display_name || "ไม่ระบุชื่อ",
       category: seer.primary_skill || "ไม่ระบุ",
       experience: experienceYears,
-      followers: seer.review_count || 0, // ใช้ review_count แทน followers
+      followers: followersCount, // ใช้จำนวนผู้ติดตามที่ดึงมาจาก API โดยตรง
       rating: seer.rating || 0,
+      reviewCount: reviewCount, // ใช้จำนวนรีวิวที่ดึงมาจาก API โดยตรง
       seerId: seer.id,
       description: seer.description || "",
       socialsName: seer.socials_name || "",
@@ -182,6 +248,7 @@ const QseerSchedulePage = () => {
               experience={profileProps.experience}
               followers={profileProps.followers}
               rating={profileProps.rating}
+              reviewCount={profileProps.reviewCount}
               seerId={profileProps.seerId}
               description={profileProps.description}
               socialsName={profileProps.socialsName}

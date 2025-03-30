@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Images from "../../assets";
 import ReviewPopup from "./ReviewPopup";
+import axios from "axios";
 
 const QueueCard = ({ 
   id, 
@@ -13,19 +14,35 @@ const QueueCard = ({
   time, 
   status,
   confirmation_code,
-  raw_data // ข้อมูลทั้งหมดจาก API รวมถึง questions
+  raw_data, // ข้อมูลทั้งหมดจาก API รวมถึง questions
+  onReviewStatusChange // callback เมื่อสถานะการรีวิวเปลี่ยน
 }) => {
     const navigate = useNavigate();
     const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [hasReviewed, setHasReviewed] = useState(raw_data?.has_reviewed || false); // เริ่มต้นจากข้อมูลที่มีอยู่แล้ว
+
+    // ตรวจสอบสถานะการรีวิวเมื่อโหลดคอมโพเนนต์
+    useEffect(() => {
+        // ตรวจสอบจาก localStorage ก่อน
+        const reviewStateKey = `review_state_${id}`;
+        const savedReviewState = localStorage.getItem(reviewStateKey);
+        
+        if (savedReviewState === 'true') {
+            setHasReviewed(true);
+            if (onReviewStatusChange) {
+                onReviewStatusChange(id, true);
+            }
+        } else if (raw_data?.has_reviewed) {
+            setHasReviewed(true);
+            localStorage.setItem(reviewStateKey, 'true');
+            if (onReviewStatusChange) {
+                onReviewStatusChange(id, true);
+            }
+        }
+    }, [id, raw_data, onReviewStatusChange]);
 
     // แก้ไขการนำทางไปยังหน้า QueueDetails เพื่อให้แน่ใจว่าส่งข้อมูลคำถามไปด้วย
     const handleViewDetails = () => {
-        console.log("Navigating to queuedetails with data:", {
-            id,
-            raw_data: raw_data,
-            has_questions: raw_data && raw_data.questions && Array.isArray(raw_data.questions)
-        });
-        
         navigate(`/queuedetails/${id}`, {
             state: { 
                 appointmentData: raw_data,
@@ -38,10 +55,33 @@ const QueueCard = ({
                     date,
                     time,
                     status,
-                    confirmation_code
+                    confirmation_code,
+                    hasReviewed: hasReviewed
                 }
             }
         });
+    };
+
+    // เปิด popup รีวิว
+    const handleOpenReview = () => {
+        setIsReviewOpen(true);
+    };
+
+    // ปิด popup รีวิว
+    const handleCloseReview = (success = false) => {
+        setIsReviewOpen(false);
+        
+        // ถ้ารีวิวสำเร็จหรือพบว่าเคยรีวิวแล้ว ให้อัพเดทสถานะ
+        if (success) {
+            setHasReviewed(true);
+            // บันทึกสถานะการรีวิวใน localStorage
+            localStorage.setItem(`review_state_${id}`, 'true');
+            
+            // แจ้งให้คอมโพเนนต์แม่รู้ว่ามีการรีวิวแล้ว
+            if (onReviewStatusChange) {
+                onReviewStatusChange(id, true);
+            }
+        }
     };
 
     return (
@@ -102,13 +142,20 @@ const QueueCard = ({
                     {status}
                 </button>
 
-                {/* รีวิวหมอดู (เป็นข้อความ ไม่ใช่ปุ่ม) */}
-                {status === "เข้ารับบริการสำเร็จ" && (
+                {/* รีวิวหมอดู (แสดงตามสถานะ) */}
+                {status === "เข้ารับบริการสำเร็จ" && !hasReviewed && (
                     <p
                         className="text-purple-800 text-sm mt-1 underline cursor-pointer hover:text-purple-600"
-                        onClick={() => setIsReviewOpen(true)}
+                        onClick={handleOpenReview}
                     >
                         รีวิวหมอดู
+                    </p>
+                )}
+                
+                {/* แสดงข้อความเมื่อรีวิวแล้ว */}
+                {status === "เข้ารับบริการสำเร็จ" && hasReviewed && (
+                    <p className="text-gray-400 text-sm mt-1">
+                        ได้รีวิวแล้ว
                     </p>
                 )}
             </div>
@@ -116,8 +163,9 @@ const QueueCard = ({
             {/* Popup รีวิว */}
             <ReviewPopup
                 isOpen={isReviewOpen}
-                onClose={() => setIsReviewOpen(false)}
+                onClose={handleCloseReview}
                 fortuneTeller={fortuneTeller}
+                appointmentId={id}
             />
         </div>
     );

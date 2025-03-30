@@ -6,6 +6,9 @@ import AuctionDetailSection from "../../components/Auctioncomponent/Detail/Aucti
 import ProfileCard from "../../components/Profilecomponent/ProfileCard";
 import Navbar from "../../components/navbar";
 import Images from "../../assets";
+import axios from "axios";
+
+const API_BASE_URL = 'https://backend.qseer.app';
 
 const DetailAuction = () => {
   const { id } = useParams();
@@ -13,6 +16,9 @@ const DetailAuction = () => {
   const [auction, setAuction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [seerData, setSeerData] = useState(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
   
   // ฟังก์ชันเลื่อนไปยังด้านบนสุดของหน้า
   const scrollToTop = () => {
@@ -22,16 +28,15 @@ const DetailAuction = () => {
     });
   };
 
+  // ดึงข้อมูลประมูลจาก API
   useEffect(() => {
     // เลื่อนไปที่ด้านบนของหน้าเมื่อโหลดครั้งแรก
     window.scrollTo(0, 0);
     
-    // เรียกข้อมูลประมูลจาก API
     const fetchAuctionDetail = async () => {
       setLoading(true);
       
       try {
-        const API_BASE_URL = 'https://backend.qseer.app';
         const response = await fetch(`${API_BASE_URL}/api/auction/${id}`);
         
         if (!response.ok) {
@@ -61,8 +66,9 @@ const DetailAuction = () => {
             id: data.seer?.id,
             name: data.seer?.display_name || "ไม่ระบุชื่อหมอดู",
             image: data.seer?.image || Images.profileSmall,
-            subtitle: data.seer?.category, // ข้อมูลเพิ่มเติม
-            rating: 0, // จะถูกแทนที่ด้วยข้อมูลจริงในคอมโพเนนต์ ProfileCard
+            subtitle: data.seer?.category,
+            rating: data.seer?.rating || 0,
+            experience: data.seer?.experience || "10+",
           },
           // เก็บข้อมูลดิบจาก API เผื่อใช้
           originalData: data
@@ -70,17 +76,96 @@ const DetailAuction = () => {
         
         console.log("ข้อมูลประมูลที่แปลงแล้ว:", formattedAuction);
         setAuction(formattedAuction);
+        
+        // ถ้ามี ID ของหมอดู ให้ดึงข้อมูลเพิ่มเติม
+        if (data.seer?.id) {
+          fetchSeerDetails(data.seer.id);
+        }
+        
         setError(null);
       } catch (err) {
         console.error("Error fetching auction detail:", err);
         setError(err.message);
-      } finally {
         setLoading(false);
       }
     };
     
     fetchAuctionDetail();
   }, [id]);
+
+  // ดึงข้อมูลเพิ่มเติมของหมอดู
+  const fetchSeerDetails = async (seerId) => {
+    try {
+      console.log("Fetching seer details for ID:", seerId);
+      
+      // ดึงข้อมูลหมอดู
+      const seerResponse = await axios.get(`${API_BASE_URL}/api/seer/${seerId}`);
+      const seerData = seerResponse.data;
+      
+      // ดึงข้อมูลจำนวนผู้ติดตาม
+      const followersResponse = await axios.get(`${API_BASE_URL}/api/seer/${seerId}/total_followers`);
+      const followersData = followersResponse.data;
+      
+      console.log("Seer details:", seerData);
+      console.log("Followers count:", followersData);
+      
+      setSeerData(seerData);
+      
+      // ตั้งค่าจำนวนผู้ติดตาม
+      if (followersData && typeof followersData.count !== 'undefined') {
+        setFollowersCount(followersData.count);
+      }
+      
+      // คำนวณประสบการณ์เป็นปีถ้าเป็นวันที่
+      let experienceYears = "10+";
+      if (seerData.experience) {
+        try {
+          const experienceDate = new Date(seerData.experience);
+          const currentDate = new Date();
+          const diffYears = currentDate.getFullYear() - experienceDate.getFullYear();
+          if (!isNaN(diffYears) && diffYears > 0) {
+            experienceYears = `${diffYears} ปี`;
+          }
+        } catch(e) {
+          console.error("ไม่สามารถคำนวณประสบการณ์ได้:", e);
+        }
+      }
+      
+      // อัปเดตข้อมูลในออบเจ็กต์ auction
+      setAuction(prevAuction => ({
+        ...prevAuction,
+        astrologer: {
+          ...prevAuction.astrologer,
+          rating: seerData.rating || 0,
+          experience: experienceYears,
+          // อื่นๆ ที่ต้องการอัปเดต
+        }
+      }));
+      
+      // ดึงข้อมูลจำนวนรีวิว
+      fetchReviewCount(seerId);
+    } catch (error) {
+      console.error("Error fetching seer details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // ดึงข้อมูลจำนวนรีวิว
+  const fetchReviewCount = async (seerId) => {
+    try {
+      const reviewResponse = await axios.get(`${API_BASE_URL}/api/review/seer/${seerId}`);
+      console.log("Review data:", reviewResponse.data);
+      
+      if (Array.isArray(reviewResponse.data)) {
+        setReviewCount(reviewResponse.data.length);
+      } else if (reviewResponse.data && reviewResponse.data.total !== undefined) {
+        setReviewCount(reviewResponse.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching review count:", error);
+    }
+  };
 
   // แสดง loading state
   if (loading) {
@@ -163,18 +248,14 @@ const DetailAuction = () => {
                 profileImageUrl={auction.astrologer.image}
                 name={auction.astrologer.name}
                 category={auction.astrologer.subtitle}
+                experience={auction.astrologer.experience}
+                followers={followersCount}
+                rating={auction.astrologer.rating}
+                reviewCount={reviewCount}
               />
             </div>
             
-            {/* ปุ่มเข้าร่วมการประมูล */}
-            <div className="mt-8 flex justify-center">
-              <button 
-                onClick={navigateToBidAuction}
-                className="px-6 py-3 bg-[#77599A] text-white rounded-full hover:bg-[#5A189A] transition-colors shadow-lg"
-              >
-                เข้าร่วมการประมูล
-              </button>
-            </div>
+         
           </div>
         </div>
       </div>

@@ -8,12 +8,14 @@ import WinnerPopup from "../../components/Auctioncomponent/ฺBid/WinnerPopup";
 import LoserPopup from "../../components/Auctioncomponent/ฺBid/LoserPopup";
 import Navbar from "../../components/navbar";
 
+// API Base URL
+const API_BASE_URL = 'https://backend.qseer.app/api';
+
 const BidAuction = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { auction_id } = useParams();
   const auctionId = auction_id || location.state?.auction_id;
-  const updatedCoins = location.state?.updatedCoins || 0;
   
   // รับค่าพารามิเตอร์จาก location.state
   const initialBidFromState = location.state?.initialBid || 0;
@@ -28,15 +30,8 @@ const BidAuction = () => {
     { label: "นาที", value: "0" },
     { label: "วินาที", value: "0" }
   ]);
-
-  const [bidders, setBidders] = useState([
-    { id: 1, username: "ร*********", hiddenUser: "JaiJup*****", coins: 100, rank: 1 },
-    { id: 2, username: "ร*********", hiddenUser: "Rajir*****", coins: 90, rank: 2 },
-    { id: 3, username: "แ*********", hiddenUser: "Manmkiti64", coins: 85, rank: 3 },
-    { id: 4, username: "บ*********", hiddenUser: "punra*****", coins: 80, rank: 4 },
-    { id: 5, username: "ร*********", hiddenUser: "punra*****", coins: 70, rank: 5 },
-  ]);
-
+  
+  const [bidders, setBidders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [auctionInfo, setAuctionInfo] = useState({
@@ -44,10 +39,15 @@ const BidAuction = () => {
     min_increment: minIncrementFromState,
     auctioneer_name: auctioneerNameFromState
   });
-  const [currentRank, setCurrentRank] = useState("3");
-  const [bidderCoins, setBidderCoins] = useState(85);
-  const [userCoins, setUserCoins] = useState(0); // จำนวน coins ของผู้ใช้
-  const [apiConnected, setApiConnected] = useState(true); // สถานะการเชื่อมต่อกับ API
+  const [currentRank, setCurrentRank] = useState("0");
+  const [bidderCoins, setBidderCoins] = useState(0);
+  const [userCoins, setUserCoins] = useState(0);
+  const [currentUser, setCurrentUser] = useState({
+    id: null,
+    username: "",
+    hiddenUser: "",
+    profileImage: null
+  });
 
   // ตรวจสอบ auction_id
   useEffect(() => {
@@ -60,66 +60,64 @@ const BidAuction = () => {
     setError(null);
   }, [auctionId]);
 
-  // API URL ที่ถูกต้อง - ใช้ path สัมพัทธ์
-  const getApiBaseUrl = () => {
-    return '/api';
-  };
-
   // ฟังก์ชันดึงข้อมูลผู้ใช้จาก API
   const fetchUserInfo = async () => {
-    if (!apiConnected) return; // ไม่เรียก API ถ้าพบว่าไม่สามารถเชื่อมต่อได้
-
     try {
-      const response = await axios.get(`${getApiBaseUrl()}/user/me`, {
+      setIsLoading(true);
+      
+      const response = await axios.get(`${API_BASE_URL}/user/me`, {
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Expires': '0',
           'Accept': 'application/json'
         },
-        withCredentials: true,
-        timeout: 10000 // เพิ่ม timeout เพื่อป้องกัน hanging request
+        withCredentials: true
       });
       
-      if (response.data && response.data.coins !== undefined) {
-        setUserCoins(response.data.coins);
-        console.log("User coins fetched:", response.data.coins);
+      if (response.data) {
+        // อัปเดตข้อมูล Coins
+        if (response.data.coins !== undefined) {
+          setUserCoins(response.data.coins);
+          console.log("User coins fetched:", response.data.coins);
+        }
+        
+        // อัปเดตข้อมูลผู้ใช้
+        setCurrentUser({
+          id: response.data.id,
+          username: response.data.username || "",
+          hiddenUser: response.data.hidden_username || "",
+          profileImage: response.data.profile_image || null
+        });
       }
     } catch (err) {
       console.error("Error fetching user info:", err);
-      
-      // ถ้าไม่สามารถเชื่อมต่อกับ API ได้ (500 error)
-      if (err.response && err.response.status === 500) {
-        setApiConnected(false);
-        // ใช้ข้อมูลจำลองแทน
-        console.log("Using mock data due to API connection failure");
-        setUserCoins(500); // ใช้ค่าเริ่มต้นเป็น 500 coins
+      if (err.response?.status === 401) {
+        // ไม่ได้ล็อกอิน - อาจจะต้องนำทางไปยังหน้าล็อกอิน
+        console.log("User not logged in");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // ฟังก์ชันดึงข้อมูลผู้ประมูลจาก API
   const fetchBidders = async () => {
-    if (!auctionId || !apiConnected) {
-      if (!auctionId) console.error("Missing auction_id, cannot fetch bidders");
+    if (!auctionId) {
+      console.error("Missing auction_id, cannot fetch bidders");
       return;
     }
 
     try {
       setIsLoading(true);
       
-      const response = await axios.get(`${getApiBaseUrl()}/auction/${auctionId}/bids`, {
+      const response = await axios.get(`${API_BASE_URL}/auction/${auctionId}/bids`, {
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Expires': '0',
           'Accept': 'application/json'
         },
-        withCredentials: true,
-        timeout: 10000 // เพิ่ม timeout
+        withCredentials: true
       });
       
-      console.log("API Response:", response.data);
+      console.log("Bids API Response:", response.data);
       
       // ตรวจสอบว่า response.data เป็นอาร์เรย์หรือไม่
       let bidsArray = [];
@@ -134,20 +132,6 @@ const BidAuction = () => {
             break;
           }
         }
-        
-        if (bidsArray.length === 0) {
-          console.warn("Response is not an array and no array field found:", response.data);
-          if (response.status === 304) {
-            setIsLoading(false);
-            return; // ใช้ข้อมูลเดิมที่ cache ไว้
-          }
-        }
-      }
-      
-      // ถ้าไม่มีข้อมูลจาก API ใช้ข้อมูลเริ่มต้น
-      if (bidsArray.length === 0) {
-        setIsLoading(false);
-        return;
       }
       
       // แยกผู้ที่มีการลงเงินและยังไม่ได้ลงเงิน
@@ -183,25 +167,20 @@ const BidAuction = () => {
       
       setBidders(fetchedBidders);
       
-      // อัปเดตข้อมูลของ selectedBidder
-      const selectedBidder = fetchedBidders.find(b => b.username === "แ*********");
-      if (selectedBidder) {
-        setBidderCoins(selectedBidder.coins);
-        setCurrentRank(selectedBidder.rank.toString());
+      // อัปเดตข้อมูลของผู้ใช้ปัจจุบัน (ถ้ามี)
+      if (currentUser.id) {
+        const currentUserBidder = fetchedBidders.find(b => b.id === currentUser.id);
+        if (currentUserBidder) {
+          setBidderCoins(currentUserBidder.coins);
+          setCurrentRank(currentUserBidder.rank.toString());
+        }
       }
       
-      setError(null); // ล้าง error ถ้าดึงข้อมูลสำเร็จ
+      setError(null);
       
     } catch (err) {
       console.error("Error fetching bidders:", err);
-      
-      // ถ้าไม่สามารถเชื่อมต่อกับ API ได้ (500 error)
-      if (err.response && err.response.status === 500) {
-        setApiConnected(false);
-        setError("เซิร์ฟเวอร์ไม่ตอบสนอง กำลังใช้ข้อมูลจำลอง");
-      } else {
-        setError("ไม่สามารถดึงข้อมูลผู้ประมูลได้");
-      }
+      setError("ไม่สามารถดึงข้อมูลผู้ประมูลได้");
     } finally {
       setIsLoading(false);
     }
@@ -214,17 +193,18 @@ const BidAuction = () => {
     
     // ค้นหาผู้ใช้ปัจจุบันในรายการ bidders
     const currentUserIndex = updatedBidders.findIndex(b => b.id === currentUserId);
-    const selectedBidder = updatedBidders.find(b => b.username === "แ*********");
     
     // อัปเดตจำนวน coins ของผู้ใช้ปัจจุบัน
     if (currentUserIndex !== -1) {
       updatedBidders[currentUserIndex].coins = newCoins;
-    } else if (selectedBidder) {
+    } else {
       // ถ้าไม่พบผู้ใช้ในรายการ ให้เพิ่มเข้าไป
       updatedBidders.push({
-        ...selectedBidder,
         id: currentUserId,
-        coins: newCoins
+        username: currentUser.username || "",
+        hiddenUser: currentUser.hiddenUser || "",
+        coins: newCoins,
+        rank: 0 // จะถูกอัปเดตในขั้นตอนต่อไป
       });
     }
     
@@ -273,26 +253,22 @@ const BidAuction = () => {
 
   // ฟังก์ชันดึงข้อมูลการประมูล
   const fetchAuctionInfo = async () => {
-    if (!auctionId || !apiConnected) {
-      if (!auctionId) console.error("Missing auction_id, cannot fetch auction info");
+    if (!auctionId) {
+      console.error("Missing auction_id, cannot fetch auction info");
       return;
     }
 
     try {
-      const response = await axios.get(`${getApiBaseUrl()}/auction/${auctionId}`, {
+      const response = await axios.get(`${API_BASE_URL}/auction/${auctionId}`, {
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Expires': '0',
           'Accept': 'application/json'
         },
-        withCredentials: true,
-        timeout: 10000 // เพิ่ม timeout
+        withCredentials: true
       });
       
       const data = response.data;
       setAuctionInfo({
-        ...auctionInfo,
         initial_bid: data.initial_bid || auctionInfo.initial_bid,
         min_increment: data.min_increment || auctionInfo.min_increment,
         auctioneer_name: data.auctioneer_name || auctionInfo.auctioneer_name,
@@ -310,20 +286,7 @@ const BidAuction = () => {
       }
     } catch (err) {
       console.error("Error fetching auction info:", err);
-      
-      // ถ้าไม่สามารถเชื่อมต่อกับ API ได้ (500 error)
-      if (err.response && err.response.status === 500) {
-        setApiConnected(false);
-        
-        // ใช้ค่าจำลองสำหรับเวลาสิ้นสุด (1 วันจากปัจจุบัน)
-        const mockEndTime = new Date();
-        mockEndTime.setDate(mockEndTime.getDate() + 1);
-        updateTimeLeft(mockEndTime.toISOString());
-        
-        setError("เซิร์ฟเวอร์ไม่ตอบสนอง กำลังใช้ข้อมูลจำลอง");
-      } else {
-        setError("ไม่สามารถดึงข้อมูลการประมูลได้");
-      }
+      setError("ไม่สามารถดึงข้อมูลการประมูลได้");
     }
   };
 
@@ -364,7 +327,7 @@ const BidAuction = () => {
     return () => clearInterval(timer);
   };
 
-  // ใช้ Server-Sent Events (SSE) หรือ polling ตามความเหมาะสม
+  // ใช้ Server-Sent Events (SSE) เพื่อรับข้อมูลแบบ real-time
   useEffect(() => {
     if (!auctionId) {
       console.error("Missing auction_id, cannot initialize data fetching");
@@ -374,91 +337,80 @@ const BidAuction = () => {
     // ดึงข้อมูลเริ่มต้น
     fetchAuctionInfo();
     fetchBidders();
-    fetchUserInfo(); // ดึงข้อมูลผู้ใช้และจำนวน coins
+    fetchUserInfo();
     
+    // ใช้ SSE ถ้าบราวเซอร์รองรับ
     let eventSource;
     let pollingInterval;
     
-    // ลองใช้ SSE ก่อน
     try {
-      if (apiConnected) {
-        eventSource = new EventSource(`${getApiBaseUrl()}/auction/${auctionId}/bids/stream?times=600`);
+      // เริ่มการเชื่อมต่อ SSE
+      eventSource = new EventSource(`${API_BASE_URL}/auction/${auctionId}/bids/stream?times=600`);
+      
+      // เมื่อได้รับข้อมูลใหม่
+      eventSource.onmessage = (event) => {
+        console.log("SSE received data:", event.data);
         
-        // เมื่อได้รับข้อมูลใหม่
-        eventSource.onmessage = (event) => {
-          console.log("SSE received data:", event.data);
+        try {
+          const data = JSON.parse(event.data);
           
-          try {
-            const data = JSON.parse(event.data);
+          // ตรวจสอบว่าข้อมูลเป็นอาร์เรย์
+          if (Array.isArray(data)) {
+            // แยกผู้ประมูลตามจำนวนเงิน
+            const activeBids = data.filter(bid => bid.amount > 0);
+            const zeroBids = data.filter(bid => bid.amount === 0);
             
-            // ตรวจสอบว่าข้อมูลเป็นอาร์เรย์
-            if (Array.isArray(data)) {
-              // แยกผู้ประมูลตามจำนวนเงิน
-              const activeBids = data.filter(bid => bid.amount > 0);
-              const zeroBids = data.filter(bid => bid.amount === 0);
-              
-              // เรียงลำดับผู้ที่ลงเงินแล้ว
-              const sortedActiveBids = [...activeBids].sort((a, b) => b.amount - a.amount);
-              
-              // สร้าง bidders ที่มีการลงเงินแล้ว
-              const activeBidders = sortedActiveBids.map((bid, index) => ({
-                id: bid.user_id,
-                username: bid.username || `User${bid.user_id}`,
-                hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
-                coins: bid.amount,
-                rank: index + 1
-              }));
-              
-              // สร้าง bidders ที่ยังไม่ได้ลงเงิน
-              const lastRank = activeBidders.length > 0 ? activeBidders.length : 0;
-              const zeroBidders = zeroBids.map(bid => ({
-                id: bid.user_id,
-                username: bid.username || `User${bid.user_id}`,
-                hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
-                coins: 0,
-                rank: lastRank + 1
-              }));
-              
-              // รวมและอัปเดต bidders
-              const updatedBidders = [...activeBidders, ...zeroBidders];
-              setBidders(updatedBidders);
-              
-              // อัปเดตข้อมูลของ selectedBidder
-              const selectedBidder = updatedBidders.find(b => b.username === "แ*********");
-              if (selectedBidder) {
-                setBidderCoins(selectedBidder.coins);
-                setCurrentRank(selectedBidder.rank.toString());
+            // เรียงลำดับผู้ที่ลงเงินแล้ว
+            const sortedActiveBids = [...activeBids].sort((a, b) => b.amount - a.amount);
+            
+            // สร้าง bidders ที่มีการลงเงินแล้ว
+            const activeBidders = sortedActiveBids.map((bid, index) => ({
+              id: bid.user_id,
+              username: bid.username || `User${bid.user_id}`,
+              hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
+              coins: bid.amount,
+              rank: index + 1
+            }));
+            
+            // สร้าง bidders ที่ยังไม่ได้ลงเงิน
+            const lastRank = activeBidders.length > 0 ? activeBidders.length : 0;
+            const zeroBidders = zeroBids.map(bid => ({
+              id: bid.user_id,
+              username: bid.username || `User${bid.user_id}`,
+              hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
+              coins: 0,
+              rank: lastRank + 1
+            }));
+            
+            // รวมและอัปเดต bidders
+            const updatedBidders = [...activeBidders, ...zeroBidders];
+            setBidders(updatedBidders);
+            
+            // อัปเดตข้อมูลของผู้ใช้ปัจจุบัน (ถ้ามี)
+            if (currentUser.id) {
+              const currentUserBidder = updatedBidders.find(b => b.id === currentUser.id);
+              if (currentUserBidder) {
+                setBidderCoins(currentUserBidder.coins);
+                setCurrentRank(currentUserBidder.rank.toString());
               }
             }
-          } catch (err) {
-            console.error("Error parsing SSE data:", err);
           }
-        };
+        } catch (err) {
+          console.error("Error parsing SSE data:", err);
+        }
+      };
+      
+      // จัดการข้อผิดพลาด
+      eventSource.onerror = (error) => {
+        console.error("SSE Error:", error);
         
-        // จัดการข้อผิดพลาด
-        eventSource.onerror = (error) => {
-          console.error("SSE Error:", error);
-          
-          // ปิดการเชื่อมต่อ SSE
-          if (eventSource) {
-            eventSource.close();
-            eventSource = null;
-          }
-          
-          // สลับไปใช้ polling แทน
-          setApiConnected(false);
-          
-          // ตั้งเวลาดึงข้อมูลทุก 10 วินาที
-          pollingInterval = setInterval(() => {
-            if (!isLoading) {
-              fetchBidders();
-              // อัปเดต user coins ทุก 30 วินาที
-              if (Math.random() < 0.3) fetchUserInfo();
-            }
-          }, 10000);
-        };
-      } else {
-        // ถ้าไม่สามารถใช้ SSE ได้ ให้ใช้ polling แทน
+        // ปิดการเชื่อมต่อ SSE
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        
+        // ใช้ polling เป็นตัวสำรอง
         pollingInterval = setInterval(() => {
           if (!isLoading) {
             fetchBidders();
@@ -466,14 +418,11 @@ const BidAuction = () => {
             if (Math.random() < 0.3) fetchUserInfo();
           }
         }, 10000);
-      }
+      };
     } catch (err) {
       console.error("Error initializing SSE:", err);
       
-      // ใช้การโหลดข้อมูลแบบปกติแทน
-      setApiConnected(false);
-      
-      // ตั้งเวลาดึงข้อมูลทุก 10 วินาที
+      // ใช้ polling เป็นตัวสำรอง
       pollingInterval = setInterval(() => {
         if (!isLoading) {
           fetchBidders();
@@ -485,7 +434,7 @@ const BidAuction = () => {
     
     // ทำความสะอาดเมื่อ component unmount
     return () => {
-      console.log("Closing SSE connection");
+      console.log("Cleaning up resources");
       if (eventSource) {
         eventSource.close();
       }
@@ -493,10 +442,12 @@ const BidAuction = () => {
         clearInterval(pollingInterval);
       }
     };
-  }, [auctionId, apiConnected]);
+  }, [auctionId]);
 
-  // หาอันดับของ "แ*********" ในลิสต์
-  const selectedBidder = bidders.find((bidder) => bidder.username === "แ*********") || bidders[2];
+  // หาข้อมูลผู้ประมูลของผู้ใช้ปัจจุบัน
+  const selectedBidder = currentUser.id
+    ? bidders.find((bidder) => bidder.id === currentUser.id)
+    : null;
 
   // เช็คสถานะจาก `location.state` เพื่อแสดง Popup
   const [showWinnerPopup, setShowWinnerPopup] = useState(false);
@@ -510,7 +461,7 @@ const BidAuction = () => {
     }
   }, [location.state]);
 
-  // ฟังก์ชันกลับไปยังหน้า AuctionDetails
+  // ฟังก์ชันกลับไปยังหน้าก่อนหน้า
   const navigateBack = () => {
     navigate(-1);
   };
@@ -522,17 +473,17 @@ const BidAuction = () => {
         <Navbar />
       </div>
 
-      {/* ปุ่มย้อนกลับ และ แสดง error กรณีไม่มี ID */}
+      {/* กรณีไม่มี auction_id */}
       {idError ? (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6 pt-[100px]">
           <div className="bg-red-100 border border-red-400 text-red-700 p-8 rounded-lg shadow-md text-center max-w-md">
             <h2 className="text-xl font-bold mb-4">เกิดข้อผิดพลาด</h2>
             <p className="mb-6">{error}</p>
             <button
-              onClick={() => navigate("/homepage")}
+              onClick={() => navigate("/auction")}
               className="px-5 py-3 bg-red-600 text-white rounded-lg"
             >
-              กลับไปหน้าแรก
+              กลับไปหน้าประมูล
             </button>
           </div>
         </div>
@@ -550,13 +501,6 @@ const BidAuction = () => {
               ย้อนกลับ
             </button>
           </div>
-
-          {/* แสดง API Connection Status */}
-          {!apiConnected && (
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded relative mb-4 w-full max-w-[850px]">
-              เซิร์ฟเวอร์ไม่ตอบสนอง กำลังใช้ข้อมูลจำลอง
-            </div>
-          )}
 
           {/* แสดง error ถ้ามี */}
           {error && !idError && (
@@ -583,7 +527,10 @@ const BidAuction = () => {
           )}
           {showLoserPopup && (
             <div className="fixed inset-0 z-50 flex justify-center items-center">
-              <LoserPopup rank={selectedBidder?.rank || 3} onClose={() => setShowLoserPopup(false)} />
+              <LoserPopup 
+                rank={selectedBidder?.rank || 0} 
+                onClose={() => setShowLoserPopup(false)} 
+              />
             </div>
           )}
 
@@ -602,12 +549,12 @@ const BidAuction = () => {
             setBidderCoins={setBidderCoins}
             updateRankings={updateRankings}
             fetchBidders={fetchBidders}
-            getApiBaseUrl={getApiBaseUrl}
+            getApiBaseUrl={() => API_BASE_URL}
             auction_id={auctionId}
             userCoins={userCoins}
             setUserCoins={setUserCoins}
             auctionInfo={auctionInfo}
-            apiConnected={apiConnected}
+            currentUser={currentUser}
           />
         </div>
       )}
