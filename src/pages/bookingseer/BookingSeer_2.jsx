@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Navbar from "../../components/navbar";
 import Payment from "../../components/bookingcomponent/step2/Payment";
 import QuestionForm from "../../components/bookingcomponent/step2/QuestionForm";
 import UserInfoForm from "../../components/bookingcomponent/step2/UserInfoForm";
 import dayjs from "dayjs";
-import { useLocation, useNavigate } from "react-router-dom";
 
 const BookingSeer_2 = () => {
   const location = useLocation();
@@ -75,107 +75,78 @@ const BookingSeer_2 = () => {
   }
 
   const handlePayment = async () => {
-    if (!isFormValid()) {
-      alert("กรุณากรอกข้อมูลและเลือกวิธีการชำระเงินให้ครบถ้วน");
-      return;
-    }
+    // if (!isFormValid()) {
+    //   alert("กรุณากรอกข้อมูลและเลือกวิธีการชำระเงินให้ครบถ้วน");
+    //   return;
+    // }
+    // setIsPaymentLoading(true);
     
-    try {
-      setIsPaymentLoading(true);
-      
-      // สร้าง format วันที่และเวลาตามที่ API ต้องการ
-      const [hour, minute] = selectedTime.split(":");
-      const startTime = new Date(selectedDate.$d);
-      
-      // แก้ไขเป็นรูปแบบ ISO string ที่มี timezone +07:00 (เวลาไทย)
-      const thaiYear = startTime.getFullYear();
-      const thaiMonth = String(startTime.getMonth() + 1).padStart(2, '0');
-      const thaiDay = String(startTime.getDate()).padStart(2, '0');
-      const formattedDate = `${thaiYear}-${thaiMonth}-${thaiDay}T${hour.padStart(2,'0')}:${minute.padStart(2,'0')}:00+07:00`;
+    const [hour, minute] = selectedTime.split(":");
+    const startTime = new Date(selectedDate.$d);
+    const formattedDate = `${startTime.getFullYear()}-${String(startTime.getMonth()+1).padStart(2, '0')}-${String(startTime.getDate()).padStart(2, '0')}T${hour.padStart(2,'0')}:${minute.padStart(2,'0')}:00.000Z`;
 
-      // แสดงข้อมูลที่จะส่งในคอนโซลเพื่อตรวจสอบ
-      console.log("Selected Date Object:", selectedDate);
-      console.log("Date Object:", startTime);
-      console.log("Formatted Date:", formattedDate);
-      console.log("Package Info:", packageInfo);
-      
-      // สร้าง body สำหรับส่งไปยัง API
-      const appointmentBody = {
-        seer_id: Number(packageInfo.seer_id), // แปลงเป็นตัวเลข
-        package_id: Number(packageInfo.id), // แปลงเป็นตัวเลข
-        start_time: formattedDate,
-        questions: questions.filter(q => q.trim() !== "") // กรองเอาเฉพาะคำถามที่ไม่ว่างเปล่า
-      };
-      
-      console.log("Request body:", appointmentBody);
+    const appointmentBody = {
+      seer_id: packageInfo.seer_id,
+      package_id: packageInfo.id,
+      start_time: formattedDate,
+      questions: questions
+    };
+    console.log(appointmentBody)
 
-      // เรียกใช้ API เพื่อสร้างการจองคิว
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://backend.qseer.app/api/appointment/seer', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(appointmentBody),
-        credentials: 'include'
-      });
-      
-      console.log("Response status:", response.status);
-      
-      // ตรวจสอบรายละเอียดข้อผิดพลาด
-      const responseData = await response.json();
-      console.log("Response data:", responseData);
-
-      // ตรวจสอบการตอบกลับจาก API
-      if (response.status === 201) {
-        alert(`การจองสำเร็จ! รหัสการจอง: ${responseData.code}`);
-        // หลังจากจองสำเร็จ นำผู้ใช้ไปยังหน้าที่เหมาะสม (เช่น หน้าประวัติการจอง)
-        // window.location.href = "/booking-history";
-      } else if (response.status === 400) {
-        // แสดงข้อความแจ้งเตือนตามประเภทข้อผิดพลาด
-        if (responseData.detail === "Time slot not available.") {
-          const confirmNewTime = window.confirm("ช่วงเวลาที่คุณเลือกไม่ว่างหรือถูกจองไปแล้ว ต้องการกลับไปเลือกเวลาใหม่หรือไม่?");
-          if (confirmNewTime) {
-            // นำทางกลับไปยังหน้าเลือกเวลา พร้อมข้อมูลแพ็กเกจ
-            navigate("/bookingSeer", {
-              state: {
-                packageInfo: packageInfo
-              }
-            });
-            return;
-          }
-        } else if (responseData.detail.includes("Exceeded question limit")) {
-          alert("จำนวนคำถามเกินกว่าที่กำหนด");
-        } else if (responseData.detail.includes("Insufficient coins")) {
-          alert("เหรียญไม่เพียงพอสำหรับการจอง");
-        } else {
-          alert(`เกิดข้อผิดพลาด: ${responseData.detail}`);
-        }
-      } else if (response.status === 401 || response.status === 403) {
-        alert("กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
-        // window.location.href = "/login";
-      } else if (response.status === 404) {
-        alert("ไม่พบหมอดูหรือแพ็คเกจที่เลือก");
-      } else if (response.status === 422) {
-        // ข้อผิดพลาดการตรวจสอบค่า
-        let errorMsg = "ข้อมูลไม่ถูกต้อง: ";
-        if (responseData.detail && Array.isArray(responseData.detail)) {
-          errorMsg += responseData.detail.map(err => err.msg).join(', ');
-        } else {
-          errorMsg += JSON.stringify(responseData);
-        }
-        alert(errorMsg);
-      } else {
-        alert("เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง");
-      }
-    } catch (error) {
-      console.error("Error during booking:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setIsPaymentLoading(false);
-    }
+    const token = localStorage.getItem('token');
+    await fetch('https://backend.qseer.app/api/appointment/seer', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(appointmentBody),
+      credentials: 'include'
+    })
+    .then((res)=>res.json());
+    
+    // if (response.status === 201) {
+    //   alert(`การจองสำเร็จ! รหัสการจอง: ${responseData.code}`);
+    //   // หลังจากจองสำเร็จ นำผู้ใช้ไปยังหน้าที่เหมาะสม (เช่น หน้าประวัติการจอง)
+    //   // window.location.href = "/booking-history";
+    // } else if (response.status === 400) {
+    //   // แสดงข้อความแจ้งเตือนตามประเภทข้อผิดพลาด
+    //   if (responseData.detail === "Time slot not available.") {
+    //     const confirmNewTime = window.confirm("ช่วงเวลาที่คุณเลือกไม่ว่างหรือถูกจองไปแล้ว ต้องการกลับไปเลือกเวลาใหม่หรือไม่?");
+    //     if (confirmNewTime) {
+    //       // นำทางกลับไปยังหน้าเลือกเวลา พร้อมข้อมูลแพ็กเกจ
+    //       navigate("/bookingSeer", {
+    //         state: {
+    //           packageInfo: packageInfo
+    //         }
+    //       });
+    //       return;
+    //     }
+    //   } else if (responseData.detail.includes("Exceeded question limit")) {
+    //     alert("จำนวนคำถามเกินกว่าที่กำหนด");
+    //   } else if (responseData.detail.includes("Insufficient coins")) {
+    //     alert("เหรียญไม่เพียงพอสำหรับการจอง");
+    //   } else {
+    //     alert(`เกิดข้อผิดพลาด: ${responseData.detail}`);
+    //   }
+    // } else if (response.status === 401 || response.status === 403) {
+    //   alert("กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
+    //   // window.location.href = "/login";
+    // } else if (response.status === 404) {
+    //   alert("ไม่พบหมอดูหรือแพ็คเกจที่เลือก");
+    // } else if (response.status === 422) {
+    //   // ข้อผิดพลาดการตรวจสอบค่า
+    //   let errorMsg = "ข้อมูลไม่ถูกต้อง: ";
+    //   if (responseData.detail && Array.isArray(responseData.detail)) {
+    //     errorMsg += responseData.detail.map(err => err.msg).join(', ');
+    //   } else {
+    //     errorMsg += JSON.stringify(responseData);
+    //   }
+    //   alert(errorMsg);
+    // } else {
+    //   alert("เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง");
+    // }
   }
 
   useEffect(()=>{
