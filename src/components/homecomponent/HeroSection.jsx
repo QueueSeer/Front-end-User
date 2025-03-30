@@ -11,7 +11,7 @@ const HeroSection = () => {
       <div className="flex-1 text-black text-center md:text-left sm:max-w-[65%] sm:px-2 sm:mb-1 translate-y-[60px] md:translate-y-0">
 
         <h1 className="text-4xl sm:text-xl md:text-5xl font-bold leading-tight sm:leading-snug ">
-          สวัสดีวันอาทิตย์
+          สวัสดีวันจันทร์
         </h1>
         <p className="text-xl sm:text-base md:text-2xl mt-4 sm:mt-1">
           ดูดวงสะดวก จองคิวทันใจที่ Qseer

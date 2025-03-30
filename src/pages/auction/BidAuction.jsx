@@ -99,7 +99,57 @@ const BidAuction = () => {
     }
   };
 
-  // ฟังก์ชันดึงข้อมูลผู้ประมูลจาก API
+  // ฟังก์ชันดึงข้อมูลผู้ประมูลจากเหตุการณ์ stream
+  const processBidsData = (data) => {
+    if (!Array.isArray(data)) {
+      console.error("Bids data is not an array:", data);
+      return;
+    }
+
+    // แยกผู้ที่มีการลงเงินและยังไม่ได้ลงเงิน
+    const activeBids = data.filter(bid => bid.amount > 0);
+    const zeroBids = data.filter(bid => bid.amount === 0);
+    
+    // เรียงลำดับผู้ที่ลงเงินแล้วตามจำนวนเงิน (มากไปน้อย)
+    const sortedActiveBids = [...activeBids].sort((a, b) => b.amount - a.amount);
+    
+    // แปลงเป็น bidders ที่มีการลงเงินแล้ว พร้อมกำหนดลำดับ
+    const activeBidders = sortedActiveBids.map((bid, index) => ({
+      id: bid.user_id,
+      username: bid.username || `User${bid.user_id}`, 
+      hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
+      coins: bid.amount,
+      rank: index + 1
+    }));
+    
+    // ค้นหาลำดับสุดท้ายของผู้ที่ลงเงิน
+    const lastRank = activeBidders.length > 0 ? activeBidders.length : 0;
+    
+    // แปลงเป็น bidders ที่ยังไม่ได้ลงเงิน กำหนดอันดับเป็นลำดับสุดท้าย + 1
+    const zeroBidders = zeroBids.map(bid => ({
+      id: bid.user_id,
+      username: bid.username || `User${bid.user_id}`,
+      hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
+      coins: 0,
+      rank: lastRank + 1
+    }));
+    
+    // รวม bidders ทั้งหมด
+    const fetchedBidders = [...activeBidders, ...zeroBidders];
+    
+    setBidders(fetchedBidders);
+    
+    // อัปเดตข้อมูลของผู้ใช้ปัจจุบัน (ถ้ามี)
+    if (currentUser.id) {
+      const currentUserBidder = fetchedBidders.find(b => b.id === currentUser.id);
+      if (currentUserBidder) {
+        setBidderCoins(currentUserBidder.coins);
+        setCurrentRank(currentUserBidder.rank.toString());
+      }
+    }
+  };
+
+  // ฟังก์ชันรองรับการดึงข้อมูล bids แบบฉุกเฉิน
   const fetchBidders = async () => {
     if (!auctionId) {
       console.error("Missing auction_id, cannot fetch bidders");
@@ -109,7 +159,8 @@ const BidAuction = () => {
     try {
       setIsLoading(true);
       
-      const response = await axios.get(`${API_BASE_URL}/auction/${auctionId}/bids`, {
+      // ใช้ SSE endpoint ซึ่งควรส่งข้อมูลเริ่มต้นกลับมาด้วย
+      const response = await axios.get(`${API_BASE_URL}/auction/${auctionId}/bids/stream?times=1`, {
         headers: {
           'Cache-Control': 'no-cache',
           'Accept': 'application/json'
@@ -134,48 +185,7 @@ const BidAuction = () => {
         }
       }
       
-      // แยกผู้ที่มีการลงเงินและยังไม่ได้ลงเงิน
-      const activeBids = bidsArray.filter(bid => bid.amount > 0);
-      const zeroBids = bidsArray.filter(bid => bid.amount === 0);
-      
-      // เรียงลำดับผู้ที่ลงเงินแล้วตามจำนวนเงิน (มากไปน้อย)
-      const sortedActiveBids = [...activeBids].sort((a, b) => b.amount - a.amount);
-      
-      // แปลงเป็น bidders ที่มีการลงเงินแล้ว พร้อมกำหนดลำดับ
-      const activeBidders = sortedActiveBids.map((bid, index) => ({
-        id: bid.user_id,
-        username: bid.username || `User${bid.user_id}`, 
-        hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
-        coins: bid.amount,
-        rank: index + 1
-      }));
-      
-      // ค้นหาลำดับสุดท้ายของผู้ที่ลงเงิน
-      const lastRank = activeBidders.length > 0 ? activeBidders.length : 0;
-      
-      // แปลงเป็น bidders ที่ยังไม่ได้ลงเงิน กำหนดอันดับเป็นลำดับสุดท้าย + 1
-      const zeroBidders = zeroBids.map(bid => ({
-        id: bid.user_id,
-        username: bid.username || `User${bid.user_id}`,
-        hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
-        coins: 0,
-        rank: lastRank + 1
-      }));
-      
-      // รวม bidders ทั้งหมด
-      const fetchedBidders = [...activeBidders, ...zeroBidders];
-      
-      setBidders(fetchedBidders);
-      
-      // อัปเดตข้อมูลของผู้ใช้ปัจจุบัน (ถ้ามี)
-      if (currentUser.id) {
-        const currentUserBidder = fetchedBidders.find(b => b.id === currentUser.id);
-        if (currentUserBidder) {
-          setBidderCoins(currentUserBidder.coins);
-          setCurrentRank(currentUserBidder.rank.toString());
-        }
-      }
-      
+      processBidsData(bidsArray);
       setError(null);
       
     } catch (err) {
@@ -347,51 +357,6 @@ const BidAuction = () => {
     return () => clearInterval(timer);
   };
 
-// เพิ่มฟังก์ชัน concludeAuction สำหรับเรียกใช้ API conclude
-const concludeAuction = async () => {
-  if (!auctionId) {
-    console.error("Missing auction_id, cannot conclude auction");
-    return;
-  }
-
-  try {
-    console.log("Concluding auction:", auctionId);
-    
-    // เรียกใช้ API conclude
-    const response = await axios.post(`${API_BASE_URL}/auction/conclude`, {
-      auction_ID: parseInt(auctionId), // แปลงเป็นตัวเลข
-      time_date: new Date().toISOString(), // เวลาปัจจุบัน
-      security_key: "YOUR_SECURITY_KEY" // ถ้าจำเป็นต้องใช้
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      withCredentials: true
-    });
-    
-    console.log("Conclude API response:", response.data);
-    
-    // หลังจากเรียกใช้ API สำเร็จ ให้ดึงข้อมูลประมูลอีกครั้งเพื่อตรวจสอบสถานะ
-    fetchAuctionInfo();
-    fetchBidders();
-    
-    // ตรวจสอบว่าผู้ใช้ปัจจุบันชนะหรือไม่
-    const userBidder = bidders.find(b => b.id === currentUser.id);
-    if (userBidder && userBidder.rank === 1) {
-      // ผู้ใช้ชนะการประมูล
-      setShowWinnerPopup(true);
-    } else if (userBidder) {
-      // ผู้ใช้แพ้การประมูล
-      setShowLoserPopup(true);
-    }
-    
-  } catch (err) {
-    console.error("Error concluding auction:", err);
-    // ไม่ต้องแสดง error ให้ผู้ใช้เห็น เพราะเป็นการเรียกใช้ภายใน
-  }
-};
-
   // ใช้ Server-Sent Events (SSE) เพื่อรับข้อมูลแบบ real-time
   useEffect(() => {
     if (!auctionId) {
@@ -418,48 +383,7 @@ const concludeAuction = async () => {
         
         try {
           const data = JSON.parse(event.data);
-          
-          // ตรวจสอบว่าข้อมูลเป็นอาร์เรย์
-          if (Array.isArray(data)) {
-            // แยกผู้ประมูลตามจำนวนเงิน
-            const activeBids = data.filter(bid => bid.amount > 0);
-            const zeroBids = data.filter(bid => bid.amount === 0);
-            
-            // เรียงลำดับผู้ที่ลงเงินแล้ว
-            const sortedActiveBids = [...activeBids].sort((a, b) => b.amount - a.amount);
-            
-            // สร้าง bidders ที่มีการลงเงินแล้ว
-            const activeBidders = sortedActiveBids.map((bid, index) => ({
-              id: bid.user_id,
-              username: bid.username || `User${bid.user_id}`,
-              hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
-              coins: bid.amount,
-              rank: index + 1
-            }));
-            
-            // สร้าง bidders ที่ยังไม่ได้ลงเงิน
-            const lastRank = activeBidders.length > 0 ? activeBidders.length : 0;
-            const zeroBidders = zeroBids.map(bid => ({
-              id: bid.user_id,
-              username: bid.username || `User${bid.user_id}`,
-              hiddenUser: bid.hidden_username || `User${bid.user_id.toString().substr(-4)}`,
-              coins: 0,
-              rank: lastRank + 1
-            }));
-            
-            // รวมและอัปเดต bidders
-            const updatedBidders = [...activeBidders, ...zeroBidders];
-            setBidders(updatedBidders);
-            
-            // อัปเดตข้อมูลของผู้ใช้ปัจจุบัน (ถ้ามี)
-            if (currentUser.id) {
-              const currentUserBidder = updatedBidders.find(b => b.id === currentUser.id);
-              if (currentUserBidder) {
-                setBidderCoins(currentUserBidder.coins);
-                setCurrentRank(currentUserBidder.rank.toString());
-              }
-            }
-          }
+          processBidsData(data);
         } catch (err) {
           console.error("Error parsing SSE data:", err);
         }
@@ -587,7 +511,10 @@ const concludeAuction = async () => {
           {/* Popup อยู่บนสุด */}
           {showWinnerPopup && (
             <div className="fixed inset-0 z-50 flex justify-center items-center">
-              <WinnerPopup onClose={() => setShowWinnerPopup(false)} />
+              <WinnerPopup 
+                onClose={() => setShowWinnerPopup(false)} 
+                auction_id={auctionId} 
+              />
             </div>
           )}
           {showLoserPopup && (
@@ -595,6 +522,7 @@ const concludeAuction = async () => {
               <LoserPopup 
                 rank={selectedBidder?.rank || 0} 
                 onClose={() => setShowLoserPopup(false)} 
+                auction_id={auctionId}
               />
             </div>
           )}

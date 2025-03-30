@@ -36,9 +36,9 @@ const AuctionHeader = ({ auction, onBack }) => {
         if (userResponse.data && userResponse.data.coins !== undefined) {
           setUserCoins(userResponse.data.coins);
           
-          // ตรวจสอบว่าผู้ใช้เคยเข้าร่วมประมูลหรือไม่
-          if (userResponse.data.id) {
-            const bidsResponse = await axios.get(`${API_BASE_URL}/api/auction/${auction.id}/bids`, {
+          // ใช้ API endpoint ใหม่เพื่อตรวจสอบว่าผู้ใช้เคยเข้าร่วมประมูลหรือไม่
+          try {
+            const myBidResponse = await axios.get(`${API_BASE_URL}/api/auction/${auction.id}/bids/me`, {
               headers: {
                 'Cache-Control': 'no-cache',
                 'Accept': 'application/json'
@@ -46,30 +46,16 @@ const AuctionHeader = ({ auction, onBack }) => {
               withCredentials: true
             });
             
-            // ตรวจสอบว่า response.data เป็นอาร์เรย์หรือไม่
-            let bidsArray = [];
-            if (Array.isArray(bidsResponse.data)) {
-              bidsArray = bidsResponse.data;
-            } else if (bidsResponse.data && typeof bidsResponse.data === 'object') {
-              // อาจจะมีการห่อหุ้มอาร์เรย์ไว้ในฟิลด์อื่น
-              const possibleArrayFields = ['bids', 'items', 'data', 'results'];
-              for (const field of possibleArrayFields) {
-                if (Array.isArray(bidsResponse.data[field])) {
-                  bidsArray = bidsResponse.data[field];
-                  break;
-                }
-              }
-            }
-            
-            // ตรวจสอบว่ามีการบิดของผู้ใช้ในรายการหรือไม่
-            const userBid = bidsArray.find(bid => bid.user_id === userResponse.data.id);
-            
-            // ถ้าพบบิดของผู้ใช้และมีจำนวนเงินบิดมากกว่า 0 แสดงว่าเคยเข้าร่วมประมูลแล้ว
-            if (userBid && userBid.amount > 0) {
+            // ตรวจสอบว่ามีการบิดและจำนวนเงินบิดมากกว่า 0
+            if (myBidResponse.data && myBidResponse.data.amount > 0) {
               setUserHasJoinedAuction(true);
             } else {
               setUserHasJoinedAuction(false);
             }
+          } catch (bidErr) {
+            // ถ้ามี error จาก API (เช่น 404 หรือ 401) แสดงว่าผู้ใช้ยังไม่เคยเข้าร่วมประมูล
+            console.log("User has not joined this auction yet:", bidErr);
+            setUserHasJoinedAuction(false);
           }
         }
       } catch (err) {
@@ -159,8 +145,6 @@ const AuctionHeader = ({ auction, onBack }) => {
               {auction.astrologer?.name || "ไม่ระบุชื่อหมอดู"}
             </p>
           </div>
-
-          
 
           {/* ปุ่มร่วมประมูล หรือ ไปหน้าประมูล */}
           <button
