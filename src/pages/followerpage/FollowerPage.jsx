@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from "../../components/navbar";
+
 import Images from "../../assets";
-import Sidebar from "../../components/Sidebar"; 
+import Navbar from "../../components/navbar";
+import Sidebar from "../../components/Sidebar";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const FollowingPage = () => {
+  const navigate = useNavigate()
   const [following, setFollowing] = useState([]);
   const [totalFollowing, setTotalFollowing] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -103,7 +106,7 @@ const FollowingPage = () => {
                     <div 
                       key={seer.id} 
                       className="flex items-center space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-100 shadow-sm"
-                      onClick={() => window.location.href = `/seer/${seer.id}`}
+                      onClick={() => navigate(`/qseerSchedulePage/${seer.id}`, { state: { seer } })}
                     >
                       <img
                         src={seer.image || Images.defaultAvatar} // รูปภาพสำรองถ้าไม่มีรูป

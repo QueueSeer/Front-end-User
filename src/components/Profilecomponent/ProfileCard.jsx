@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+
 import Images from "./../../assets";
 import axios from "axios";
 
@@ -235,7 +236,7 @@ const ProfileCard = ({
           <button 
             className={`border border-black px-4 py-1 rounded-lg font-medium transition-colors duration-300 
               ${isLoggedIn 
-                ? (isFollowing ? 'bg-[#420F75] text-white' : 'bg-white text-black hover:bg-gray-100') 
+                ? (!isFollowing ? 'bg-[#420F75] text-white' : 'bg-white text-black hover:bg-gray-100') 
                 : 'bg-[#420F75] text-white'}
               ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             onClick={handleFollowToggle}

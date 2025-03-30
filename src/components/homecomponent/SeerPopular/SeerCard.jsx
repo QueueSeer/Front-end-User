@@ -1,5 +1,5 @@
-import React from "react";
 import Images from "../../../assets";
+import React from "react";
 import SeerRating from "./SeerRating";
 import { useMediaQuery } from 'react-responsive';
 import { useNavigate } from "react-router-dom"; // ✅ ใช้ useNavigate
@@ -14,7 +14,7 @@ const SeerCard = ({ seer }) => {
     
     // ✅ ฟังก์ชันนำทางไปยังหน้า QseerSchedulePage
     const handleClick = () => {
-        navigate("/qseerSchedulePage", { state: { seer } });
+        navigate(`/qseerSchedulePage/${seer.id}`, { state: { seer } });
     };
 
     return (
