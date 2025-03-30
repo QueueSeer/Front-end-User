@@ -42,7 +42,7 @@ export default function App() {
     <AuthProvider> {/* ครอบ Router ด้วย AuthProvider */}
       <Router>
         <Routes>
-          <Route path="/" element={<Queuedetails />} />
+          <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/fillter" element={<Fillter />} />
