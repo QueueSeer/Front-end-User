@@ -175,10 +175,7 @@ const SearchBookingPage = () => {
       {/* Main Content */}
       <div className="min-h-screen bg-gray-100 px-4 lg:px-12 pb-10 flex flex-col lg:flex-row gap-8">
         {/* Sidebar */}
-        <div className="lg:w-1/4">
-          <SidebarFilter onFilterChange={handleFilterChange} />
-        </div>
-
+       
         {/* Package Cards */}
         <div className="w-full">
           {loading ? (
@@ -199,7 +196,7 @@ const SearchBookingPage = () => {
                   พบ <span className="font-bold">{packages.length}</span> รายการสำหรับ "{searchTerm}"
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
                 {packages.map((pkg) => (
                   <div 
                     key={pkg.id} 

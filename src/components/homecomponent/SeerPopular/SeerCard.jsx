@@ -35,12 +35,7 @@ const SeerCard = ({ seer }) => {
                 {seer?.name || "หมอดู"}
             </p>
             <p className={`${isMobile ? "text-xs" : "text-sm"} text-gray-500`}>{seer?.category || ""}</p>
-            <div className="mt-2 flex items-center justify-center w-full gap-2 align-middle">
-                <span className={`${isMobile ? "text-xs" : "text-sm"} text-gray-700 font-semibold flex items-center`}>
-                    {rating.toFixed(1)}
-                </span>
-                <SeerRating rating={rating} />
-            </div>
+            
         </div>
     );
 };

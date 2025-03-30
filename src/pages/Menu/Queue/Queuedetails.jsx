@@ -81,6 +81,40 @@ const Queuedetails = () => {
     return `${date.getHours().toString().padStart(2, '0')}.${date.getMinutes().toString().padStart(2, '0')} น.`;
   }
 
+  // ฟังก์ชันแปลงคำถามให้อยู่ในรูปแบบ array เสมอ
+ // ปรับปรุงฟังก์ชัน formatQuestions เพื่อให้จัดการได้ทุกกรณี
+function formatQuestions(questions) {
+  console.log("Raw questions data type:", typeof questions, questions);
+  
+  let formattedQuestions = [];
+  if (!questions) return formattedQuestions;
+
+  if (Array.isArray(questions)) {
+    formattedQuestions = questions.filter(q => q);
+  } else if (typeof questions === 'string') {
+    try {
+      // พยายามแปลง JSON string เป็น array
+      const parsed = JSON.parse(questions);
+      if (Array.isArray(parsed)) {
+        formattedQuestions = parsed.filter(Boolean);
+      } else if (typeof parsed === 'object') {
+        formattedQuestions = Object.values(parsed).filter(Boolean);
+      } else {
+        formattedQuestions = [questions]; // ใช้ string เดิมเป็นคำถามหนึ่งรายการ
+      }
+    } catch (e) {
+      console.log("Failed to parse questions as JSON:", e);
+      formattedQuestions = [questions]; // ถ้าแปลงไม่ได้ให้ใช้ string นั้นเป็นคำถามเดียว
+    }
+  } else if (typeof questions === 'object') {
+    // ถ้าเป็น object ให้แปลงเป็นคำถาม
+    formattedQuestions = Object.values(questions).filter(Boolean);
+  }
+  
+  console.log("Formatted questions result:", formattedQuestions);
+  return formattedQuestions;
+}
+
   const fetchCancelCount = async () => {
     try {
       const response = await axios.get('https://backend.qseer.app/api/appointment/user-cancelled-count', { withCredentials: true });
@@ -99,61 +133,30 @@ const Queuedetails = () => {
       const response = await axios.get(`https://backend.qseer.app/api/appointment/${appointmentId}`, {
         withCredentials: true
       });
-
+  
       const data = response.data;
-      console.log("Appointment data fetched successfully:", data);
-
-      // ปรับข้อมูลคำถามให้เป็น array เสมอ
-      let questionsArray = [];
-      if (data.questions) {
-        if (Array.isArray(data.questions)) {
-          questionsArray = data.questions;
-          console.log("Found questions array:", questionsArray);
-        } else {
-          console.warn("API returned questions but not as array:", data.questions);
-          // พยายามแปลงเป็น array ถ้าเป็นไปได้
-          try {
-            if (typeof data.questions === 'string') {
-              questionsArray = JSON.parse(data.questions);
-              if (!Array.isArray(questionsArray)) {
-                questionsArray = [data.questions];
-              }
-            } else {
-              questionsArray = [String(data.questions)];
-            }
-          } catch (e) {
-            console.error("Failed to parse questions:", e);
-            questionsArray = [];
-          }
-        }
-      }
+      console.log("Raw API response:", data);
+      console.log("Questions data:", data.questions, typeof data.questions);
+      console.log("Client data:", data.client);
+      console.log("Seer data:", data.seer);
+      console.log("Package data:", data.package);
       
-      // ตั้งค่า state ทั้งหมดพร้อมกัน
+      // ตั้งค่า state หลัก
       setAppointmentData(data);
       setIsCanceled(data.status === "u_cancelled" || data.status === "s_cancelled");
-      setQuestions(questionsArray);
-
-      // ดึงข้อมูลผู้จองจาก required ที่อยู่ใน client ตามโครงสร้าง API
-      if (data.client) {
-        const required = data.client.required || {};
-        
-        setUserData({
-          name: required.name || data.client.display_name || "ไม่ระบุ",
-          gender: data.client.gender || "ไม่ระบุ",
-          birthDate: formatThaiDate(required.birthdate),
-          birthTime: "ไม่ระบุ", // API ไม่มีข้อมูล birthtime
-          email: required.email || "ไม่ระบุ",
-          connectionType: required.phone_number || "ไม่ระบุ"
-        });
-      }
+      
+      // ... code เดิม
     } catch (error) {
       console.error("Error fetching appointment:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+      }
       setError("ไม่สามารถโหลดข้อมูลการจองได้");
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     // กรณีมี id ใน URL แต่ยังไม่มี appointmentData
     if (id && !appointmentData.id) {
@@ -170,19 +173,10 @@ const Queuedetails = () => {
       console.log("Using existing appointment data:", appointmentData);
       setIsCanceled(appointmentData.status === "u_cancelled" || appointmentData.status === "s_cancelled");
       
-      // ตั้งค่าคำถามจากข้อมูลที่มีอยู่
-      if (appointmentData.questions) {
-        console.log("Setting questions from appointmentData:", appointmentData.questions);
-        if (Array.isArray(appointmentData.questions)) {
-          setQuestions(appointmentData.questions);
-        } else {
-          console.warn("Questions is not an array:", appointmentData.questions);
-          setQuestions([]);
-        }
-      } else {
-        console.log("No questions in appointmentData");
-        setQuestions([]);
-      }
+      // แปลงและตั้งค่าคำถามจากข้อมูลที่มีอยู่
+      const formattedQuestions = formatQuestions(appointmentData.questions);
+      console.log("Formatted questions from existing data:", formattedQuestions);
+      setQuestions(formattedQuestions);
       
       // ตั้งค่าข้อมูลผู้จองตามโครงสร้าง API
       if (appointmentData.client) {
@@ -192,9 +186,9 @@ const Queuedetails = () => {
           name: required.name || appointmentData.client.display_name || "ไม่ระบุ",
           gender: appointmentData.client.gender || "ไม่ระบุ",
           birthDate: formatThaiDate(required.birthdate),
-          birthTime: "ไม่ระบุ", // API ไม่มีข้อมูล birthtime
+          birthTime: required.birthtime ? formatThaiTime(required.birthtime) : "ไม่ระบุ",
           email: required.email || "ไม่ระบุ",
-          connectionType: required.phone_number || "ไม่ระบุ"
+          connectionType: required.phone_number ? `เบอร์โทร: ${required.phone_number}` : "อีเมล"
         });
       }
     }
@@ -282,17 +276,18 @@ const Queuedetails = () => {
             </div>
           )}
 
-          <div className="mt-6 border border-green-400 rounded-md p-4 text-center text-gray-700">
-            <p>
-              ชำระผ่าน <b>โอนคอยน์</b> วันที่ <b>{formatThaiDate(appointmentData.payment_time)}</b>{" "}
-              จำนวนราคา <b>{getPackagePrice()}</b>
-            </p>
-            {isCanceled && (
-              <p className="mt-2 text-red-500">
-                คุณจะได้รับคอยน์คืนเต็มจำนวน {(appointmentData.total || 0)} คอยน์ จากระบบภายในระยะเวลา 7 วัน
-              </p>
-            )}
-          </div>
+        {/* ส่วนแสดงข้อมูลการชำระเงิน */}
+<div className="mt-6 border border-green-400 rounded-md p-4 text-center text-gray-700">
+  <p>
+    ชำระผ่าน <b>โชคคอยน์</b> วันที่ <b>{formatThaiDate(appointmentData.start_time)}</b>{" "}
+    
+  </p>
+  {isCanceled && (
+    <p className="mt-2 text-red-500">
+      คุณจะได้รับคอยน์คืนเต็มจำนวน {(appointmentData.total || 0)} คอยน์ จากระบบภายในระยะเวลา 7 วัน
+    </p>
+  )}
+</div>
 
           <div className="mt-8 flex gap-8 items-start">
             <div className="flex-[1.4] bg-[#7B5EA7] text-white p-8 rounded-lg shadow-md text-left">
@@ -350,27 +345,32 @@ const Queuedetails = () => {
                 <p className="font-semibold text-gray-700">อีเมล:</p>
                 <p>{userData.email}</p>
                 <p className="font-semibold text-gray-700">แจ้งเตือนผ่าน:</p>
-                <p>{userData.connectionType}</p>
+                <p>{userData.email}</p>
               </div>
             </div>
           </div>
 
-          {/* คำถามผู้ใช้ - แก้ไขส่วนการแสดงผล */}
+          {/* คำถามผู้ใช้ - ปรับปรุงส่วนการแสดงผล */}
           {isLoading ? (
             <div className="mt-8 text-center">
               <p className="text-gray-500">กำลังโหลดข้อมูลคำถาม...</p>
             </div>
-          ) : Array.isArray(questions) && questions.length > 0 ? (
-            <div className="mt-8 text-left w-full">
-              <h3 className="text-lg font-bold mb-2">คำถามที่คุณถาม</h3>
-              <ul className="list-disc list-inside text-gray-700">
+          ) : questions && questions.length > 0 ? (
+            <div className="mt-8 text-left bg-gray-50 p-6 rounded-lg w-full">
+              <h3 className="text-lg font-bold mb-4">คำถามที่คุณถาม</h3>
+              <ul className="space-y-2">
                 {questions.map((q, index) => (
-                  <li key={index}>{q || "ไม่ระบุรายละเอียด"}</li>
+                  <li key={index} className="flex items-start">
+                    <span className="bg-[#7B5EA7] text-white rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <p className="text-gray-700">{q || "ไม่ระบุรายละเอียด"}</p>
+                  </li>
                 ))}
               </ul>
             </div>
           ) : (
-            <div className="mt-8 text-center">
+            <div className="mt-8 bg-gray-50 p-6 rounded-lg w-full text-center">
               <p className="text-gray-500">ไม่มีคำถามที่ระบุ</p>
             </div>
           )}

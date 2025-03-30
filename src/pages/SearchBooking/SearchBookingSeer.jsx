@@ -200,9 +200,7 @@ const SearchBookingSeer = () => {
       {/* Main Content */}
       <div className="min-h-screen bg-gray-100 px-4 lg:px-12 pb-10 flex flex-col lg:flex-row gap-8">
         {/* Sidebar */}
-        <div className="lg:w-1/4">
-          <SidebarFilter />
-        </div>
+       
 
         {/* Content */}
         <div className="w-full">

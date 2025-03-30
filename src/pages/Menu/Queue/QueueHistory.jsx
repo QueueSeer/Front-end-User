@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // เพิ่ม import useNavigate
 import Sidebar from "../../../components/Sidebar";
 import QueueCard from "../../../components/QueueCard/QueueCard";
 import Images from "../../../assets";
 import Navbar from "../../../components/navbar";
 import Layout from "./Layout";
-import axios from "axios"; // เพิ่ม import axios
+import axios from "axios";
 
 const QueueHistoryPage = () => {
+  const navigate = useNavigate(); // เพิ่ม navigate เพื่อใช้ในการนำทาง
   // State สำหรับ Tab ที่เลือก
   const [activeTab, setActiveTab] = useState("รอเข้ารับบริการ");
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +77,11 @@ const QueueHistoryPage = () => {
     return `${hours}.${minutes} น.`;
   };
 
+  // เพิ่มฟังก์ชันสำหรับการนำทางไปหน้า QueueDetails
+  const navigateToDetails = (apmt_id) => {
+    navigate(`/queuedetails/${apmt_id}`);  // แก้จาก queue-details เป็น queuedetails
+  };
+
   // ดึงข้อมูลการนัดหมายจาก API
   const fetchAppointments = async (tab) => {
     try {
@@ -108,7 +115,7 @@ const QueueHistoryPage = () => {
         
         // แปลงข้อมูลจาก API เป็นรูปแบบที่ QueueCard ต้องการ
         const formattedAppointments = combinedData.map(appointment => ({
-          id: appointment.id,
+          id: appointment.id, // นี่คือ apmt_id ที่เราต้องการ
           image: "/images/tarot.jpg", // ถ้า API ไม่มีรูปให้ใช้รูปเริ่มต้น
           title: appointment.package?.name || "ไม่ระบุรายการ",
           categories: appointment.package?.category || "ไม่ระบุประเภท",
@@ -144,7 +151,7 @@ const QueueHistoryPage = () => {
         
         // แปลงข้อมูลจาก API เป็นรูปแบบที่ QueueCard ต้องการ
         const formattedAppointments = data.map(appointment => ({
-          id: appointment.id,
+          id: appointment.id, // นี่คือ apmt_id ที่เราต้องการ
           image: "/images/tarot.jpg", // ถ้า API ไม่มีรูปให้ใช้รูปเริ่มต้น
           title: appointment.package?.name || "ไม่ระบุรายการ",
           categories: appointment.package?.category || "ไม่ระบุประเภท",
@@ -218,9 +225,11 @@ const QueueHistoryPage = () => {
         </div>
       )}
 
-      {/* Queue List */}
+      {/* Queue List - แต่ละรายการสามารถคลิกเพื่อดูรายละเอียด */}
       {!isLoading && appointments[activeTab].map((item, index) => (
-        <QueueCard key={index} {...item} status={activeTab} />
+        <div key={index} className="mb-4 cursor-pointer" onClick={() => navigateToDetails(item.id)}>
+          <QueueCard {...item} status={activeTab} />
+        </div>
       ))}
     </Layout>
   );
