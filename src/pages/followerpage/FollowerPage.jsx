@@ -119,7 +119,7 @@ const FollowingPage = () => {
                       />
                       <div>
                         <h2 className="text-lg font-bold text-gray-800">{seer.display_name}</h2>
-                        <p className="text-sm text-gray-600">@{seer.primary_skill}</p>
+                        <p className="text-sm text-gray-600">{seer.primary_skill}</p>
                       </div>
                     </div>
                   ))}
