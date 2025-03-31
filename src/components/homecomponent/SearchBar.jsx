@@ -257,7 +257,7 @@ const SearchBar = ({ seersData = [], packagesData = [] }) => {
                   onClick={() => handlePackageClick(pkg)}
                 >
                   <img 
-                    src={pkg.image || Images.tarot} 
+                    src={pkg.image || Images.pic}
                     alt={pkg.name}
                     className="w-12 h-12 rounded-md mr-3 object-cover"
                     onError={(e) => {
