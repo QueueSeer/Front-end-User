@@ -92,7 +92,9 @@ const QueueCard = ({
     };
 
     // เปิด popup รีวิว
-    const handleOpenReview = () => {
+    const handleOpenReview = (e) => {
+        // เพิ่ม stopPropagation เพื่อป้องกันไม่ให้ event ส่งต่อไปยัง parent
+        e.stopPropagation();
         setIsReviewOpen(true);
     };
 
@@ -138,7 +140,10 @@ const QueueCard = ({
     };
 
     return (
-        <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-md p-5 mb-4 relative">
+        <div 
+            className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-md p-5 mb-4 relative"
+            onClick={handleViewDetails} // ระวังตรงนี้ - การ์ดทั้งหมดมี event handler นี้
+        >
             {/* Image */}
             <img 
                 src={getImageToDisplay()} 
@@ -179,7 +184,12 @@ const QueueCard = ({
                 {/* More Details */}
                 <p
                     className="text-gray-500 text-sm mt-3 cursor-pointer flex items-center hover:text-purple-600"
-                    onClick={handleViewDetails}
+                    onClick={(e) => {
+                        // ส่วนนี้ไม่จำเป็นเพราะ parent ก็มี onClick={handleViewDetails} อยู่แล้ว
+                        // แต่เพิ่ม stopPropagation เพื่อความชัดเจน
+                        e.stopPropagation();
+                        handleViewDetails();
+                    }}
                 >
                     รายละเอียด
                     <img src={Images.next2} alt="details" className="w-2 h-3 ml-2" />
@@ -196,6 +206,7 @@ const QueueCard = ({
                             ? "bg-[#8677A7] text-white"
                             : "bg-red-600 text-white"
                     }`}
+                    onClick={(e) => e.stopPropagation()} // เพิ่ม stopPropagation ที่ปุ่มสถานะด้วย
                 >
                     {status}
                 </button>
@@ -209,7 +220,7 @@ const QueueCard = ({
                 {status === "เข้ารับบริการสำเร็จ" && !checkingReviewStatus && !hasReviewed && (
                     <p
                         className="text-purple-800 text-sm mt-1 underline cursor-pointer hover:text-purple-600"
-                        onClick={handleOpenReview}
+                        onClick={handleOpenReview} // เพิ่ม parameter e ใน handleOpenReview
                     >
                         รีวิวหมอดู
                     </p>
@@ -217,7 +228,10 @@ const QueueCard = ({
                 
                 {/* แสดงข้อความเมื่อรีวิวแล้ว */}
                 {status === "เข้ารับบริการสำเร็จ" && !checkingReviewStatus && hasReviewed && (
-                    <p className="text-gray-400 text-sm mt-1">
+                    <p 
+                        className="text-gray-400 text-sm mt-1"
+                        onClick={(e) => e.stopPropagation()} // เพิ่ม stopPropagation ตรงนี้ด้วย
+                    >
                         ได้รีวิวแล้ว
                     </p>
                 )}
