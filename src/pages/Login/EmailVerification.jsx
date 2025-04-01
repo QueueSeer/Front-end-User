@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
 const EmailVerification = () => {
   const [status, setStatus] = useState("loading"); // "loading" | "success" | "fail"
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const verificationAttempted = useRef(false); // ใช้ ref เพื่อเก็บสถานะว่าได้พยายามตรวจสอบ token แล้วหรือไม่
 
   useEffect(() => {
     // รับ token จาก URL parameter
     const token = searchParams.get("token");
     console.log("Token from URL:", token);
 
-    if (token) {
+    // ตรวจสอบว่าเคยพยายามตรวจสอบ token นี้แล้วหรือไม่
+    if (token && !verificationAttempted.current) {
+      // ตั้งค่า ref เพื่อไม่ให้ยิง request ซ้ำ
+      verificationAttempted.current = true;
+      
       // แสดงสถานะ loading
       setStatus("loading");
       
@@ -35,11 +40,11 @@ const EmailVerification = () => {
           console.error("Error:", error);
           setStatus("fail");
         });
-    } else {
+    } else if (!token) {
       console.log("ไม่พบ token ใน URL");
       setStatus("fail");
     }
-  }, [searchParams]);
+  }, [searchParams]); // ยังคงใช้ searchParams เป็น dependency
 
   // ฟังก์ชันสำหรับเข้าสู่ระบบ
   const handleLogin = () => {
